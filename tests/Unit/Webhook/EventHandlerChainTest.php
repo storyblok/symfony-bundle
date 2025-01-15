@@ -11,15 +11,15 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Tests\Unit\Webhook;
+namespace Storyblok\Bundle\Tests\Unit\Webhook;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
-use SensioLabs\Storyblok\Bundle\Tests\Double\ConfigurableHandler;
-use SensioLabs\Storyblok\Bundle\Webhook\Event;
-use SensioLabs\Storyblok\Bundle\Webhook\Exception\UnsupportedEventException;
-use SensioLabs\Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
-use SensioLabs\Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
+use Storyblok\Bundle\Tests\Double\ConfigurableHandler;
+use Storyblok\Bundle\Webhook\Event;
+use Storyblok\Bundle\Webhook\Exception\UnsupportedEventException;
+use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
+use Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
 
 final class EventHandlerChainTest extends TestCase
 {

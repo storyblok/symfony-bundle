@@ -1,7 +1,7 @@
 {
-  "name": "sensiolabs-de/storyblok-bundle",
+  "name": "storyblok/storyblok-bundle",
   "type": "symfony-bundle",
-  "description": "Symfony bundle for sensiolabs-de/storyblok-api",
+  "description": "Symfony bundle for storyblok/php-management-api-client and storyblok/php-content-api-client",
   "license": "MIT",
   "authors": [
     {
@@ -45,12 +45,12 @@
   },
   "autoload": {
     "psr-4": {
-      "SensioLabs\\Storyblok\\Bundle\\": "src/"
+      "Storyblok\\Bundle\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "SensioLabs\\Storyblok\\Bundle\\Tests\\": "tests/"
+      "Storyblok\\Bundle\\Tests\\": "tests/"
     }
   },
   "minimum-stability": "stable"

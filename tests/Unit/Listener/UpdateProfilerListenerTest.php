@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Tests\Unit\Listener;
+namespace Storyblok\Bundle\Tests\Unit\Listener;
 
-use SensioLabs\Storyblok\Bundle\Listener\UpdateProfilerListener;
-use SensioLabs\Storyblok\Bundle\Tests\Util\FakerTrait;
-use SensioLabs\Storyblok\Bundle\Tests\Util\TestKernel;
+use Storyblok\Bundle\Listener\UpdateProfilerListener;
+use Storyblok\Bundle\Tests\Util\FakerTrait;
+use Storyblok\Bundle\Tests\Util\TestKernel;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;

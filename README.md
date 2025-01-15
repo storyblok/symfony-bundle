@@ -128,8 +128,8 @@ published or deleted):
 
 namespace App\Webhook;
 
-use SensioLabs\Storyblok\Bundle\Webhook\Event;
-use SensioLabs\Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
+use Storyblok\Bundle\Webhook\Event;
+use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 
 final class PurgeVarnishHandler implements WebhookHandlerInterface
 {

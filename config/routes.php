@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Routing\Loader\Configurator;
 
-use SensioLabs\Storyblok\Bundle\Controller\WebhookController;
+use Storyblok\Bundle\Controller\WebhookController;
 use Symfony\Component\HttpFoundation\Request;
 
 return function (RoutingConfigurator $routes): void {

@@ -11,9 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Tests\Util;
+namespace Storyblok\Bundle\Tests\Util;
 
-use SensioLabs\Storyblok\Api\Bridge\Faker\Generator;
+use Storyblok\Api\Bridge\Faker\Generator;
 
 trait FakerTrait
 {

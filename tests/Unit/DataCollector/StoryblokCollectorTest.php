@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Tests\Unit\DataCollector;
+namespace Storyblok\Bundle\Tests\Unit\DataCollector;
 
 use PHPUnit\Framework\TestCase;
-use SensioLabs\Storyblok\Bundle\DataCollector\StoryblokCollector;
-use SensioLabs\Storyblok\Bundle\Tests\Util\FakerTrait;
+use Storyblok\Bundle\DataCollector\StoryblokCollector;
+use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\JsonMockResponse;
 use Symfony\Component\HttpClient\TraceableHttpClient;

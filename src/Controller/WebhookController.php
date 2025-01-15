@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Controller;
+namespace Storyblok\Bundle\Controller;
 
 use Psr\Log\LoggerInterface;
-use SensioLabs\Storyblok\Bundle\Webhook\Event;
-use SensioLabs\Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
+use Storyblok\Bundle\Webhook\Event;
+use Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

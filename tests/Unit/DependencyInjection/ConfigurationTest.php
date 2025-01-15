@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Tests\Unit\DependencyInjection;
+namespace Storyblok\Bundle\Tests\Unit\DependencyInjection;
 
 use Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait;
 use PHPUnit\Framework\TestCase;
-use SensioLabs\Storyblok\Bundle\DependencyInjection\Configuration;
-use SensioLabs\Storyblok\Bundle\Tests\Util\FakerTrait;
+use Storyblok\Bundle\DependencyInjection\Configuration;
+use Storyblok\Bundle\Tests\Util\FakerTrait;
 
 final class ConfigurationTest extends TestCase
 {
