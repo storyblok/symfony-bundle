@@ -1,5 +1,5 @@
 {
-  "name": "storyblok/storyblok-bundle",
+  "name": "storyblok/symfony-bundle",
   "type": "symfony-bundle",
   "description": "Symfony bundle for storyblok/php-management-api-client and storyblok/php-content-api-client",
   "license": "MIT",
