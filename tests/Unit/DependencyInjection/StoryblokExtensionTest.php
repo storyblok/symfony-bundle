@@ -11,16 +11,16 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Tests\Unit\DependencyInjection;
+namespace Storyblok\Bundle\Tests\Unit\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
-use SensioLabs\Storyblok\Api\AssetsApi;
-use SensioLabs\Storyblok\Api\AssetsApiInterface;
-use SensioLabs\Storyblok\Api\StoryblokClientInterface;
-use SensioLabs\Storyblok\Bundle\DataCollector\StoryblokCollector;
-use SensioLabs\Storyblok\Bundle\DependencyInjection\StoryblokExtension;
-use SensioLabs\Storyblok\Bundle\Listener\UpdateProfilerListener;
-use SensioLabs\Storyblok\Bundle\Tests\Util\FakerTrait;
+use Storyblok\Api\AssetsApi;
+use Storyblok\Api\AssetsApiInterface;
+use Storyblok\Api\StoryblokClientInterface;
+use Storyblok\Bundle\DataCollector\StoryblokCollector;
+use Storyblok\Bundle\DependencyInjection\StoryblokExtension;
+use Storyblok\Bundle\Listener\UpdateProfilerListener;
+use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpClient\TraceableHttpClient;
 

@@ -11,15 +11,15 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\DependencyInjection;
+namespace Storyblok\Bundle\DependencyInjection;
 
-use SensioLabs\Storyblok\Api\AssetsApi;
-use SensioLabs\Storyblok\Api\AssetsApiInterface;
-use SensioLabs\Storyblok\Api\StoryblokClient;
-use SensioLabs\Storyblok\Api\StoryblokClientInterface;
-use SensioLabs\Storyblok\Bundle\DataCollector\StoryblokCollector;
-use SensioLabs\Storyblok\Bundle\Listener\UpdateProfilerListener;
-use SensioLabs\Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
+use Storyblok\Api\AssetsApi;
+use Storyblok\Api\AssetsApiInterface;
+use Storyblok\Api\StoryblokClient;
+use Storyblok\Api\StoryblokClientInterface;
+use Storyblok\Bundle\DataCollector\StoryblokCollector;
+use Storyblok\Bundle\Listener\UpdateProfilerListener;
+use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;

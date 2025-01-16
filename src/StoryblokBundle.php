@@ -11,9 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle;
+namespace Storyblok\Bundle;
 
-use SensioLabs\Storyblok\Bundle\DependencyInjection\StoryblokExtension;
+use Storyblok\Bundle\DependencyInjection\StoryblokExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;

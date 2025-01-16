@@ -13,7 +13,7 @@
         <ini name="error_reporting" value="-1" />
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.0" />
         <server name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0" />
-        <server name="KERNEL_CLASS" value="SensioLabs\Storyblok\Bundle\Tests\Util\TestKernel" />
+        <server name="KERNEL_CLASS" value="Storyblok\Bundle\Tests\Util\TestKernel" />
     </php>
 
     <testsuites>

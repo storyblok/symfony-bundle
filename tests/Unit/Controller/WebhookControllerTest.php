@@ -11,15 +11,15 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Tests\Unit\Controller;
+namespace Storyblok\Bundle\Tests\Unit\Controller;
 
 use Monolog\Test\TestCase;
 use Psr\Log\NullLogger;
-use SensioLabs\Storyblok\Bundle\Controller\WebhookController;
-use SensioLabs\Storyblok\Bundle\Tests\Double\ConfigurableHandler;
-use SensioLabs\Storyblok\Bundle\Tests\Util\FakerTrait;
-use SensioLabs\Storyblok\Bundle\Webhook\Event;
-use SensioLabs\Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
+use Storyblok\Bundle\Controller\WebhookController;
+use Storyblok\Bundle\Tests\Double\ConfigurableHandler;
+use Storyblok\Bundle\Tests\Util\FakerTrait;
+use Storyblok\Bundle\Webhook\Event;
+use Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 

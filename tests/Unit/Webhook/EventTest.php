@@ -11,10 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Tests\Unit\Webhook;
+namespace Storyblok\Bundle\Tests\Unit\Webhook;
 
 use OskarStark\Enum\Test\EnumTestCase;
-use SensioLabs\Storyblok\Bundle\Webhook\Event;
+use Storyblok\Bundle\Webhook\Event;
 
 final class EventTest extends EnumTestCase
 {

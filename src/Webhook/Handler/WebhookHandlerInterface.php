@@ -11,9 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Webhook\Handler;
+namespace Storyblok\Bundle\Webhook\Handler;
 
-use SensioLabs\Storyblok\Bundle\Webhook\Event;
+use Storyblok\Bundle\Webhook\Event;
 
 interface WebhookHandlerInterface
 {

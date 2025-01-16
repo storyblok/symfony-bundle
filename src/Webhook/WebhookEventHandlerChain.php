@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace SensioLabs\Storyblok\Bundle\Webhook;
+namespace Storyblok\Bundle\Webhook;
 
 use Psr\Log\LoggerInterface;
-use SensioLabs\Storyblok\Bundle\Webhook\Exception\UnsupportedEventException;
-use SensioLabs\Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
+use Storyblok\Bundle\Webhook\Exception\UnsupportedEventException;
+use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 /**

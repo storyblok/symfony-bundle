@@ -1,12 +1,15 @@
-# Storyblok Bundle
+# Storyblok Symfony Bundle
 
-| Branch   | PHP                                                                                                                                                                          | Code Coverage                                                                                                                                             |
-|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `master` | [![PHP](https://github.com/sensiolabs-de/storyblok-bundle/actions/workflows/ci.yaml/badge.svg)](https://github.com/sensiolabs-de/storyblok-bundle/actions/workflows/ci.yaml) | [![codecov](https://codecov.io/gh/sensiolabs-de/storyblok-bundle/graph/badge.svg?token=MFMNCBLNXB)](https://codecov.io/gh/sensiolabs-de/storyblok-bundle) |
+> [!WARNING]
+> This bundle is in the initial phase and subject to change in a future release.
+
+| Branch   | PHP                                                                                                                                                                          | Code Coverage                                                                                                                      |
+|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `master` | [![PHP](https://github.com/sensiolabs-de/storyblok-bundle/actions/workflows/ci.yaml/badge.svg)](https://github.com/sensiolabs-de/storyblok-bundle/actions/workflows/ci.yaml) | [![codecov](https://codecov.io/gh/storyblok/symfony-bundle/graph/badge.svg)](https://codecov.io/gh/storyblok/symfony-bundle) |
 
 A Symfony bundle to integrate the [Storyblok headless CMS](https://www.storyblok.com/) with your Symfony application.
 
-This bundle leverages the [sensiolabs-de/storyblok-api](https://github.com/sensiolabs-de/storyblok-api), a type-safe PHP
+This bundle leverages the [storyblok/php-content-api-client](https://github.com/storyblok/php-content-api-client), a type-safe PHP
 SDK for Storyblok. It configures the Storyblok client and provides a Symfony Profiler extension for easier debugging and
 monitoring of Storyblok API interactions.
 
@@ -15,7 +18,7 @@ monitoring of Storyblok API interactions.
 To install the bundle run:
 
 ```bash
-composer require sensiolabs-de/storyblok-api sensiolabs-de/storyblok-bundle
+composer require storyblok/php-content-api-client storyblok/symfony-bundle
 ```
 
 ## Configuration
@@ -128,8 +131,8 @@ published or deleted):
 
 namespace App\Webhook;
 
-use SensioLabs\Storyblok\Bundle\Webhook\Event;
-use SensioLabs\Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
+use Storyblok\Bundle\Webhook\Event;
+use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 
 final class PurgeVarnishHandler implements WebhookHandlerInterface
 {
@@ -169,4 +172,4 @@ final class PurgeVarnishHandler implements WebhookHandlerInterface
 
 This approach provides a streamlined and secure way to handle Webhooks from Storyblok, allowing your Symfony application
 to react to changes effectively. For more details and use cases, you can always refer to
-the [Storyblok API SDK documentation](https://github.com/sensiolabs-de/storyblok-api).
+the [Storyblok API SDK documentation](https://github.com/storyblok/php-content-api-client).
