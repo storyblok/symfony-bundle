@@ -1,8 +1,11 @@
-# Storyblok Bundle
+# Storyblok Symfony Bundle
 
-| Branch   | PHP                                                                                                                                                                          | Code Coverage                                                                                                                                             |
-|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `master` | [![PHP](https://github.com/sensiolabs-de/storyblok-bundle/actions/workflows/ci.yaml/badge.svg)](https://github.com/sensiolabs-de/storyblok-bundle/actions/workflows/ci.yaml) | [![codecov](https://codecov.io/gh/sensiolabs-de/storyblok-bundle/graph/badge.svg?token=MFMNCBLNXB)](https://codecov.io/gh/sensiolabs-de/storyblok-bundle) |
+> [!WARNING]
+> This bundle is in the initial phase and subject to change in a future release.
+
+| Branch   | PHP                                                                                                                                                                          | Code Coverage                                                                                                                      |
+|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `master` | [![PHP](https://github.com/sensiolabs-de/storyblok-bundle/actions/workflows/ci.yaml/badge.svg)](https://github.com/sensiolabs-de/storyblok-bundle/actions/workflows/ci.yaml) | [![codecov](https://codecov.io/gh/storyblok/symfony-bundle/graph/badge.svg)](https://codecov.io/gh/storyblok/symfony-bundle) |
 
 A Symfony bundle to integrate the [Storyblok headless CMS](https://www.storyblok.com/) with your Symfony application.
 
