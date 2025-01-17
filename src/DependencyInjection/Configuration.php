@@ -47,6 +47,9 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue('published')
                     ->cannotBeEmpty()
                 ->end()
+                ->booleanNode('auto_resolve_stories')
+                    ->defaultValue(false)
+                ->end()
             ->end()
         ;
 
