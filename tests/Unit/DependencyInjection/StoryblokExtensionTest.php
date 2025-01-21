@@ -184,7 +184,7 @@ final class StoryblokExtensionTest extends TestCase
         $config = [
             ['base_uri' => $faker->url()],
             ['token' => $faker->uuid()],
-            ['auto_resolve_stories' => true],
+            ['auto_resolve_relations' => true],
         ];
 
         $extension->load(
