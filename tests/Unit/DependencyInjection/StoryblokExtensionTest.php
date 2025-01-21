@@ -16,6 +16,8 @@ namespace Storyblok\Bundle\Tests\Unit\DependencyInjection;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Api\AssetsApi;
 use Storyblok\Api\AssetsApiInterface;
+use Storyblok\Api\Resolver\ResolverInterface;
+use Storyblok\Api\StoriesResolvedApi;
 use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\DependencyInjection\StoryblokExtension;
@@ -166,5 +168,31 @@ final class StoryblokExtensionTest extends TestCase
         self::assertTrue($builder->hasDefinition(AssetsApi::class));
 
         self::assertSame($token, $builder->getParameter('storyblok_api.assets_token'));
+    }
+
+    /**
+     * @test
+     */
+    public function loadWithAutoResolveStoriesTrue(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['auto_resolve_relations' => true],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        self::assertTrue($builder->hasAlias(ResolverInterface::class));
+        self::assertTrue($builder->hasDefinition(StoriesResolvedApi::class));
     }
 }

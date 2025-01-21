@@ -161,6 +161,26 @@ final class PurgeVarnishHandler implements WebhookHandlerInterface
 }
 ```
 
+#### Auto resolve relations
+
+
+If you want to update relations automatically, you can enable this with the following configuration:
+
+```yaml
+# config/packages/storyblok.yaml
+storyblok:
+    # ...
+    auto_resolve_relations: true
+```
+
+This will replace `StoriesApi` to `StoriesResolvedApi`. The `StoriesResolvedApi` will automatically resolve relations.
+
+> [!WARNING]
+> Maximum 50 different relations can be resolved in one request. See
+> [Storyblok docs](https://www.storyblok.com/docs/api/content-delivery/v2/stories/retrieve-a-single-story)
+> for more information
+
+
 #### Best Practices
 
 - **Handle Only Necessary Events**: Use the `supports` method to filter only the Webhook events your handler should

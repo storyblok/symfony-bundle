@@ -15,6 +15,11 @@ namespace Storyblok\Bundle\DependencyInjection;
 
 use Storyblok\Api\AssetsApi;
 use Storyblok\Api\AssetsApiInterface;
+use Storyblok\Api\Resolver\ResolverInterface;
+use Storyblok\Api\Resolver\StoryResolver;
+use Storyblok\Api\StoriesApi;
+use Storyblok\Api\StoriesApiInterface;
+use Storyblok\Api\StoriesResolvedApi;
 use Storyblok\Api\StoryblokClient;
 use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
@@ -64,6 +69,24 @@ final class StoryblokExtension extends Extension
                     '$client' => $httpClient,
                 ],
             ));
+        }
+
+        if (true === $config['auto_resolve_relations']) {
+            $storiesApi = new Definition(StoriesApi::class, [
+                '$client' => $container->getDefinition(StoryblokClient::class),
+                '$version' => $container->getParameter('storyblok_api.version'),
+            ]);
+
+            $resolver = new Definition(StoryResolver::class);
+            $container->setAlias(ResolverInterface::class, StoryResolver::class);
+
+            $resolvedStoriesApi = new Definition(StoriesResolvedApi::class, [
+                '$storiesApi' => $storiesApi,
+                '$resolver' => $resolver,
+            ]);
+
+            $container->setDefinition(StoriesResolvedApi::class, $resolvedStoriesApi);
+            $container->setAlias(StoriesApiInterface::class, StoriesResolvedApi::class);
         }
     }
 
