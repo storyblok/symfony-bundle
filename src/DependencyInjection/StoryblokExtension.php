@@ -15,6 +15,8 @@ namespace Storyblok\Bundle\DependencyInjection;
 
 use Storyblok\Api\AssetsApi;
 use Storyblok\Api\AssetsApiInterface;
+use Storyblok\Api\Resolver\ResolverInterface;
+use Storyblok\Api\Resolver\StoryResolver;
 use Storyblok\Api\StoriesApi;
 use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Api\StoriesResolvedApi;
@@ -30,9 +32,6 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\TraceableHttpClient;
-use Storyblok\Api\Resolver\ResolverInterface;
-use Storyblok\Api\Resolver\StoryResolver;
-
 
 final class StoryblokExtension extends Extension
 {
