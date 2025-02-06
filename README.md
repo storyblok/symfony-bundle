@@ -1,4 +1,8 @@
-# Storyblok Symfony Bundle
+<div align="center">
+    <img src="assets/php-symfony-bundle-github-repository.png" alt="Storyblok Symfony Bundle" align="center" />
+    <h1 align="center">Storyblok Symfony Bundle</h1>
+    <p align="center">Co-created with <a href="https://sensiolabs.com/">SensioLabs</a>, the creators of Symfony.</p>
+</div>
 
 > [!WARNING]
 > This bundle is in the initial phase and subject to change in a future release.
@@ -193,3 +197,8 @@ This will replace `StoriesApi` to `StoriesResolvedApi`. The `StoriesResolvedApi`
 This approach provides a streamlined and secure way to handle Webhooks from Storyblok, allowing your Symfony application
 to react to changes effectively. For more details and use cases, you can always refer to
 the [Storyblok API SDK documentation](https://github.com/storyblok/php-content-api-client).
+
+
+## License
+
+This project is licensed under the MIT License. Please see [License File](LICENSE) for more information.
