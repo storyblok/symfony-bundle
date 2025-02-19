@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 final readonly class WebhookEventHandlerChain
 {
     /**
-     * @var list<WebhookHandlerInterface>
+     * @var array<WebhookHandlerInterface>
      */
     private array $handlers;
 
@@ -74,7 +74,7 @@ final readonly class WebhookEventHandlerChain
     }
 
     /**
-     * @return list<WebhookHandlerInterface>
+     * @return array<WebhookHandlerInterface>
      */
     private function getHandlers(Event $event): array
     {
