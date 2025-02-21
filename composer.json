@@ -13,14 +13,14 @@
     "php": ">=8.3",
     "oskarstark/enum-helper": "^1.5",
     "psr/log": "^3.0",
-    "storyblok/php-content-api-client": ">=0.2.0",
+    "storyblok/php-content-api-client": ">=0.4.0",
     "symfony/config": "^6.0 || ^7.0",
     "symfony/dependency-injection": "^6.0 || ^7.0",
     "symfony/framework-bundle": "^6.0 || ^7.0",
     "symfony/http-client": "^6.0 || ^7.0",
     "symfony/http-kernel": "^6.0 || ^7.0",
     "symfony/monolog-bundle": "^3.10",
-    "thecodingmachine/safe": "^2.0",
+    "thecodingmachine/safe": "^2.0 || ^3.0",
     "webmozart/assert": "^1.11"
   },
   "require-dev": {
@@ -30,11 +30,11 @@
     "ergebnis/test-util": "^1.5",
     "matthiasnoback/symfony-config-test": "^5.2",
     "phpstan/extension-installer": "^1.0",
-    "phpstan/phpstan": "^1.0",
-    "phpstan/phpstan-webmozart-assert": "^1.0",
+    "phpstan/phpstan": "^2.0",
+    "phpstan/phpstan-webmozart-assert": "^2.0",
     "phpunit/phpunit": "^9.0",
     "symfony/event-dispatcher": "^6.0 || ^7.1",
-    "thecodingmachine/phpstan-safe-rule": "^1.0"
+    "thecodingmachine/phpstan-safe-rule": "^1.4"
   },
   "config": {
     "sort-packages": true,

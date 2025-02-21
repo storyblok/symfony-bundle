@@ -1,8 +1,15 @@
-.build/
-vendor
-composer.lock
-.php-cs-fixer.cache
-phpunit.xml
-.idea
-.phpunit.result.cache
-var/
+# Composer
+/vendor/
+/composer.lock
+
+# PHPUnit
+/phpunit.xml
+/.phpunit.result.cache
+/.phpunit.cache/
+
+# PHP-CS-Fixer
+/.php-cs-fixer.cache
+
+# Build artifacts
+/.build/
+/var/

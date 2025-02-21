@@ -36,7 +36,7 @@ final readonly class WebhookEventHandlerChain
         iterable $handlers,
         private LoggerInterface $logger,
     ) {
-        $this->handlers = iterator_to_array($handlers);
+        $this->handlers = iterator_to_array($handlers, preserve_keys: false);
     }
 
     /**
@@ -78,9 +78,9 @@ final readonly class WebhookEventHandlerChain
      */
     private function getHandlers(Event $event): array
     {
-        return array_filter(
+        return array_values(array_filter(
             $this->handlers,
             static fn (WebhookHandlerInterface $handler) => $handler->supports($event),
-        );
+        ));
     }
 }
