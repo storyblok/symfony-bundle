@@ -36,7 +36,7 @@ final readonly class WebhookEventHandlerChain
         iterable $handlers,
         private LoggerInterface $logger,
     ) {
-        $this->handlers = iterator_to_array($handlers, false);
+        $this->handlers = iterator_to_array($handlers, preserve_keys: false);
     }
 
     /**
