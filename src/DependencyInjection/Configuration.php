@@ -50,6 +50,10 @@ final class Configuration implements ConfigurationInterface
                 ->booleanNode('auto_resolve_relations')
                     ->defaultValue(false)
                 ->end()
+                ->scalarNode('blocks_template_path')
+                    ->defaultValue('blocks')
+                    ->cannotBeEmpty()
+                ->end()
             ->end()
         ;
 

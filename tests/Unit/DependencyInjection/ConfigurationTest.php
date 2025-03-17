@@ -34,6 +34,7 @@ final class ConfigurationTest extends TestCase
         $secret = $faker->uuid();
         $version = $faker->randomElement(['draft', 'published']);
         $autoResolve = $faker->boolean();
+        $templatePath = $faker->word();
 
         self::assertProcessedConfigurationEquals([
             ['base_uri' => $url],
@@ -41,12 +42,14 @@ final class ConfigurationTest extends TestCase
             ['webhook_secret' => $secret],
             ['version' => $version],
             ['auto_resolve_relations' => $autoResolve],
+            ['blocks_template_path' => $templatePath],
         ], [
             'base_uri' => $url,
             'token' => $token,
             'webhook_secret' => $secret,
             'version' => $version,
             'auto_resolve_relations' => $autoResolve,
+            'blocks_template_path' => $templatePath,
         ]);
     }
 
@@ -68,6 +71,7 @@ final class ConfigurationTest extends TestCase
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
+            'blocks_template_path' => 'blocks',
         ]);
     }
 

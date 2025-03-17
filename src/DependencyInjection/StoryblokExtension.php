@@ -22,16 +22,21 @@ use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Api\StoriesResolvedApi;
 use Storyblok\Api\StoryblokClient;
 use Storyblok\Api\StoryblokClientInterface;
+use Storyblok\Bundle\Block\Attribute\AsBlock;
+use Storyblok\Bundle\Block\BlockCollection;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\TraceableHttpClient;
+use Webmozart\Assert\Assert;
+use function Symfony\Component\String\u;
 
 final class StoryblokExtension extends Extension
 {
@@ -88,6 +93,8 @@ final class StoryblokExtension extends Extension
             $container->setDefinition(StoriesResolvedApi::class, $resolvedStoriesApi);
             $container->setAlias(StoriesApiInterface::class, StoriesResolvedApi::class);
         }
+
+        $this->registerAttributes($container, $config);
     }
 
     private function configureAssetsApi(ContainerBuilder $container): void
@@ -126,5 +133,29 @@ final class StoryblokExtension extends Extension
         );
 
         $container->setAlias(AssetsApiInterface::class, AssetsApi::class);
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function registerAttributes(ContainerBuilder $container, array $config): void
+    {
+        $container->registerAttributeForAutoconfiguration(AsBlock::class, static function (
+            ChildDefinition $definition,
+            AsBlock $attribute,
+            \ReflectionClass|\ReflectionMethod|\Reflector $reflector,
+        ) use ($container, $config): void {
+            Assert::isInstanceOf($reflector, \ReflectionClass::class, 'Only classes can be tagged with #[AsBlock].');
+
+            $name = $attribute->technicalName ?? u($reflector->getShortName())->snake()->toString();
+            $template = $attribute->template ?? \sprintf('%s/%s.html.twig', $config['blocks_template_path'], $name);
+
+            $collectionDefinition = $container->getDefinition(BlockCollection::class);
+            $collectionDefinition->addMethodCall('add', [[
+                'className' => $reflector->getName(),
+                'technicalName' => $name,
+                'template' => $template,
+            ]]);
+        });
     }
 }
