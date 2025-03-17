@@ -30,15 +30,7 @@ final class BlockExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('render_block', $this->renderBlock(...), ['is_safe' => ['html']]),
+            new TwigFilter('render_block', $this->renderer->render(...), ['is_safe' => ['html']]),
         ];
-    }
-
-    /**
-     * @param array<string, mixed> $values
-     */
-    public function renderBlock(array $values): string
-    {
-        return $this->renderer->render($values);
     }
 }
