@@ -143,10 +143,8 @@ final class StoryblokExtension extends Extension
         $container->registerAttributeForAutoconfiguration(AsBlock::class, static function (
             ChildDefinition $definition,
             AsBlock $attribute,
-            \ReflectionClass|\ReflectionMethod|\Reflector $reflector,
+            \ReflectionClass $reflector,
         ) use ($container, $config): void {
-            Assert::isInstanceOf($reflector, \ReflectionClass::class, 'Only classes can be tagged with #[AsBlock].');
-
             $name = $attribute->technicalName ?? u($reflector->getShortName())->snake()->toString();
             $template = $attribute->template ?? \sprintf('%s/%s.html.twig', $config['blocks_template_path'], $name);
 

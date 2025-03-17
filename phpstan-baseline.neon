@@ -19,6 +19,12 @@ parameters:
 			path: src/DependencyInjection/Configuration.php
 
 		-
+			message: '#^Parameter \#2 \$configurator of method Symfony\\Component\\DependencyInjection\\ContainerBuilder\:\:registerAttributeForAutoconfiguration\(\) expects callable\(Symfony\\Component\\DependencyInjection\\ChildDefinition, Storyblok\\Bundle\\Block\\Attribute\\AsBlock, Reflector\)\: void, Closure\(Symfony\\Component\\DependencyInjection\\ChildDefinition, Storyblok\\Bundle\\Block\\Attribute\\AsBlock, ReflectionClass\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/DependencyInjection/StoryblokExtension.php
+
+		-
 			message: '#^Parameter \#2 \$className of class Storyblok\\Bundle\\Block\\BlockDefinition constructor expects class\-string, string given\.$#'
 			identifier: argument.type
 			count: 2
