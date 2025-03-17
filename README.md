@@ -217,7 +217,7 @@ final readonly class SampleBlock
 
 | Parameter       | Type    | Required? | Description |
 |----------------|--------|-----------|-------------|
-| `technicalName` | `string` | No | The block name used in Storyblok. Defaults to the class name converted to camelCase. |
+| `technicalName` | `string` | No | The block name used in Storyblok. Defaults to the class name converted to snake_case. |
 | `template`      | `string` | No | The Twig template for rendering the block. Defaults to `blocks/{technical_name}.html.twig`. |
 
 ### Customizing the Default Template Path
