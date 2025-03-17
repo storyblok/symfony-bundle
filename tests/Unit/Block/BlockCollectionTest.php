@@ -108,4 +108,16 @@ final class BlockCollectionTest extends TestCase
 
         $collection->byTechnicalName($faker->domainName());
     }
+
+    /**
+     * @test
+     */
+    public function getIterator(): void
+    {
+        $faker = self::faker();
+
+        $collection = new BlockCollection();
+
+        self::assertInstanceOf(\ArrayIterator::class, $collection->getIterator());
+    }
 }
