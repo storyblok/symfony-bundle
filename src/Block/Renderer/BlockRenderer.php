@@ -26,15 +26,22 @@ final readonly class BlockRenderer implements RendererInterface
     ) {
     }
 
-    public function render(array $values): string
+    public function render(array|object $values): string
     {
         try {
-            Assert::keyExists($values, 'component');
-            $name = $values['component'];
+            if (\is_object($values)) {
+                $definition = $this->blocks->get($values::class);
 
-            $definition = $this->blocks->byTechnicalName($name);
+                $block = $values;
+            } else {
+                Assert::keyExists($values, 'component');
+                $name = $values['component'];
+                $definition = $this->blocks->byTechnicalName($name);
 
-            return $this->twig->render($definition->template, ['block' => new ($definition->className)($values)]);
+                $block = new ($definition->className)($values);
+            }
+
+            return $this->twig->render($definition->template, ['block' => $block]);
         } catch (BlockNotFoundException) {
             return '';
         }

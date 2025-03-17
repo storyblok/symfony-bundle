@@ -55,6 +55,33 @@ final class BlockRendererTest extends TestCase
     /**
      * @test
      */
+    public function renderWithObject(): void
+    {
+        $faker = self::faker();
+
+        $expected = $faker->realText();
+
+        $twig = $this->createMock(Environment::class);
+        $twig->expects(self::once())
+            ->method('render')
+            ->willReturn($expected);
+
+        $collection = new BlockCollection([
+            new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'),
+        ]);
+
+        $values = new SampleBlock([
+            'component' => 'sample_block',
+            'title' => $faker->sentence(),
+            'description' => $faker->realText(),
+        ]);
+
+        self::assertSame($expected, (new BlockRenderer($twig, $collection))->render($values));
+    }
+
+    /**
+     * @test
+     */
     public function renderValuesComponentKeyMustExist(): void
     {
         $faker = self::faker();

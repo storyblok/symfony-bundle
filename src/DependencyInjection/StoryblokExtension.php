@@ -35,7 +35,6 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\TraceableHttpClient;
-use Webmozart\Assert\Assert;
 use function Symfony\Component\String\u;
 
 final class StoryblokExtension extends Extension

@@ -16,9 +16,9 @@ namespace Storyblok\Bundle\Block\Renderer;
 interface RendererInterface
 {
     /**
-     * @param array<string, mixed> $values The values of the block coming from Storyblok
+     * @param array<string, mixed>|object $values The values of the block coming from Storyblok
      *
      * @return string Returns HTML
      */
-    public function render(array $values): string;
+    public function render(array|object $values): string;
 }
