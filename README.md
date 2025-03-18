@@ -181,6 +181,67 @@ This will replace `StoriesApi` to `StoriesResolvedApi`. The `StoriesResolvedApi`
 > [Storyblok docs](https://www.storyblok.com/docs/api/content-delivery/v2/stories/retrieve-a-single-story)
 > for more information
 
+## Block Registration with `#[AsBlock]`
+
+You can register Storyblok blocks using the `#[AsBlock]` attribute.
+
+The `name` and `template` parameters are optional, you will find their defaults in the following section.
+
+### Usage
+
+To define a block, use the attribute on a class:
+
+```php
+use Storyblok\Bundle\Block\Attribute\AsBlock;
+use Webmozart\Assert\Assert;
+
+#[AsBlock(name: 'sample', template: 'custom_blocks/sample.html.twig')]
+final readonly class SampleBlock
+{
+    public string $title;
+    public string $description;
+
+    public function __construct(array $values)
+    {
+        Assert::keyExists($values, 'title');
+        $this->title = $values['title'];
+
+        Assert::keyExists($values, 'description');
+        $this->description = $values['description'];
+    }
+}
+```
+
+### Attribute Parameters
+
+| Parameter  | Type    | Required? | Description |
+|------------|--------|-----------|-------------|
+| `name`     | `string` | No | The block name used in Storyblok. Defaults to the class name converted to snake_case. |
+| `template` | `string` | No | The Twig template for rendering the block. Defaults to `blocks/{name}.html.twig`. |
+
+### Customizing the Default Template Path
+
+You can change the default template path structure by configuring it in `storyblok.yaml`:
+
+```yaml
+# config/packages/storyblok.yaml
+storyblok:
+    blocks_template_path: 'my/custom/path'
+```
+
+### Rendering Blocks in Twig
+
+A new `render_block` Twig filter allows easy rendering of Storyblok blocks:
+
+```twig
+{% for block in page.body %}
+    {% if block is not null %}
+        {{ block|render_block }}
+    {% endif %}
+{% endfor %}
+```
+
+This ensures dynamic rendering of Storyblok components with minimal effort.
 
 #### Best Practices
 

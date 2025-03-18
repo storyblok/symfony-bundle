@@ -20,7 +20,9 @@
     "symfony/http-client": "^6.0 || ^7.0",
     "symfony/http-kernel": "^6.0 || ^7.0",
     "symfony/monolog-bundle": "^3.10",
+    "symfony/string": "^6.0 || ^7.0",
     "thecodingmachine/safe": "^2.0 || ^3.0",
+    "twig/twig": "^3.20",
     "webmozart/assert": "^1.11"
   },
   "require-dev": {

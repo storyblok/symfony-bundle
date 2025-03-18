@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Storyblok\Api\StoryblokClientInterface;
+use Storyblok\Bundle\Block\BlockRegistry;
+use Storyblok\Bundle\Block\Renderer\BlockRenderer;
+use Storyblok\Bundle\Block\Renderer\RendererInterface;
 use Storyblok\Bundle\Controller\WebhookController;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
@@ -17,6 +20,7 @@ use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Api\StoryblokClient;
 use Storyblok\Api\TagsApi;
 use Storyblok\Api\TagsApiInterface;
+use Storyblok\Bundle\Twig\BlockExtension;
 use Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\ScopingHttpClient;
@@ -92,5 +96,13 @@ return static function (ContainerConfigurator $container): void {
                 'method' => 'onKernelResponse',
                 'priority' => -255,
             ])
+
+        ->set(BlockRenderer::class)
+        ->alias(RendererInterface::class, BlockRenderer::class)
+
+        ->set(BlockRegistry::class)
+
+        ->set(BlockExtension::class)
+        ->tag('twig.extension')
     ;
 };

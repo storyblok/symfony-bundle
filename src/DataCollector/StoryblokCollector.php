@@ -132,7 +132,7 @@ final class StoryblokCollector extends AbstractDataCollector implements LateData
                 $contentType = 'application/octet-stream';
 
                 foreach ($info['response_headers'] ?? [] as $h) {
-                    if (0 === stripos($h, 'content-type: ')) {
+                    if (str_starts_with(strtolower($h), strtolower('content-type: '))) {
                         $contentType = substr($h, \strlen('content-type: '));
 
                         break;
