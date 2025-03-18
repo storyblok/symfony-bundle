@@ -15,58 +15,46 @@ namespace Storyblok\Bundle\Block;
 
 use Storyblok\Bundle\Block\Exception\BlockNotFoundException;
 
-/**
- * @implements \IteratorAggregate<int, BlockDefinition>
- */
-final class BlockCollection implements \Countable, \IteratorAggregate
+final class BlockRegistry implements \Countable
 {
     /**
      * @var array<class-string, BlockDefinition>
      */
-    private array $blocks = [];
+    public static array $blocks = [];
 
-    /**
-     * @param list<BlockDefinition|array{
-     *     fqcn: class-string,
-     *     name: non-empty-string,
-     *     template: non-empty-string,
-     * }> $blocks
-     */
-    public function __construct(array $blocks = [])
+    public function __construct()
     {
-        foreach ($blocks as $block) {
-            $this->add($block);
-        }
+        // Noop! Only used by the dependency injection. Static methods are used to interact with the registry.
     }
 
     /**
      * @param array<string, mixed>|BlockDefinition $definition
      */
-    public function add(array|BlockDefinition $definition): void
+    public static function add(array|BlockDefinition $definition): void
     {
         if (\is_array($definition)) {
             $definition = BlockDefinition::fromArray($definition);
         }
 
-        $this->blocks[$definition->className] = $definition;
+        self::$blocks[$definition->className] = $definition;
     }
 
     /**
      * @param class-string $fqcn
      */
-    public function get(string $fqcn): BlockDefinition
+    public static function get(string $fqcn): BlockDefinition
     {
-        if (!\array_key_exists($fqcn, $this->blocks)) {
+        if (!\array_key_exists($fqcn, self::$blocks)) {
             throw new BlockNotFoundException(\sprintf('Block "%s" not found.', $fqcn));
         }
 
-        return $this->blocks[$fqcn];
+        return self::$blocks[$fqcn];
     }
 
-    public function byName(string $name): BlockDefinition
+    public static function byName(string $name): BlockDefinition
     {
         $definitions = \array_values(\array_filter(
-            $this->blocks,
+            self::$blocks,
             static fn (BlockDefinition $definition) => $definition->name === $name,
         ));
 
@@ -77,16 +65,8 @@ final class BlockCollection implements \Countable, \IteratorAggregate
         return $definitions[0];
     }
 
-    /**
-     * @return \ArrayIterator<int, BlockDefinition>
-     */
-    public function getIterator(): \Traversable
-    {
-        return new \ArrayIterator(\array_values($this->blocks));
-    }
-
     public function count(): int
     {
-        return \count($this->blocks);
+        return \count(self::$blocks);
     }
 }

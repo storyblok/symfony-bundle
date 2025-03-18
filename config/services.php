@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Storyblok\Api\StoryblokClientInterface;
-use Storyblok\Bundle\Block\BlockCollection;
+use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
 use Storyblok\Bundle\Controller\WebhookController;
@@ -100,7 +100,7 @@ return static function (ContainerConfigurator $container): void {
         ->set(BlockRenderer::class)
         ->alias(RendererInterface::class, BlockRenderer::class)
 
-        ->set(BlockCollection::class)
+        ->set(BlockRegistry::class)
 
         ->set(BlockExtension::class)
         ->tag('twig.extension')

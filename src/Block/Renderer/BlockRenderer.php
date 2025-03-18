@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Block\Renderer;
 
-use Storyblok\Bundle\Block\BlockCollection;
+use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Exception\BlockNotFoundException;
 use Twig\Environment;
 use Webmozart\Assert\Assert;
@@ -22,7 +22,7 @@ final readonly class BlockRenderer implements RendererInterface
 {
     public function __construct(
         private Environment $twig,
-        private BlockCollection $blocks,
+        private BlockRegistry $blocks,
     ) {
     }
 
@@ -30,13 +30,13 @@ final readonly class BlockRenderer implements RendererInterface
     {
         try {
             if (\is_object($values)) {
-                $definition = $this->blocks->get($values::class);
+                $definition = $this->blocks::get($values::class);
 
                 $block = $values;
             } else {
                 Assert::keyExists($values, 'component');
                 $name = $values['component'];
-                $definition = $this->blocks->byName($name);
+                $definition = $this->blocks::byName($name);
 
                 $block = new ($definition->className)($values);
             }

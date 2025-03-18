@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace Storyblok\Bundle\Tests\Unit\Block\Renderer;
 
 use PHPUnit\Framework\TestCase;
-use Storyblok\Bundle\Block\BlockCollection;
 use Storyblok\Bundle\Block\BlockDefinition;
+use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Tests\Double\Block\SampleBlock;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
@@ -39,9 +39,8 @@ final class BlockRendererTest extends TestCase
             ->method('render')
             ->willReturn($expected);
 
-        $collection = new BlockCollection([
-            new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'),
-        ]);
+        $collection = new BlockRegistry();
+        $collection::add(new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'));
 
         $values = [
             'component' => 'sample_block',
@@ -66,9 +65,8 @@ final class BlockRendererTest extends TestCase
             ->method('render')
             ->willReturn($expected);
 
-        $collection = new BlockCollection([
-            new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'),
-        ]);
+        $collection = new BlockRegistry();
+        $collection::add(new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'));
 
         $values = new SampleBlock([
             'component' => 'sample_block',
@@ -90,9 +88,8 @@ final class BlockRendererTest extends TestCase
         $twig->expects(self::never())
             ->method('render');
 
-        $collection = new BlockCollection([
-            new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'),
-        ]);
+        $collection = new BlockRegistry();
+        $collection::add(new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'));
 
         $values = [
             'title' => $faker->sentence(),
@@ -115,9 +112,8 @@ final class BlockRendererTest extends TestCase
         $twig->expects(self::never())
             ->method('render');
 
-        $collection = new BlockCollection([
-            new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'),
-        ]);
+        $collection = new BlockRegistry();
+        $collection::add(new BlockDefinition('sample_block', SampleBlock::class, 'sample/block.html.twig'));
 
         $values = [
             'component' => $faker->word(),

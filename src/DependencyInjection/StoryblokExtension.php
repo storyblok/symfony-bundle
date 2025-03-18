@@ -23,7 +23,7 @@ use Storyblok\Api\StoriesResolvedApi;
 use Storyblok\Api\StoryblokClient;
 use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Bundle\Block\Attribute\AsBlock;
-use Storyblok\Bundle\Block\BlockCollection;
+use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
@@ -147,7 +147,7 @@ final class StoryblokExtension extends Extension
             $name = $attribute->name ?? u($reflector->getShortName())->snake()->toString();
             $template = $attribute->template ?? \sprintf('%s/%s.html.twig', $config['blocks_template_path'], $name);
 
-            $collectionDefinition = $container->getDefinition(BlockCollection::class);
+            $collectionDefinition = $container->getDefinition(BlockRegistry::class);
             $collectionDefinition->addMethodCall('add', [[
                 'className' => $reflector->getName(),
                 'name' => $name,
