@@ -36,7 +36,7 @@ final readonly class BlockRenderer implements RendererInterface
             } else {
                 Assert::keyExists($values, 'component');
                 $name = $values['component'];
-                $definition = $this->blocks->byTechnicalName($name);
+                $definition = $this->blocks->byName($name);
 
                 $block = new ($definition->className)($values);
             }

@@ -25,12 +25,12 @@ final class BlockDefinitionTest extends TestCase
     /**
      * @test
      */
-    public function technicalName(): void
+    public function name(): void
     {
         $faker = self::faker();
         $expected = $faker->word();
 
-        self::assertSame($expected, (new BlockDefinition($expected, SampleBlock::class, 'sample/block.html.twig'))->technicalName);
+        self::assertSame($expected, (new BlockDefinition($expected, SampleBlock::class, 'sample/block.html.twig'))->name);
     }
 
     /**
@@ -39,7 +39,7 @@ final class BlockDefinitionTest extends TestCase
      * @dataProvider \Ergebnis\DataProvider\StringProvider::blank()
      * @dataProvider \Ergebnis\DataProvider\StringProvider::empty()
      */
-    public function technicalNameInvalid(string $value): void
+    public function nameInvalid(string $value): void
     {
         self::expectException(\InvalidArgumentException::class);
 
@@ -117,7 +117,7 @@ final class BlockDefinitionTest extends TestCase
         );
 
         self::assertEquals($expected, BlockDefinition::fromArray([
-            'technicalName' => $expected->technicalName,
+            'name' => $expected->name,
             'className' => $expected->className,
             'template' => $expected->template,
         ]));
@@ -126,7 +126,7 @@ final class BlockDefinitionTest extends TestCase
     /**
      * @test
      */
-    public function fromArrayTechnicalNameKeyMustExist(): void
+    public function fromArraynameKeyMustExist(): void
     {
         self::expectException(\InvalidArgumentException::class);
 
@@ -139,12 +139,12 @@ final class BlockDefinitionTest extends TestCase
     /**
      * @test
      */
-    public function fromArrayTechnicalNameInvalid(): void
+    public function fromArraynameInvalid(): void
     {
         self::expectException(\InvalidArgumentException::class);
 
         BlockDefinition::fromArray([
-            'technicalName' => self::faker()->randomNumber(),
+            'name' => self::faker()->randomNumber(),
             'className' => SampleBlock::class,
             'template' => self::faker()->word(),
         ]);
@@ -158,7 +158,7 @@ final class BlockDefinitionTest extends TestCase
         self::expectException(\InvalidArgumentException::class);
 
         BlockDefinition::fromArray([
-            'technicalName' => SampleBlock::class,
+            'name' => SampleBlock::class,
             'template' => self::faker()->word(),
         ]);
     }
@@ -171,7 +171,7 @@ final class BlockDefinitionTest extends TestCase
         self::expectException(\InvalidArgumentException::class);
 
         BlockDefinition::fromArray([
-            'technicalName' => self::faker()->randomNumber(),
+            'name' => self::faker()->randomNumber(),
             'className' => self::faker()->randomNumber(),
             'template' => self::faker()->word(),
         ]);
@@ -185,7 +185,7 @@ final class BlockDefinitionTest extends TestCase
         self::expectException(\InvalidArgumentException::class);
 
         BlockDefinition::fromArray([
-            'technicalName' => self::faker()->word(),
+            'name' => self::faker()->word(),
             'className' => SampleBlock::class,
         ]);
     }
@@ -198,7 +198,7 @@ final class BlockDefinitionTest extends TestCase
         self::expectException(\InvalidArgumentException::class);
 
         BlockDefinition::fromArray([
-            'technicalName' => self::faker()->randomNumber(),
+            'name' => self::faker()->randomNumber(),
             'className' => self::faker()->randomNumber(),
             'template' => self::faker()->randomNumber(),
         ]);

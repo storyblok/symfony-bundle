@@ -44,7 +44,7 @@ final class BlockCollectionTest extends TestCase
     {
         $faker = self::faker();
 
-        $values = ['technicalName' => $faker->word(), 'className' => SampleBlock::class, 'template' => $faker->word()];
+        $values = ['name' => $faker->word(), 'className' => SampleBlock::class, 'template' => $faker->word()];
 
         $collection = new BlockCollection();
         $collection->add($values);
@@ -84,20 +84,20 @@ final class BlockCollectionTest extends TestCase
     /**
      * @test
      */
-    public function byTechnicalName(): void
+    public function byName(): void
     {
         $faker = self::faker();
 
         $collection = new BlockCollection();
         $collection->add($block = new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
 
-        self::assertSame($block, $collection->byTechnicalName($block->technicalName));
+        self::assertSame($block, $collection->byName($block->name));
     }
 
     /**
      * @test
      */
-    public function byTechnicalNameThrowsExceptionWhenBlockDefinitionWasNotFound(): void
+    public function byNameThrowsExceptionWhenBlockDefinitionWasNotFound(): void
     {
         $faker = self::faker();
 
@@ -106,7 +106,7 @@ final class BlockCollectionTest extends TestCase
 
         self::expectException(BlockNotFoundException::class);
 
-        $collection->byTechnicalName($faker->domainName());
+        $collection->byName($faker->domainName());
     }
 
     /**
@@ -114,8 +114,6 @@ final class BlockCollectionTest extends TestCase
      */
     public function getIterator(): void
     {
-        $faker = self::faker();
-
         $collection = new BlockCollection();
 
         self::assertInstanceOf(\ArrayIterator::class, $collection->getIterator());

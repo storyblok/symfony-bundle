@@ -150,7 +150,7 @@ final class StoryblokExtension extends Extension
             $collectionDefinition = $container->getDefinition(BlockCollection::class);
             $collectionDefinition->addMethodCall('add', [[
                 'className' => $reflector->getName(),
-                'technicalName' => $name,
+                'name' => $name,
                 'template' => $template,
             ]]);
         });

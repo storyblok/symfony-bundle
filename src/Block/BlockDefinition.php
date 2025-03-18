@@ -21,12 +21,12 @@ final readonly class BlockDefinition
      * @param class-string $className
      */
     public function __construct(
-        public string $technicalName,
+        public string $name,
         public string $className,
         public string $template,
     ) {
-        Assert::stringNotEmpty($technicalName);
-        Assert::notWhitespaceOnly($technicalName);
+        Assert::stringNotEmpty($name);
+        Assert::notWhitespaceOnly($name);
 
         Assert::stringNotEmpty($className);
         Assert::notWhitespaceOnly($className);
@@ -45,14 +45,14 @@ final readonly class BlockDefinition
         Assert::string($values['className']);
         Assert::classExists($values['className']);
 
-        Assert::keyExists($values, 'technicalName');
-        Assert::string($values['technicalName']);
+        Assert::keyExists($values, 'name');
+        Assert::string($values['name']);
 
         Assert::keyExists($values, 'template');
         Assert::string($values['template']);
 
         return new self(
-            technicalName: $values['technicalName'],
+            name: $values['name'],
             className: $values['className'],
             template: $values['template'],
         );

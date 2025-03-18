@@ -28,7 +28,7 @@ final class BlockCollection implements \Countable, \IteratorAggregate
     /**
      * @param list<BlockDefinition|array{
      *     fqcn: class-string,
-     *     technicalName: non-empty-string,
+     *     name: non-empty-string,
      *     template: non-empty-string,
      * }> $blocks
      */
@@ -63,11 +63,11 @@ final class BlockCollection implements \Countable, \IteratorAggregate
         return $this->blocks[$fqcn];
     }
 
-    public function byTechnicalName(string $name): BlockDefinition
+    public function byName(string $name): BlockDefinition
     {
         $definitions = \array_values(\array_filter(
             $this->blocks,
-            static fn (BlockDefinition $definition) => $definition->technicalName === $name,
+            static fn (BlockDefinition $definition) => $definition->name === $name,
         ));
 
         if (0 === \count($definitions)) {
