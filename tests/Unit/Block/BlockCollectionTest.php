@@ -23,6 +23,16 @@ use Storyblok\Bundle\Tests\Util\FakerTrait;
 final class BlockCollectionTest extends TestCase
 {
     use FakerTrait;
+    private BlockRegistry $registry;
+
+    protected function setUp(): void
+    {
+        $this->registry = new BlockRegistry();
+
+        $reflection = new \ReflectionClass($this->registry);
+        $property = $reflection->getProperty('blocks');
+        $property->setValue($this->registry, []);
+    }
 
     /**
      * @test
@@ -31,10 +41,9 @@ final class BlockCollectionTest extends TestCase
     {
         $faker = self::faker();
 
-        $collection = new BlockRegistry();
-        $collection::add(new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
+        $this->registry::add(new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
 
-        self::assertCount(1, $collection);
+        self::assertCount(1, $this->registry);
     }
 
     /**
@@ -46,39 +55,36 @@ final class BlockCollectionTest extends TestCase
 
         $values = ['name' => $faker->word(), 'className' => SampleBlock::class, 'template' => $faker->word()];
 
-        $collection = new BlockRegistry();
-        $collection::add($values);
+        $this->registry::add($values);
 
-        self::assertCount(1, $collection);
+        self::assertCount(1, $this->registry);
     }
 
     /**
      * @test
      */
-    public function get(): void
+    public function byClass(): void
     {
         $faker = self::faker();
 
-        $collection = new BlockRegistry();
-        $collection::add($block = new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
+        $this->registry::add($block = new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
 
-        self::assertSame($block, $collection::get($block->className));
+        self::assertSame($block, $this->registry::byClass($block->className));
     }
 
     /**
      * @test
      */
-    public function getThrowsExceptionWhenBlockDefinitionWasNotFound(): void
+    public function byClassThrowsExceptionWhenBlockDefinitionWasNotFound(): void
     {
         $faker = self::faker();
 
-        $collection = new BlockRegistry();
-        $collection::add(new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
+        $this->registry::add(new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
 
         self::expectException(BlockNotFoundException::class);
         self::expectExceptionMessage(\sprintf('Block "%s" not found.', \stdClass::class));
 
-        $collection::get(\stdClass::class);
+        $this->registry::byClass(\stdClass::class);
     }
 
     /**
@@ -88,10 +94,9 @@ final class BlockCollectionTest extends TestCase
     {
         $faker = self::faker();
 
-        $collection = new BlockRegistry();
-        $collection::add($block = new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
+        $this->registry::add($block = new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
 
-        self::assertSame($block, $collection::byName($block->name));
+        self::assertSame($block, $this->registry::byName($block->name));
     }
 
     /**
@@ -101,11 +106,10 @@ final class BlockCollectionTest extends TestCase
     {
         $faker = self::faker();
 
-        $collection = new BlockRegistry();
-        $collection::add(new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
+        $this->registry::add(new BlockDefinition($faker->word(), SampleBlock::class, $faker->word()));
 
         self::expectException(BlockNotFoundException::class);
 
-        $collection::byName($faker->domainName());
+        $this->registry::byName($faker->domainName());
     }
 }

@@ -30,7 +30,7 @@ final readonly class BlockRenderer implements RendererInterface
     {
         try {
             if (\is_object($values)) {
-                $definition = $this->blocks::get($values::class);
+                $definition = $this->blocks::byClass($values::class);
 
                 $block = $values;
             } else {
