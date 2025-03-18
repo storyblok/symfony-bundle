@@ -20,7 +20,7 @@ final class BlockRegistry implements \Countable
     /**
      * @var array<string, BlockDefinition>
      */
-    public static array $blocks = [];
+    private static array $blocks = [];
 
     public function __construct()
     {
