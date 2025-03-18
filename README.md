@@ -188,6 +188,8 @@ This will replace `StoriesApi` to `StoriesResolvedApi`. The `StoriesResolvedApi`
 
 You can register Storyblok blocks using the `#[AsBlock]` attribute.
 
+The `name` and `template` parameters are optional, you will find their defaults in the following section.
+
 ### Usage
 
 To define a block, use the attribute on a class:
@@ -215,14 +217,14 @@ final readonly class SampleBlock
 
 ### Attribute Parameters
 
-| Parameter       | Type    | Required? | Description |
-|----------------|--------|-----------|-------------|
-| `technicalName` | `string` | No | The block name used in Storyblok. Defaults to the class name converted to snake_case. |
-| `template`      | `string` | No | The Twig template for rendering the block. Defaults to `blocks/{technical_name}.html.twig`. |
+| Parameter  | Type    | Required? | Description |
+|------------|--------|-----------|-------------|
+| `name`     | `string` | No | The block name used in Storyblok. Defaults to the class name converted to snake_case. |
+| `template` | `string` | No | The Twig template for rendering the block. Defaults to `blocks/{name}.html.twig`. |
 
 ### Customizing the Default Template Path
 
-If you prefer a different template structure, configure it in `storyblok.yaml`:
+You can change the default template path structure by configuring it in `storyblok.yaml`:
 
 ```yaml
 # config/packages/storyblok.yaml
