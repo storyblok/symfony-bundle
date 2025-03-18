@@ -28,20 +28,20 @@ final class AsBlockTest extends TestCase
     {
         $block = new AsBlock();
 
-        self::assertNull($block->technicalName);
+        self::assertNull($block->name);
         self::assertNull($block->template);
     }
 
     /**
      * @test
      */
-    public function technicalName(): void
+    public function name(): void
     {
         $block = new AsBlock(
-            technicalName: $expected = self::faker()->word(),
+            name: $expected = self::faker()->word(),
         );
 
-        self::assertSame($expected, $block->technicalName);
+        self::assertSame($expected, $block->name);
     }
 
     /**

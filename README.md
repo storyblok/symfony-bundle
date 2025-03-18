@@ -196,7 +196,7 @@ To define a block, use the attribute on a class:
 use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Webmozart\Assert\Assert;
 
-#[AsBlock(technicalName: 'sample', template: 'custom_blocks/sample.html.twig')]
+#[AsBlock(name: 'sample', template: 'custom_blocks/sample.html.twig')]
 final readonly class SampleBlock
 {
     public string $title;

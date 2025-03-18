@@ -144,7 +144,7 @@ final class StoryblokExtension extends Extension
             AsBlock $attribute,
             \ReflectionClass $reflector,
         ) use ($container, $config): void {
-            $name = $attribute->technicalName ?? u($reflector->getShortName())->snake()->toString();
+            $name = $attribute->name ?? u($reflector->getShortName())->snake()->toString();
             $template = $attribute->template ?? \sprintf('%s/%s.html.twig', $config['blocks_template_path'], $name);
 
             $collectionDefinition = $container->getDefinition(BlockCollection::class);

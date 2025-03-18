@@ -17,7 +17,7 @@ namespace Storyblok\Bundle\Block\Attribute;
 final readonly class AsBlock
 {
     public function __construct(
-        public ?string $technicalName = null,
+        public ?string $name = null,
         public ?string $template = null,
     ) {
     }
