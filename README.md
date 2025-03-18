@@ -186,7 +186,7 @@ This will replace `StoriesApi` to `StoriesResolvedApi`. The `StoriesResolvedApi`
 
 ## Block Registration with `#[AsBlock]`
 
-Starting with this release, you can register Storyblok blocks using the `#[AsBlock]` attribute.
+You can register Storyblok blocks using the `#[AsBlock]` attribute.
 
 ### Usage
 
