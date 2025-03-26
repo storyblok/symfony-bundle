@@ -20,7 +20,10 @@ use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Api\StoryblokClient;
 use Storyblok\Api\TagsApi;
 use Storyblok\Api\TagsApiInterface;
+use Storyblok\Bundle\Tiptap\DefaultEditorBuilder;
+use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Storyblok\Bundle\Twig\BlockExtension;
+use Storyblok\Bundle\Twig\RichTextExtension;
 use Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\ScopingHttpClient;
@@ -100,9 +103,15 @@ return static function (ContainerConfigurator $container): void {
         ->set(BlockRenderer::class)
         ->alias(RendererInterface::class, BlockRenderer::class)
 
+        ->set(DefaultEditorBuilder::class)
+        ->alias(EditorBuilderInterface::class, DefaultEditorBuilder::class)
+
         ->set(BlockRegistry::class)
 
         ->set(BlockExtension::class)
+        ->tag('twig.extension')
+
+        ->set(RichTextExtension::class)
         ->tag('twig.extension')
     ;
 };
