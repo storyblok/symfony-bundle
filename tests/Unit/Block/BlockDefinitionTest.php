@@ -25,7 +25,7 @@ final class BlockDefinitionTest extends TestCase
     /**
      * @test
      */
-    public function name(): void
+    public function validName(): void
     {
         $faker = self::faker();
         $expected = $faker->word();

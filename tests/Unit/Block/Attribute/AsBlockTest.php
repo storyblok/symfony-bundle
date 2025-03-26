@@ -35,7 +35,7 @@ final class AsBlockTest extends TestCase
     /**
      * @test
      */
-    public function name(): void
+    public function validName(): void
     {
         $block = new AsBlock(
             name: $expected = self::faker()->word(),

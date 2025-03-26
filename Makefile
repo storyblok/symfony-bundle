@@ -13,7 +13,7 @@ cs:
 
 .PHONY: tests
 tests:
-	symfony php vendor/bin/phpunit -v
+	symfony php vendor/bin/phpunit
 
 .PHONY: refactoring
 refactoring:
