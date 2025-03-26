@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Block\Attribute;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
@@ -21,9 +22,7 @@ final class AsBlockTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function defaults(): void
     {
         $block = new AsBlock();
