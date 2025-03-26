@@ -243,6 +243,22 @@ A new `render_block` Twig filter allows easy rendering of Storyblok blocks:
 
 This ensures dynamic rendering of Storyblok components with minimal effort.
 
+### Rich Text Rendering
+
+This bundle provides a convenient rich_text Twig filter to render Storyblok Rich Text fields using
+the [storyblok/php-tiptap-extension](https://github.com/storyblok/php-tiptap-extension) library. You can directly use
+the `rich_text` filter in your Twig templates:
+
+```twig
+<div>
+    {{ story.content|rich_text }}
+</div>
+```
+
+It works out of the box with:
+- A default TipTap editor configuration
+- Automatic rendering of registered Storyblok blocks using the `Storyblok\Bundle\Block\BlockRegistry`
+
 #### Best Practices
 
 - **Handle Only Necessary Events**: Use the `supports` method to filter only the Webhook events your handler should
