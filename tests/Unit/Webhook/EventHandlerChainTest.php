@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Webhook;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Storyblok\Bundle\Tests\Double\ConfigurableHandler;
@@ -23,9 +24,7 @@ use Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
 
 final class EventHandlerChainTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function eventIsSupported(): void
     {
         $chain = $this->getChain(new \ArrayIterator([
@@ -37,9 +36,7 @@ final class EventHandlerChainTest extends TestCase
         self::assertTrue($chain->supports(Event::StoryPublished));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function eventIsNotSupported(): void
     {
         $chain = $this->getChain(new \ArrayIterator([
@@ -51,9 +48,7 @@ final class EventHandlerChainTest extends TestCase
         self::assertFalse($chain->supports(Event::StoryPublished));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function handleThrowsUnsupportedEventExceptionWhenNoHandlersAreRegistered(): void
     {
         $chain = $this->getChain(new \ArrayIterator());
@@ -63,9 +58,7 @@ final class EventHandlerChainTest extends TestCase
         $chain->handle(Event::StoryPublished, []);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function handleThrowsUnsupportedEventExceptionWhenNoHandlerIsSupported(): void
     {
         $chain = $this->getChain(new \ArrayIterator([

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Listener;
 
+use PHPUnit\Framework\Attributes\Test;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Storyblok\Bundle\Tests\Util\TestKernel;
@@ -27,9 +28,7 @@ final class UpdateProfilerListenerTest extends KernelTestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function onKernelUpdate(): void
     {
         $kernel = self::createKernel([
@@ -56,9 +55,7 @@ final class UpdateProfilerListenerTest extends KernelTestCase
         self::assertSame('1', $response->headers->get('Symfony-Debug-Toolbar-Replace'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function onKernelUpdateWhenRequestIsNotXmlHttpRequest(): void
     {
         $kernel = self::createKernel([
@@ -83,9 +80,7 @@ final class UpdateProfilerListenerTest extends KernelTestCase
         self::assertNull($response->headers->get('Symfony-Debug-Toolbar-Replace'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function onKernelUpdateWhenDebugIsFalse(): void
     {
         $kernel = self::createKernel([

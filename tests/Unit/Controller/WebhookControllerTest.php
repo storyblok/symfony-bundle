@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Controller;
 
+use PHPUnit\Framework\Attributes\Test;
 use Monolog\Test\TestCase;
 use Psr\Log\NullLogger;
 use Storyblok\Bundle\Controller\WebhookController;
@@ -27,9 +28,7 @@ final class WebhookControllerTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function missingXStoryblokTopicHeaderReturns400(): void
     {
         $logger = new NullLogger();
@@ -42,9 +41,7 @@ final class WebhookControllerTest extends TestCase
         self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function invalidXStoryblokTopicHeaderReturns400(): void
     {
         $logger = new NullLogger();
@@ -58,9 +55,7 @@ final class WebhookControllerTest extends TestCase
         self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function eventNotSupportedReturns200(): void
     {
         $logger = new NullLogger();
@@ -74,9 +69,7 @@ final class WebhookControllerTest extends TestCase
         self::assertSame(Response::HTTP_OK, $response->getStatusCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function eventSupportedButHandlerThrowsExceptionReturns200(): void
     {
         $logger = new NullLogger();
@@ -93,9 +86,7 @@ final class WebhookControllerTest extends TestCase
         self::assertSame(Response::HTTP_OK, $response->getStatusCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function eventSupportedReturns200(): void
     {
         $logger = new NullLogger();
@@ -112,9 +103,7 @@ final class WebhookControllerTest extends TestCase
         self::assertSame(Response::HTTP_OK, $response->getStatusCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function signingWebhookWithMissingWebhookSignatureHeaderReturns400(): void
     {
         $logger = new NullLogger();
@@ -132,9 +121,7 @@ final class WebhookControllerTest extends TestCase
         self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function signingWebhookWithInvalidWebhookSignatureHeaderReturns401(): void
     {
         $logger = new NullLogger();
@@ -153,9 +140,7 @@ final class WebhookControllerTest extends TestCase
         self::assertSame(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function validSigningWebhookReturns200(): void
     {
         $content = '[]';

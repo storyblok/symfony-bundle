@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Api\AssetsApi;
 use Storyblok\Api\AssetsApiInterface;
@@ -30,9 +31,7 @@ final class StoryblokExtensionTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function loadWillSetParameters(): void
     {
         $faker = self::faker();
@@ -57,9 +56,7 @@ final class StoryblokExtensionTest extends TestCase
         self::assertSame($version, $builder->getParameter('storyblok_api.version'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function loadWithoutKernelDebugWillRemoveDefinitions(): void
     {
         $faker = self::faker();
@@ -82,9 +79,7 @@ final class StoryblokExtensionTest extends TestCase
         self::assertFalse($builder->hasDefinition(UpdateProfilerListener::class));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function loadWithKernelDebugWillReplaceHttpClientWithTracableHttpClient(): void
     {
         $faker = self::faker();
@@ -110,9 +105,7 @@ final class StoryblokExtensionTest extends TestCase
         self::assertSame(TraceableHttpClient::class, $definition->getClass());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function loadWithoutAssetsToken(): void
     {
         $faker = self::faker();
@@ -139,9 +132,7 @@ final class StoryblokExtensionTest extends TestCase
         self::assertFalse($builder->hasParameter('storyblok_api.assets_token'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function loadWithAssetsToken(): void
     {
         $faker = self::faker();
@@ -170,9 +161,7 @@ final class StoryblokExtensionTest extends TestCase
         self::assertSame($token, $builder->getParameter('storyblok_api.assets_token'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function loadWithAutoResolveStoriesTrue(): void
     {
         $faker = self::faker();

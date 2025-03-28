@@ -31,9 +31,7 @@ final class AsBlockTest extends TestCase
         self::assertNull($block->template);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function validName(): void
     {
         $block = new AsBlock(
@@ -43,9 +41,7 @@ final class AsBlockTest extends TestCase
         self::assertSame($expected, $block->name);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function template(): void
     {
         $block = new AsBlock(

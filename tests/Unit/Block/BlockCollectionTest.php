@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Block;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\BlockDefinition;
 use Storyblok\Bundle\Block\BlockRegistry;
@@ -24,9 +25,7 @@ final class BlockCollectionTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function add(): void
     {
         $faker = self::faker();
@@ -37,9 +36,7 @@ final class BlockCollectionTest extends TestCase
         self::assertCount(1, $collection);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function addWithArray(): void
     {
         $faker = self::faker();
@@ -52,9 +49,7 @@ final class BlockCollectionTest extends TestCase
         self::assertCount(1, $collection);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function get(): void
     {
         $faker = self::faker();
@@ -65,9 +60,7 @@ final class BlockCollectionTest extends TestCase
         self::assertSame($block, $collection::get($block->className));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function getThrowsExceptionWhenBlockDefinitionWasNotFound(): void
     {
         $faker = self::faker();
@@ -81,9 +74,7 @@ final class BlockCollectionTest extends TestCase
         $collection::get(\stdClass::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function byName(): void
     {
         $faker = self::faker();
@@ -94,9 +85,7 @@ final class BlockCollectionTest extends TestCase
         self::assertSame($block, $collection::byName($block->name));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function byNameThrowsExceptionWhenBlockDefinitionWasNotFound(): void
     {
         $faker = self::faker();

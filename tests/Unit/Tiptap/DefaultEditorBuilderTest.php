@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Tiptap;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
@@ -22,9 +23,7 @@ final class DefaultEditorBuilderTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function getEditor(): void
     {
         $renderer = $this->createMock(RendererInterface::class);

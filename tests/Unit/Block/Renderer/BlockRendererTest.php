@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Block\Renderer;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\BlockDefinition;
 use Storyblok\Bundle\Block\BlockRegistry;
@@ -25,9 +26,7 @@ final class BlockRendererTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function render(): void
     {
         $faker = self::faker();
@@ -51,9 +50,7 @@ final class BlockRendererTest extends TestCase
         self::assertSame($expected, (new BlockRenderer($twig, $collection))->render($values));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function renderWithObject(): void
     {
         $faker = self::faker();
@@ -77,9 +74,7 @@ final class BlockRendererTest extends TestCase
         self::assertSame($expected, (new BlockRenderer($twig, $collection))->render($values));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function renderValuesComponentKeyMustExist(): void
     {
         $faker = self::faker();
@@ -101,9 +96,7 @@ final class BlockRendererTest extends TestCase
         (new BlockRenderer($twig, $collection))->render($values);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function renderCatchesBlockNotFoundExceptionAndReturnsEmptyString(): void
     {
         $faker = self::faker();

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\Test;
 use Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\DependencyInjection\Configuration;
@@ -23,9 +24,7 @@ final class ConfigurationTest extends TestCase
     use ConfigurationTestCaseTrait;
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function values(): void
     {
         $faker = self::faker();
@@ -53,9 +52,7 @@ final class ConfigurationTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function defaults(): void
     {
         $faker = self::faker();
@@ -75,9 +72,7 @@ final class ConfigurationTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function configBaseUriMustExist(): void
     {
         $faker = self::faker();
@@ -89,9 +84,7 @@ final class ConfigurationTest extends TestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function configTokenMustExist(): void
     {
         $faker = self::faker();
