@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Twig;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
@@ -23,9 +24,7 @@ final class RichTextExtensionTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function getFilters(): void
     {
         $builder = $this->createMock(EditorBuilderInterface::class);
@@ -36,9 +35,7 @@ final class RichTextExtensionTest extends TestCase
         self::assertSame('rich_text', $filters[0]->getName());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function richText(): void
     {
         $expected = self::faker()->randomHtml();

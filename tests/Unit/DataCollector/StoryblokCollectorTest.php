@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\DataCollector;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
@@ -24,9 +25,7 @@ final class StoryblokCollectorTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function defaults(): void
     {
         $client = new TraceableHttpClient(new MockHttpClient());
@@ -37,17 +36,13 @@ final class StoryblokCollectorTest extends TestCase
         self::assertSame(0, $collector->getErrorCount());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function getTemplate(): void
     {
         self::assertSame('@Storyblok/data_collector.html.twig', StoryblokCollector::getTemplate());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function lateCollect(): void
     {
         $client = new TraceableHttpClient(new MockHttpClient([
@@ -65,9 +60,7 @@ final class StoryblokCollectorTest extends TestCase
         self::assertSame(0, $collector->getErrorCount());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function reset(): void
     {
         $client = new TraceableHttpClient(new MockHttpClient([

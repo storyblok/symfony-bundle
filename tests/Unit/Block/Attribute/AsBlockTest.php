@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Block\Attribute;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
@@ -21,9 +22,7 @@ final class AsBlockTest extends TestCase
 {
     use FakerTrait;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function defaults(): void
     {
         $block = new AsBlock();
@@ -32,10 +31,8 @@ final class AsBlockTest extends TestCase
         self::assertNull($block->template);
     }
 
-    /**
-     * @test
-     */
-    public function name(): void
+    #[Test]
+    public function validName(): void
     {
         $block = new AsBlock(
             name: $expected = self::faker()->word(),
@@ -44,9 +41,7 @@ final class AsBlockTest extends TestCase
         self::assertSame($expected, $block->name);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function template(): void
     {
         $block = new AsBlock(

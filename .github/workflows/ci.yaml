@@ -99,7 +99,7 @@ jobs:
             - name: "Install dependencies with composer"
               uses: "ramsey/composer-install@v3"
 
-            - name: "Run unit tests"
+            - name: "Run tests"
               run: "vendor/bin/phpunit --configuration=phpunit.xml.dist --coverage-clover=.build/logs/clover.xml"
 
             - name: 'Upload coverage reports to Codecov'
