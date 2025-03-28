@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Controller;
 
-use PHPUnit\Framework\Attributes\Test;
 use Monolog\Test\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Psr\Log\NullLogger;
 use Storyblok\Bundle\Controller\WebhookController;
 use Storyblok\Bundle\Tests\Double\ConfigurableHandler;

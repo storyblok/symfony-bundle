@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\Block;
 
-use PHPUnit\Framework\Attributes\Test;
+use Ergebnis\DataProvider\StringProvider;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\BlockDefinition;
 use Storyblok\Bundle\Tests\Double\Block\SampleBlock;
@@ -33,8 +34,8 @@ final class BlockDefinitionTest extends TestCase
         self::assertSame($expected, (new BlockDefinition($expected, SampleBlock::class, 'sample/block.html.twig'))->name);
     }
 
-    #[DataProviderExternal(\Ergebnis\DataProvider\StringProvider::class, 'blank')]
-    #[DataProviderExternal(\Ergebnis\DataProvider\StringProvider::class, 'empty')]
+    #[DataProviderExternal(StringProvider::class, 'blank')]
+    #[DataProviderExternal(StringProvider::class, 'empty')]
     #[Test]
     public function nameInvalid(string $value): void
     {
@@ -52,8 +53,8 @@ final class BlockDefinitionTest extends TestCase
         self::assertSame($expected, (new BlockDefinition($faker->word(), $expected, 'sample/block.html.twig'))->className);
     }
 
-    #[DataProviderExternal(\Ergebnis\DataProvider\StringProvider::class, 'blank')]
-    #[DataProviderExternal(\Ergebnis\DataProvider\StringProvider::class, 'empty')]
+    #[DataProviderExternal(StringProvider::class, 'blank')]
+    #[DataProviderExternal(StringProvider::class, 'empty')]
     #[Test]
     public function classNameInvalid(string $value): void
     {
@@ -80,8 +81,8 @@ final class BlockDefinitionTest extends TestCase
         self::assertSame($expected, (new BlockDefinition($faker->word(), SampleBlock::class, $expected))->template);
     }
 
-    #[DataProviderExternal(\Ergebnis\DataProvider\StringProvider::class, 'blank')]
-    #[DataProviderExternal(\Ergebnis\DataProvider\StringProvider::class, 'empty')]
+    #[DataProviderExternal(StringProvider::class, 'blank')]
+    #[DataProviderExternal(StringProvider::class, 'empty')]
     #[Test]
     public function templateInvalid(string $value): void
     {

@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\DependencyInjection;
 
-use PHPUnit\Framework\Attributes\Test;
 use Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\DependencyInjection\Configuration;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
