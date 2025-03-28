@@ -28,18 +28,17 @@ jobs:
               uses: "actions/checkout@v4"
 
             - name: "Install PHP with extensions"
-              uses: "shivammathur/setup-php@2.24.0"
+              uses: "shivammathur/setup-php@v2"
               with:
                   coverage: "none"
                   extensions: "${{ env.REQUIRED_PHP_EXTENSIONS }}"
                   php-version: "${{ matrix.php-version }}"
-                  tools: "composer:v2"
 
             - name: "Validate composer.json"
               run: "composer validate"
 
             - name: "Install dependencies with composer"
-              uses: "ramsey/composer-install@3.1.0"
+              uses: "ramsey/composer-install@v3"
               with:
                   composer-options: "--no-scripts"
 
@@ -71,7 +70,7 @@ jobs:
                   php-version: "${{ matrix.php-version }}"
 
             - name: "Install dependencies with composer"
-              uses: "ramsey/composer-install@3.1.0"
+              uses: "ramsey/composer-install@v3"
 
             - name: "Static code analysis"
               run: "vendor/bin/phpstan analyse --configuration phpstan.neon.dist --no-progress"
@@ -98,7 +97,7 @@ jobs:
                 php-version: "${{ matrix.php-version }}"
 
             - name: "Install dependencies with composer"
-              uses: "ramsey/composer-install@3.1.0"
+              uses: "ramsey/composer-install@v3"
 
             - name: "Run unit tests"
               run: "vendor/bin/phpunit --configuration=phpunit.xml.dist --coverage-clover=.build/logs/clover.xml"
@@ -108,3 +107,35 @@ jobs:
               with:
                 files: './.build/logs/clover.xml'
                 token: ${{ secrets.CODECOV_TOKEN }}
+
+    refactoring:
+        name: "Refactoring"
+
+        runs-on: "ubuntu-latest"
+
+        strategy:
+            matrix:
+                php-version:
+                    - "8.3"
+
+        steps:
+            - name: "Checkout"
+              uses: "actions/checkout@v4"
+
+            - name: "Install PHP with extensions"
+              uses: "shivammathur/setup-php@v2"
+              with:
+                  coverage: "none"
+                  extensions: "${{ env.REQUIRED_PHP_EXTENSIONS }}"
+                  php-version: "${{ matrix.php-version }}"
+
+            - name: "Validate composer.json"
+              run: "composer validate"
+
+            - name: "Install dependencies with composer"
+              uses: "ramsey/composer-install@v3"
+              with:
+                  composer-options: "--no-scripts"
+
+            - name: "Run rector/rector"
+              run: "vendor/bin/rector process --config rector.php --dry-run"

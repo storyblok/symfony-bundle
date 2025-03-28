@@ -13,4 +13,8 @@ cs:
 
 .PHONY: tests
 tests:
-	php vendor/bin/phpunit -v
+	symfony php vendor/bin/phpunit -v
+
+.PHONY: refactoring
+refactoring:
+	symfony php vendor/bin/rector process --config rector.php
