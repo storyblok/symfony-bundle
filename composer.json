@@ -40,6 +40,9 @@
     "symfony/event-dispatcher": "^6.0 || ^7.1",
     "thecodingmachine/phpstan-safe-rule": "^1.4"
   },
+  "scripts": {
+    "license-check": "php license-checker.php"
+  },
   "config": {
     "sort-packages": true,
     "allow-plugins": {
