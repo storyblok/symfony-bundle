@@ -54,6 +54,9 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue('blocks')
                     ->cannotBeEmpty()
                 ->end()
+                ->booleanNode('enable_smooth_redirect')
+                    ->defaultFalse()
+                ->end()
             ->end()
         ;
 
