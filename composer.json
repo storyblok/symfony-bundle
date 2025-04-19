@@ -37,8 +37,8 @@
     "phpstan/phpstan-webmozart-assert": "^2.0",
     "phpunit/phpunit": "^12",
     "rector/rector": "^2.0",
-    "thecodingmachine/phpstan-safe-rule": "^1.4",
-    "symfony/event-dispatcher": "^6.0 || ^7.1"
+    "symfony/event-dispatcher": "^6.0 || ^7.1",
+    "thecodingmachine/phpstan-safe-rule": "^1.4"
   },
   "scripts": {
     "license-check": "php license-checker.php"
