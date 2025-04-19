@@ -8,6 +8,10 @@ use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
+use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
+use Storyblok\Bundle\ContentType\Request\DefaultRequestHandler;
+use Storyblok\Bundle\ContentType\Request\SmoothRedirectRequestHandler;
+use Storyblok\Bundle\Controller\ContentTypeController;
 use Storyblok\Bundle\Controller\WebhookController;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
@@ -38,6 +42,13 @@ return static function (ContainerConfigurator $container): void {
         ->set(WebhookEventHandlerChain::class)
 
         ->set(WebhookController::class)
+            ->tag('controller.service_arguments')
+
+        ->set(ContentTypeController::class)
+            ->args([
+                '$version' => param('storyblok_api.version'),
+                '$container' => tagged_locator('storyblok.content_type.controller'),
+            ])
             ->tag('controller.service_arguments')
 
         ->set('storyblok.http_client')
@@ -113,5 +124,17 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(RichTextExtension::class)
             ->tag('twig.extension')
+
+        ->set(ContentTypeControllerRegistry::class)
+
+        ->set(DefaultRequestHandler::class)
+            ->args([
+                '$version' => param('storyblok_api.version'),
+            ])
+
+        ->set(SmoothRedirectRequestHandler::class)
+            ->args([
+                '$version' => param('storyblok_api.version'),
+            ])
     ;
 };

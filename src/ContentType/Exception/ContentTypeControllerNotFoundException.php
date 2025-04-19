@@ -11,10 +11,8 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Storyblok\Bundle\Routing;
+namespace Storyblok\Bundle\ContentType\Exception;
 
-enum Route
+final class ContentTypeControllerNotFoundException extends \RuntimeException
 {
-    public const string WEBHOOK = 'storyblok_webhook';
-    public const string STORYBLOK_CONTENT_TYPE = 'storyblok_content_type';
 }
