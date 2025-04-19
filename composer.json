@@ -17,7 +17,6 @@
     "storyblok/php-tiptap-extension": "^1.0",
     "symfony/config": "^6.0 || ^7.0",
     "symfony/dependency-injection": "^6.0 || ^7.0",
-    "symfony/event-dispatcher": "^6.0 || ^7.1",
     "symfony/framework-bundle": "^6.0 || ^7.0",
     "symfony/http-client": "^6.0 || ^7.0",
     "symfony/http-kernel": "^6.0 || ^7.0",
@@ -38,7 +37,8 @@
     "phpstan/phpstan-webmozart-assert": "^2.0",
     "phpunit/phpunit": "^12",
     "rector/rector": "^2.0",
-    "thecodingmachine/phpstan-safe-rule": "^1.4"
+    "thecodingmachine/phpstan-safe-rule": "^1.4",
+    "symfony/event-dispatcher": "^6.0 || ^7.1"
   },
   "scripts": {
     "license-check": "php license-checker.php"
