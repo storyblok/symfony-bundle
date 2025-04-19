@@ -8,6 +8,10 @@ use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
+use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
+use Storyblok\Bundle\ContentType\Request\DefaultRequestHandler;
+use Storyblok\Bundle\ContentType\Request\SmoothRedirectRequestHandler;
+use Storyblok\Bundle\Controller\ContentTypeController;
 use Storyblok\Bundle\Controller\WebhookController;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
@@ -40,6 +44,13 @@ return static function (ContainerConfigurator $container): void {
         ->set(WebhookController::class)
             ->tag('controller.service_arguments')
 
+        ->set(ContentTypeController::class)
+            ->args([
+                '$version' => param('storyblok_api.version'),
+                '$container' => tagged_locator('storyblok.content_type.controller'),
+            ])
+            ->tag('controller.service_arguments')
+
         ->set('storyblok.http_client')
             ->class(HttpClient::class)
             ->factory([HttpClient::class, 'create'])
@@ -66,24 +77,24 @@ return static function (ContainerConfigurator $container): void {
             ->alias(StoryblokClientInterface::class, StoryblokClient::class)
 
         ->set(DatasourceEntriesApi::class)
-        ->alias(DatasourceEntriesApiInterface::class, DatasourceEntriesApi::class)
+            ->alias(DatasourceEntriesApiInterface::class, DatasourceEntriesApi::class)
 
         ->set(StoriesApi::class)
             ->args([
                 '$client' => service(StoryblokClient::class),
                 '$version' => param('storyblok_api.version'),
             ])
-        ->alias(StoriesApiInterface::class, StoriesApi::class)
+            ->alias(StoriesApiInterface::class, StoriesApi::class)
 
         ->set(LinksApi::class)
-        ->args([
-            '$client' => service(StoryblokClient::class),
-            '$version' => param('storyblok_api.version'),
-        ])
-        ->alias(LinksApiInterface::class, LinksApi::class)
+            ->args([
+                '$client' => service(StoryblokClient::class),
+                '$version' => param('storyblok_api.version'),
+            ])
+            ->alias(LinksApiInterface::class, LinksApi::class)
 
         ->set(TagsApi::class)
-        ->alias(TagsApiInterface::class, TagsApi::class)
+            ->alias(TagsApiInterface::class, TagsApi::class)
 
         ->set(StoryblokCollector::class)
             ->args([
@@ -101,17 +112,29 @@ return static function (ContainerConfigurator $container): void {
             ])
 
         ->set(BlockRenderer::class)
-        ->alias(RendererInterface::class, BlockRenderer::class)
+            ->alias(RendererInterface::class, BlockRenderer::class)
 
         ->set(DefaultEditorBuilder::class)
-        ->alias(EditorBuilderInterface::class, DefaultEditorBuilder::class)
+            ->alias(EditorBuilderInterface::class, DefaultEditorBuilder::class)
 
         ->set(BlockRegistry::class)
 
         ->set(BlockExtension::class)
-        ->tag('twig.extension')
+            ->tag('twig.extension')
 
         ->set(RichTextExtension::class)
-        ->tag('twig.extension')
+            ->tag('twig.extension')
+
+        ->set(ContentTypeControllerRegistry::class)
+
+        ->set(DefaultRequestHandler::class)
+            ->args([
+                '$version' => param('storyblok_api.version'),
+            ])
+
+        ->set(SmoothRedirectRequestHandler::class)
+            ->args([
+                '$version' => param('storyblok_api.version'),
+            ])
     ;
 };
