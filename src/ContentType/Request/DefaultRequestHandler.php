@@ -22,8 +22,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 
 /**
- * This will be used as the default request handler for all content types. If a story is can not be found this throws
- * a HttpNotFoundException.
+ * This will be used as the default request handler for all content types.
+ * If a story is can not be found this throws a HttpNotFoundException.
+ *
+ * @see \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
  */
 final readonly class DefaultRequestHandler implements RequestHandlerInterface
 {

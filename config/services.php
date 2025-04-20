@@ -48,6 +48,10 @@ return static function (ContainerConfigurator $container): void {
             ->args([
                 '$version' => param('storyblok_api.version'),
                 '$container' => tagged_locator('storyblok.content_type.controller'),
+                '$public' => param('storyblok.controller.cache.public'),
+                '$mustRevalidate' => param('storyblok.controller.cache.must_revalidate'),
+                '$maxAge' => param('storyblok.controller.cache.max_age'),
+                '$smaxAge' => param('storyblok.controller.cache.smax_age'),
             ])
             ->tag('controller.service_arguments')
 

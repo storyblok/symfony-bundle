@@ -60,6 +60,11 @@ final class StoryblokExtension extends Extension
         $container->setParameter('storyblok_api.webhooks.secret', $config['webhook_secret']);
         $container->setParameter('storyblok_api.version', $config['version']);
 
+        $container->setParameter('storyblok.controller.cache.public', $config['controller']['cache']['public']);
+        $container->setParameter('storyblok.controller.cache.must_revalidate', $config['controller']['cache']['must_revalidate']);
+        $container->setParameter('storyblok.controller.cache.max_age', $config['controller']['cache']['max_age']);
+        $container->setParameter('storyblok.controller.cache.smax_age', $config['controller']['cache']['smax_age']);
+
         if (\array_key_exists('assets_token', $config)) {
             $container->setParameter('storyblok_api.assets_token', $config['assets_token']);
             $this->configureAssetsApi($container);

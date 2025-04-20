@@ -43,6 +43,10 @@ final readonly class ContentTypeController
         private ContainerInterface $container,
         private LoggerInterface $logger,
         private RequestHandlerInterface $requestHandler,
+        private bool $public,
+        private bool $mustRevalidate,
+        private int $maxAge,
+        private int $smaxAge,
         string $version,
     ) {
         $this->version = Version::from($version);
@@ -95,10 +99,18 @@ final readonly class ContentTypeController
         ]);
 
         if ($this->version->equals(Version::Published)) {
-            $response->setPublic();
-            $response->mustRevalidate();
-            $response->setMaxAge(0);
-            $response->setSharedMaxAge(3600);
+            if ($this->public) {
+                $response->setPublic();
+            } else {
+                $response->setPrivate();
+            }
+
+            if ($this->mustRevalidate) {
+                $response->mustRevalidate();
+            }
+
+            $response->setMaxAge($this->maxAge);
+            $response->setSharedMaxAge($this->smaxAge);
             $response->setLastModified(new DateTimeImmutable($story['published_at']));
         }
 
