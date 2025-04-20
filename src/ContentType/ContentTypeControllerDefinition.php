@@ -33,6 +33,8 @@ final readonly class ContentTypeControllerDefinition
         Assert::notWhitespaceOnly($dto);
         Assert::classExists($dto);
 
+        Assert::notSame($dto, $className);
+
         Assert::stringNotEmpty($type);
         Assert::notWhitespaceOnly($type);
 
