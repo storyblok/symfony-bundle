@@ -17,7 +17,7 @@ use function Symfony\Component\String\u;
 
 abstract readonly class ContentType implements ContentTypeInterface
 {
-    final public static function type(): string
+    public static function type(): string
     {
         return u(static::class)
             ->afterLast('\\')
