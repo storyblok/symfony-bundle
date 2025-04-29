@@ -26,9 +26,9 @@ use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
+use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
-use Storyblok\Bundle\Listener\CacheAwareResponseListener;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 use Symfony\Component\Config\FileLocator;
@@ -39,7 +39,6 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\TraceableHttpClient;
-use Symfony\Component\HttpKernel\KernelEvents;
 use function Symfony\Component\String\u;
 
 final class StoryblokExtension extends Extension
@@ -103,13 +102,15 @@ final class StoryblokExtension extends Extension
         }
 
         $this->registerAttributes($container, $config);
-        //        $this->registerListener($container, $config);
+        $this->registerListener($container, $config);
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     private function registerListener(ContainerBuilder $container, array $config): void
     {
-        $listener = new Definition(CacheAwareResponseListener::class, [
-            '$debug' => $container->getParameter('kernel.debug'),
+        $listener = new Definition(GlobalCachingListener::class, [
             '$public' => $config['controller']['cache']['public'],
             '$mustRevalidate' => $config['controller']['cache']['must_revalidate'],
             '$maxAge' => $config['controller']['cache']['max_age'],
@@ -117,12 +118,10 @@ final class StoryblokExtension extends Extension
         ]);
 
         $listener->addTag('kernel.event_listener', [
-            'event' => KernelEvents::RESPONSE,
-            'method' => 'onKernelResponse',
             'priority' => -255,
         ]);
 
-        $container->setDefinition(CacheAwareResponseListener::class, $listener);
+        $container->setDefinition(GlobalCachingListener::class, $listener);
     }
 
     private function configureAssetsApi(ContainerBuilder $container): void
