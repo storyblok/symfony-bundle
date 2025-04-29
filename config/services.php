@@ -66,24 +66,24 @@ return static function (ContainerConfigurator $container): void {
             ->alias(StoryblokClientInterface::class, StoryblokClient::class)
 
         ->set(DatasourceEntriesApi::class)
-        ->alias(DatasourceEntriesApiInterface::class, DatasourceEntriesApi::class)
+            ->alias(DatasourceEntriesApiInterface::class, DatasourceEntriesApi::class)
 
         ->set(StoriesApi::class)
             ->args([
                 '$client' => service(StoryblokClient::class),
                 '$version' => param('storyblok_api.version'),
             ])
-        ->alias(StoriesApiInterface::class, StoriesApi::class)
+            ->alias(StoriesApiInterface::class, StoriesApi::class)
 
         ->set(LinksApi::class)
-        ->args([
-            '$client' => service(StoryblokClient::class),
-            '$version' => param('storyblok_api.version'),
-        ])
-        ->alias(LinksApiInterface::class, LinksApi::class)
+            ->args([
+                '$client' => service(StoryblokClient::class),
+                '$version' => param('storyblok_api.version'),
+            ])
+            ->alias(LinksApiInterface::class, LinksApi::class)
 
         ->set(TagsApi::class)
-        ->alias(TagsApiInterface::class, TagsApi::class)
+            ->alias(TagsApiInterface::class, TagsApi::class)
 
         ->set(StoryblokCollector::class)
             ->args([
@@ -101,17 +101,17 @@ return static function (ContainerConfigurator $container): void {
             ])
 
         ->set(BlockRenderer::class)
-        ->alias(RendererInterface::class, BlockRenderer::class)
+            ->alias(RendererInterface::class, BlockRenderer::class)
 
         ->set(DefaultEditorBuilder::class)
-        ->alias(EditorBuilderInterface::class, DefaultEditorBuilder::class)
+            ->alias(EditorBuilderInterface::class, DefaultEditorBuilder::class)
 
         ->set(BlockRegistry::class)
 
         ->set(BlockExtension::class)
-        ->tag('twig.extension')
+            ->tag('twig.extension')
 
         ->set(RichTextExtension::class)
-        ->tag('twig.extension')
+            ->tag('twig.extension')
     ;
 };
