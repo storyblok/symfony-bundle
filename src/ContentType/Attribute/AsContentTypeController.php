@@ -19,10 +19,10 @@ use Storyblok\Bundle\ContentType\ContentTypeInterface;
 final readonly class AsContentTypeController
 {
     /**
-     * @param class-string<ContentTypeInterface> $dto
+     * @param class-string<ContentTypeInterface> $contentType
      */
     public function __construct(
-        public string $dto,
+        public string $contentType,
         public ?string $slug = null,
     ) {
     }

@@ -26,10 +26,9 @@ use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
-use Storyblok\Bundle\ContentType\Request\DefaultRequestHandler;
-use Storyblok\Bundle\ContentType\Request\RequestHandlerInterface;
-use Storyblok\Bundle\ContentType\Request\AscendingRedirectRequestHandler;
+use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
+use Storyblok\Bundle\Listener\CacheAwareResponseListener;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 use Symfony\Component\Config\FileLocator;
@@ -40,6 +39,7 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\TraceableHttpClient;
+use Symfony\Component\HttpKernel\KernelEvents;
 use function Symfony\Component\String\u;
 
 final class StoryblokExtension extends Extension
@@ -59,11 +59,6 @@ final class StoryblokExtension extends Extension
         $container->setParameter('storyblok_api.token', $config['token']);
         $container->setParameter('storyblok_api.webhooks.secret', $config['webhook_secret']);
         $container->setParameter('storyblok_api.version', $config['version']);
-
-        $container->setParameter('storyblok.controller.cache.public', $config['controller']['cache']['public']);
-        $container->setParameter('storyblok.controller.cache.must_revalidate', $config['controller']['cache']['must_revalidate']);
-        $container->setParameter('storyblok.controller.cache.max_age', $config['controller']['cache']['max_age']);
-        $container->setParameter('storyblok.controller.cache.smax_age', $config['controller']['cache']['smax_age']);
 
         if (\array_key_exists('assets_token', $config)) {
             $container->setParameter('storyblok_api.assets_token', $config['assets_token']);
@@ -103,15 +98,31 @@ final class StoryblokExtension extends Extension
             $container->setAlias(StoriesApiInterface::class, StoriesResolvedApi::class);
         }
 
-        if (true === $config['ascending_redirect_fallback']) {
-            $container->removeDefinition(DefaultRequestHandler::class);
-            $container->setAlias(RequestHandlerInterface::class, AscendingRedirectRequestHandler::class);
-        } else {
-            $container->removeDefinition(AscendingRedirectRequestHandler::class);
-            $container->setAlias(RequestHandlerInterface::class, DefaultRequestHandler::class);
+        if (false === $config['controller']['ascending_redirect_fallback']) {
+            $container->removeDefinition(StoryNotFoundExceptionListener::class);
         }
 
         $this->registerAttributes($container, $config);
+        //        $this->registerListener($container, $config);
+    }
+
+    private function registerListener(ContainerBuilder $container, array $config): void
+    {
+        $listener = new Definition(CacheAwareResponseListener::class, [
+            '$debug' => $container->getParameter('kernel.debug'),
+            '$public' => $config['controller']['cache']['public'],
+            '$mustRevalidate' => $config['controller']['cache']['must_revalidate'],
+            '$maxAge' => $config['controller']['cache']['max_age'],
+            '$smaxAge' => $config['controller']['cache']['smax_age'],
+        ]);
+
+        $listener->addTag('kernel.event_listener', [
+            'event' => KernelEvents::RESPONSE,
+            'method' => 'onKernelResponse',
+            'priority' => -255,
+        ]);
+
+        $container->setDefinition(CacheAwareResponseListener::class, $listener);
     }
 
     private function configureAssetsApi(ContainerBuilder $container): void
@@ -181,12 +192,13 @@ final class StoryblokExtension extends Extension
             $registryDefinition = $container->getDefinition(ContentTypeControllerRegistry::class);
             $registryDefinition->addMethodCall('add', [[
                 'className' => $reflector->getName(),
-                'dto' => $attribute->dto,
-                'type' => $attribute->dto::type(),
+                'contentType' => $attribute->contentType,
+                'type' => $attribute->contentType::type(),
                 'slug' => $attribute->slug,
             ]]);
 
             $definition->addTag('storyblok.content_type.controller');
+            $definition->addTag('controller.service_arguments');
         });
     }
 }

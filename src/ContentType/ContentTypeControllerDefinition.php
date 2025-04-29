@@ -19,21 +19,21 @@ final readonly class ContentTypeControllerDefinition
 {
     /**
      * @param class-string $className
-     * @param class-string $dto
+     * @param class-string $contentType
      */
     public function __construct(
         public string $className,
-        public string $dto,
+        public string $contentType,
         public string $type,
         public ?string $slug = null,
     ) {
         Assert::notWhitespaceOnly($className);
         Assert::classExists($className);
 
-        Assert::notWhitespaceOnly($dto);
-        Assert::classExists($dto);
+        Assert::notWhitespaceOnly($contentType);
+        Assert::classExists($contentType);
 
-        Assert::notSame($dto, $className);
+        Assert::notSame($contentType, $className);
 
         Assert::stringNotEmpty($type);
         Assert::notWhitespaceOnly($type);
@@ -51,16 +51,16 @@ final readonly class ContentTypeControllerDefinition
         Assert::string($values['className']);
         Assert::classExists($values['className']);
 
-        Assert::keyExists($values, 'dto');
-        Assert::string($values['dto']);
-        Assert::classExists($values['dto']);
+        Assert::keyExists($values, 'contentType');
+        Assert::string($values['contentType']);
+        Assert::classExists($values['contentType']);
 
         Assert::keyExists($values, 'type');
         Assert::string($values['type']);
 
         return new self(
             className: $values['className'],
-            dto: $values['dto'],
+            contentType: $values['contentType'],
             type: $values['type'],
             slug: $values['slug'] ?? null,
         );
