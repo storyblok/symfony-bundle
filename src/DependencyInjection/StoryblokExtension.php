@@ -28,7 +28,7 @@ use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\Request\DefaultRequestHandler;
 use Storyblok\Bundle\ContentType\Request\RequestHandlerInterface;
-use Storyblok\Bundle\ContentType\Request\SmoothRedirectRequestHandler;
+use Storyblok\Bundle\ContentType\Request\AscendingRedirectRequestHandler;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
@@ -103,11 +103,11 @@ final class StoryblokExtension extends Extension
             $container->setAlias(StoriesApiInterface::class, StoriesResolvedApi::class);
         }
 
-        if (true === $config['enable_smooth_redirect']) {
+        if (true === $config['ascending_redirect_fallback']) {
             $container->removeDefinition(DefaultRequestHandler::class);
-            $container->setAlias(RequestHandlerInterface::class, SmoothRedirectRequestHandler::class);
+            $container->setAlias(RequestHandlerInterface::class, AscendingRedirectRequestHandler::class);
         } else {
-            $container->removeDefinition(SmoothRedirectRequestHandler::class);
+            $container->removeDefinition(AscendingRedirectRequestHandler::class);
             $container->setAlias(RequestHandlerInterface::class, DefaultRequestHandler::class);
         }
 

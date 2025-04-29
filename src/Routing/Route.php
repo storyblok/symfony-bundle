@@ -16,5 +16,5 @@ namespace Storyblok\Bundle\Routing;
 enum Route
 {
     public const string WEBHOOK = 'storyblok_webhook';
-    public const string STORYBLOK_CONTENT_TYPE = 'storyblok_content_type';
+    public const string CONTENT_TYPE = 'storyblok_content_type';
 }

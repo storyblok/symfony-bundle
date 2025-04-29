@@ -17,7 +17,7 @@ return function (RoutingConfigurator $routes): void {
             'priority' => 1,
         ]);
 
-    $routes->add(Route::STORYBLOK_CONTENT_TYPE, '/{!slug}')
+    $routes->add(Route::CONTENT_TYPE, '/{!slug}')
         ->controller(ContentTypeController::class)
         ->requirements([
             'slug' => ContentTypeController::PATH_PATTERN,

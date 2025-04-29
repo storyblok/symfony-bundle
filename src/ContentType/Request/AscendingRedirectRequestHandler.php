@@ -29,7 +29,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
  * When a slug was not found it tries to find the parent slug and redirects to it. When this fails it throws a
  * HttpNotFoundException.
  */
-final readonly class SmoothRedirectRequestHandler implements RequestHandlerInterface
+final readonly class AscendingRedirectRequestHandler implements RequestHandlerInterface
 {
     public function __construct(
         private StoriesApiInterface $stories,
@@ -58,7 +58,7 @@ final readonly class SmoothRedirectRequestHandler implements RequestHandlerInter
                 ));
 
                 return new RedirectResponse(
-                    url: $this->urlGenerator->generate(Route::STORYBLOK_CONTENT_TYPE, ['slug' => $parentSlug]),
+                    url: $this->urlGenerator->generate(Route::CONTENT_TYPE, ['slug' => $parentSlug]),
                     status: Response::HTTP_MOVED_PERMANENTLY,
                 );
             } catch (ClientExceptionInterface|\InvalidArgumentException|\ValueError) {

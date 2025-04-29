@@ -57,7 +57,7 @@ final class Configuration implements ConfigurationInterface
                 ->arrayNode('controller')
                     ->addDefaultsIfNotSet()
                     ->children()
-                        ->booleanNode('enable_smooth_redirect')
+                        ->booleanNode('ascending_redirect_fallback')
                             ->defaultFalse()
                             ->info('Will redirect to the parent route if a route can not be matched until the root route. E.g. /blog/2023/10/01 will redirect to /blog/2023/10 and so on until /blog is reached.')
                         ->end()
@@ -79,9 +79,6 @@ final class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                     ->end()
-                ->end()
-                ->booleanNode('enable_smooth_redirect')
-                    ->defaultFalse()
                 ->end()
             ->end()
         ;

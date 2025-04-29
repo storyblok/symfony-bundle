@@ -10,7 +10,7 @@ use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\Request\DefaultRequestHandler;
-use Storyblok\Bundle\ContentType\Request\SmoothRedirectRequestHandler;
+use Storyblok\Bundle\ContentType\Request\AscendingRedirectRequestHandler;
 use Storyblok\Bundle\Controller\ContentTypeController;
 use Storyblok\Bundle\Controller\WebhookController;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
@@ -136,7 +136,7 @@ return static function (ContainerConfigurator $container): void {
                 '$version' => param('storyblok_api.version'),
             ])
 
-        ->set(SmoothRedirectRequestHandler::class)
+        ->set(AscendingRedirectRequestHandler::class)
             ->args([
                 '$version' => param('storyblok_api.version'),
             ])
