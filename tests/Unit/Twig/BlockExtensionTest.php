@@ -23,7 +23,7 @@ final class BlockExtensionTest extends TestCase
     #[Test]
     public function getFilters(): void
     {
-        $renderer = $this->createMock(RendererInterface::class);
+        $renderer = self::createMock(RendererInterface::class);
 
         $filters = (new BlockExtension($renderer))->getFilters();
 

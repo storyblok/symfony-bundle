@@ -26,7 +26,7 @@ final class DefaultEditorBuilderTest extends TestCase
     #[Test]
     public function getEditor(): void
     {
-        $renderer = $this->createMock(RendererInterface::class);
+        $renderer = self::createMock(RendererInterface::class);
 
         $editorBuilder = new DefaultEditorBuilder($renderer);
 
