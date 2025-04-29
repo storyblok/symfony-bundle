@@ -26,7 +26,8 @@ use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
-use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
+use Storyblok\Bundle\ContentType\ContentTypeStorage;
+use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
@@ -58,6 +59,13 @@ final class StoryblokExtension extends Extension
         $container->setParameter('storyblok_api.token', $config['token']);
         $container->setParameter('storyblok_api.webhooks.secret', $config['webhook_secret']);
         $container->setParameter('storyblok_api.version', $config['version']);
+
+        $container->setParameter('controller.cache.public', $config['controller']['cache']['public']);
+        $container->setParameter('controller.cache.must_revalidate', $config['controller']['cache']['must_revalidate']);
+        $container->setParameter('controller.cache.max_age', $config['controller']['cache']['max_age']);
+        $container->setParameter('controller.cache.smax_age', $config['controller']['cache']['smax_age']);
+
+        $container->setDefinition(ContentTypeStorageInterface::class, new Definition(ContentTypeStorage::class));
 
         if (\array_key_exists('assets_token', $config)) {
             $container->setParameter('storyblok_api.assets_token', $config['assets_token']);
@@ -102,26 +110,6 @@ final class StoryblokExtension extends Extension
         }
 
         $this->registerAttributes($container, $config);
-        $this->registerListener($container, $config);
-    }
-
-    /**
-     * @param array<string, mixed> $config
-     */
-    private function registerListener(ContainerBuilder $container, array $config): void
-    {
-        $listener = new Definition(GlobalCachingListener::class, [
-            '$public' => $config['controller']['cache']['public'],
-            '$mustRevalidate' => $config['controller']['cache']['must_revalidate'],
-            '$maxAge' => $config['controller']['cache']['max_age'],
-            '$smaxAge' => $config['controller']['cache']['smax_age'],
-        ]);
-
-        $listener->addTag('kernel.event_listener', [
-            'priority' => -255,
-        ]);
-
-        $container->setDefinition(GlobalCachingListener::class, $listener);
     }
 
     private function configureAssetsApi(ContainerBuilder $container): void

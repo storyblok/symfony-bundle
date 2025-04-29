@@ -28,4 +28,6 @@ interface ContentTypeInterface
      * @return non-empty-string
      */
     public static function type(): string;
+
+    public function publishedAt(): \DateTimeInterface;
 }

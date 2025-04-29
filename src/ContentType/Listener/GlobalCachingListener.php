@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\ContentType\Listener;
 
+use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 final readonly class GlobalCachingListener
 {
     public function __construct(
+        private ContentTypeStorageInterface $storage,
         private ?bool $public = null,
         private ?bool $mustRevalidate = null,
         private ?int $maxAge = null,
@@ -43,6 +45,12 @@ final readonly class GlobalCachingListener
 
         if (null !== $this->mustRevalidate && !$response->headers->hasCacheControlDirective('must-revalidate')) {
             $response->headers->addCacheControlDirective('must-revalidate');
+
+            $contentType = $this->storage->getContentType();
+
+            if (null !== $contentType && !$response->headers->has('Last-Modified')) {
+                $response->setLastModified($contentType->publishedAt());
+            }
         }
 
         if (null !== $this->maxAge && !$response->headers->hasCacheControlDirective('max-age')) {

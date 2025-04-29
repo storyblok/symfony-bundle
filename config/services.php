@@ -20,6 +20,7 @@ use Storyblok\Bundle\Block\Renderer\RendererInterface;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeStorage;
 use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
+use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
 use Storyblok\Bundle\ContentType\Listener\ResolveControllerListener;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\Controller\WebhookController;
@@ -121,6 +122,18 @@ return static function (ContainerConfigurator $container): void {
             ])
             ->tag('kernel.event_listener', [
                 'priority' => 0,
+            ])
+
+        ->set(GlobalCachingListener::class)
+            ->args([
+                '$storage' => service(ContentTypeStorageInterface::class),
+                '$public' => param('controller.cache.public'),
+                '$mustRevalidate' => param('controller.cache.must_revalidate'),
+                '$maxAge' => param('controller.cache.max_age'),
+                '$smaxAge' => param('controller.cache.smax_age'),
+            ])
+            ->tag('kernel.event_listener', [
+                'priority' => -255,
             ])
 
         ->set(ContentTypeValueResolver::class)
