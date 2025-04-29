@@ -68,13 +68,13 @@ final readonly class ResolveControllerListener
                 language: $request->getLocale(),
                 version: Version::from($this->version),
             ));
+
+            $story = $response->story;
+            Assert::keyExists($story, 'content');
+            Assert::keyExists($story['content'], 'component');
         } catch (ClientExceptionInterface|\InvalidArgumentException|\ValueError) {
             throw new StoryNotFoundException(\sprintf('Story with slug "%s" not found.', $slug));
         }
-
-        $story = $response->story;
-        Assert::keyExists($story, 'content');
-        Assert::keyExists($story['content'], 'component');
 
         try {
             $definition = $this->registry->bySlug(\sprintf('/%s', $slug));

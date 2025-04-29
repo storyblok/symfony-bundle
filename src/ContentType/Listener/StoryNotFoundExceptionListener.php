@@ -70,7 +70,7 @@ final readonly class StoryNotFoundExceptionListener
 
             $event->setResponse(new RedirectResponse(
                 url: $this->urlGenerator->generate(Route::CONTENT_TYPE, ['slug' => $parentSlug]),
-                status: Response::HTTP_MOVED_PERMANENTLY,
+                status: Response::HTTP_FOUND,
             ));
         } catch (ClientExceptionInterface|\InvalidArgumentException|\ValueError) {
             throw new StoryNotFoundException(\sprintf('Story with slug "%s" not found.', $slug));

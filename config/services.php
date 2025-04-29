@@ -127,10 +127,10 @@ return static function (ContainerConfigurator $container): void {
         ->set(GlobalCachingListener::class)
             ->args([
                 '$storage' => service(ContentTypeStorageInterface::class),
-                '$public' => param('controller.cache.public'),
-                '$mustRevalidate' => param('controller.cache.must_revalidate'),
-                '$maxAge' => param('controller.cache.max_age'),
-                '$smaxAge' => param('controller.cache.smax_age'),
+                '$public' => abstract_arg('public cache directive'),
+                '$mustRevalidate' => abstract_arg('must-revalidate cache directive'),
+                '$maxAge' => abstract_arg('max-age cache directive'),
+                '$smaxAge' => abstract_arg('smaxage cache directive'),
             ])
             ->tag('kernel.event_listener', [
                 'priority' => -255,
