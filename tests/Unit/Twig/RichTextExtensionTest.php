@@ -27,7 +27,7 @@ final class RichTextExtensionTest extends TestCase
     #[Test]
     public function getFilters(): void
     {
-        $builder = $this->createMock(EditorBuilderInterface::class);
+        $builder = self::createMock(EditorBuilderInterface::class);
 
         $filters = (new RichTextExtension($builder))->getFilters();
 
@@ -40,14 +40,14 @@ final class RichTextExtensionTest extends TestCase
     {
         $expected = self::faker()->randomHtml();
 
-        $editor = $this->createMock(Editor::class);
+        $editor = self::createMock(Editor::class);
         $editor->expects(self::once())
             ->method('getHTML')
             ->willReturn($expected);
 
         $richText = ['type' => 'doc', 'content' => []];
 
-        $builder = $this->createMock(EditorBuilderInterface::class);
+        $builder = self::createMock(EditorBuilderInterface::class);
         $builder->expects(self::once())
             ->method('getEditor')
             ->with($richText)
