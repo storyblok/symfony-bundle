@@ -18,6 +18,9 @@ return function (RoutingConfigurator $routes): void {
         ]);
 
     $routes->add(Route::CONTENT_TYPE, '/{!slug}')
+        /**
+         * Symfony enforces a callable as string here in order to register a route.
+         */
         ->controller(\sprintf('%s::noop', ResolveControllerListener::class))
         ->requirements([
             /**
