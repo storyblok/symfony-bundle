@@ -13,15 +13,21 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\ContentType;
 
+use OskarStark\Value\TrimmedNonEmptyString;
+use Webmozart\Assert\Assert;
 use function Symfony\Component\String\u;
 
 abstract readonly class ContentType implements ContentTypeInterface
 {
     public static function type(): string
     {
-        return u(static::class)
+        $type = u(static::class)
             ->afterLast('\\')
             ->snake()
             ->toString();
+
+        Assert::stringNotEmpty($type);
+
+        return $type;
     }
 }
