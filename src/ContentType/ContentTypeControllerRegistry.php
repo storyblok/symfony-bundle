@@ -18,7 +18,7 @@ use Storyblok\Bundle\ContentType\Exception\ContentTypeControllerNotFoundExceptio
 /**
  * @internal
  */
-final class ContentTypeControllerRegistry
+final class ContentTypeControllerRegistry implements \Countable
 {
     /**
      * @param array<class-string, ContentTypeControllerDefinition> $controllers
@@ -78,5 +78,10 @@ final class ContentTypeControllerRegistry
         }
 
         return $definitions[0];
+    }
+
+    public function count(): int
+    {
+        return \count($this->controllers);
     }
 }
