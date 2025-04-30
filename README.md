@@ -205,7 +205,7 @@ final readonly class Page extends ContentType
         $this->publishedAt = new \DateTimeImmutable($values['published_at']);
     }
 
-    public function publishedAt(): \DateTimeInterface
+    public function publishedAt(): \DateTimeImmutable
     {
         return $this->publishedAt;
     }
