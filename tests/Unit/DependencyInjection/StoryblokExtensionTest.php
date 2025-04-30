@@ -20,6 +20,7 @@ use Storyblok\Api\AssetsApiInterface;
 use Storyblok\Api\Resolver\ResolverInterface;
 use Storyblok\Api\StoriesResolvedApi;
 use Storyblok\Api\StoryblokClientInterface;
+use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\DependencyInjection\StoryblokExtension;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
@@ -183,5 +184,51 @@ final class StoryblokExtensionTest extends TestCase
 
         self::assertTrue($builder->hasAlias(ResolverInterface::class));
         self::assertTrue($builder->hasDefinition(StoriesResolvedApi::class));
+    }
+
+    #[Test]
+    public function loadWithoutAscendingRedirectFallbackWillRemoveTheServiceDefinition(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['controller' => ['ascending_redirect_fallback' => false]],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        self::assertFalse($builder->hasDefinition(StoryNotFoundExceptionListener::class));
+    }
+
+    #[Test]
+    public function loadWithAscendingRedirectFallbackWillRemoveTheServiceDefinition(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['controller' => ['ascending_redirect_fallback' => true]],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        self::assertTrue($builder->hasDefinition(StoryNotFoundExceptionListener::class));
     }
 }
