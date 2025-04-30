@@ -49,6 +49,12 @@ parameters:
 			path: tests/Unit/ContentType/ContentTypeControllerDefinitionTest.php
 
 		-
+			message: '#^Cannot access constant class on callable\.$#'
+			identifier: classConstant.nonObject
+			count: 5
+			path: tests/Unit/ContentType/Listener/ResolveControllerListenerTest.php
+
+		-
 			message: '#^Method Storyblok\\Bundle\\Tests\\Unit\\Listener\\UpdateProfilerListenerTest\:\:createKernel\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

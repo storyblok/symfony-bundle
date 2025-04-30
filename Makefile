@@ -15,6 +15,10 @@ cs:
 tests:
 	symfony php vendor/bin/phpunit
 
+.PHONY: coverage
+coverage:
+	symfony php vendor/bin/phpunit --coverage-html=.build/phpunit/
+
 .PHONY: refactoring
 refactoring:
 	symfony php vendor/bin/rector process --config rector.php
