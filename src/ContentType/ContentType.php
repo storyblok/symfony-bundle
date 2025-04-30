@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\ContentType;
 
-use OskarStark\Value\TrimmedNonEmptyString;
 use Webmozart\Assert\Assert;
 use function Symfony\Component\String\u;
 
