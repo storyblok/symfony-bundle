@@ -37,6 +37,18 @@ parameters:
 			path: tests/Unit/Block/BlockDefinitionTest.php
 
 		-
+			message: '#^Parameter \#1 \$className of class Storyblok\\Bundle\\ContentType\\ContentTypeControllerDefinition constructor expects class\-string, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/ContentType/ContentTypeControllerDefinitionTest.php
+
+		-
+			message: '#^Parameter \#2 \$contentType of class Storyblok\\Bundle\\ContentType\\ContentTypeControllerDefinition constructor expects class\-string, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/ContentType/ContentTypeControllerDefinitionTest.php
+
+		-
 			message: '#^Method Storyblok\\Bundle\\Tests\\Unit\\Listener\\UpdateProfilerListenerTest\:\:createKernel\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
