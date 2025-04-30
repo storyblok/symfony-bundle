@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * This file is part of sensiolabs-de/storyblok-bundle.
+ *
+ * (c) SensioLabs Deutschland <info@sensiolabs.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Storyblok\Bundle\Tests\Unit\ContentType\Attribute;
+
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Storyblok\Bundle\Tests\Double\ContentType\SampleContentType;
+use Storyblok\Bundle\Tests\Util\FakerTrait;
+
+final class AsContentTypeControllerTest extends TestCase
+{
+    use FakerTrait;
+
+    #[Test]
+    public function defaults(): void
+    {
+        $attribute = new AsContentTypeController(SampleContentType::class);
+
+        self::assertNull($attribute->slug);
+    }
+
+    #[Test]
+    public function contentType(): void
+    {
+        $attribute = new AsContentTypeController(
+            contentType: $expected = SampleContentType::class,
+        );
+
+        self::assertSame($expected, $attribute->contentType);
+    }
+
+    #[Test]
+    public function slug(): void
+    {
+        $attribute = new AsContentTypeController(
+            contentType: SampleContentType::class,
+            slug: $expected = self::faker()->word(),
+        );
+
+        self::assertSame($expected, $attribute->slug);
+    }
+}

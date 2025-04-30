@@ -25,6 +25,10 @@ use Storyblok\Api\StoryblokClient;
 use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Block\BlockRegistry;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
+use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
+use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
@@ -94,6 +98,20 @@ final class StoryblokExtension extends Extension
             $container->setAlias(StoriesApiInterface::class, StoriesResolvedApi::class);
         }
 
+        if (false === $config['controller']['ascending_redirect_fallback']) {
+            $container->removeDefinition(StoryNotFoundExceptionListener::class);
+        }
+
+        $storage = $container->getDefinition(GlobalCachingListener::class);
+        $storage->setArguments([
+            '$public' => $config['controller']['cache']['public'],
+            '$mustRevalidate' => $config['controller']['cache']['must_revalidate'],
+            '$maxAge' => $config['controller']['cache']['max_age'],
+            '$smaxAge' => $config['controller']['cache']['smax_age'],
+        ]);
+
+        $container->setDefinition(GlobalCachingListener::class, $storage);
+
         $this->registerAttributes($container, $config);
     }
 
@@ -148,12 +166,29 @@ final class StoryblokExtension extends Extension
             $name = $attribute->name ?? u($reflector->getShortName())->snake()->toString();
             $template = $attribute->template ?? \sprintf('%s/%s.html.twig', $config['blocks_template_path'], $name);
 
-            $collectionDefinition = $container->getDefinition(BlockRegistry::class);
-            $collectionDefinition->addMethodCall('add', [[
+            $registryDefinition = $container->getDefinition(BlockRegistry::class);
+            $registryDefinition->addMethodCall('add', [[
                 'className' => $reflector->getName(),
                 'name' => $name,
                 'template' => $template,
             ]]);
+        });
+
+        $container->registerAttributeForAutoconfiguration(AsContentTypeController::class, static function (
+            ChildDefinition $definition,
+            AsContentTypeController $attribute,
+            \ReflectionClass $reflector,
+        ) use ($container): void {
+            $registryDefinition = $container->getDefinition(ContentTypeControllerRegistry::class);
+            $registryDefinition->addMethodCall('add', [[
+                'className' => $reflector->getName(),
+                'contentType' => $attribute->contentType,
+                'type' => $attribute->contentType::type(),
+                'slug' => $attribute->slug,
+            ]]);
+
+            $definition->addTag('storyblok.content_type.controller');
+            $definition->addTag('controller.service_arguments');
         });
     }
 }

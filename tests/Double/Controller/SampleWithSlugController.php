@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * This file is part of sensiolabs-de/storyblok-bundle.
+ *
+ * (c) SensioLabs Deutschland <info@sensiolabs.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Storyblok\Bundle\Tests\Double\Controller;
+
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Storyblok\Bundle\Tests\Double\ContentType\SampleContentType;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AsContentTypeController(contentType: SampleContentType::class, slug: self::SLUG)]
+final readonly class SampleWithSlugController
+{
+    public const string SLUG = 'sample-slug/';
+
+    public function __invoke(SampleContentType $contentType): Response
+    {
+        return new Response($contentType::type());
+    }
+}

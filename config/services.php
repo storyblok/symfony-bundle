@@ -4,13 +4,6 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Storyblok\Api\StoryblokClientInterface;
-use Storyblok\Bundle\Block\BlockRegistry;
-use Storyblok\Bundle\Block\Renderer\BlockRenderer;
-use Storyblok\Bundle\Block\Renderer\RendererInterface;
-use Storyblok\Bundle\Controller\WebhookController;
-use Storyblok\Bundle\DataCollector\StoryblokCollector;
-use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Api\DatasourceEntriesApi;
 use Storyblok\Api\DatasourceEntriesApiInterface;
 use Storyblok\Api\LinksApi;
@@ -18,12 +11,26 @@ use Storyblok\Api\LinksApiInterface;
 use Storyblok\Api\StoriesApi;
 use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Api\StoryblokClient;
+use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Api\TagsApi;
 use Storyblok\Api\TagsApiInterface;
+use Storyblok\Bundle\Block\BlockRegistry;
+use Storyblok\Bundle\Block\Renderer\BlockRenderer;
+use Storyblok\Bundle\Block\Renderer\RendererInterface;
+use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
+use Storyblok\Bundle\ContentType\ContentTypeStorage;
+use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
+use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
+use Storyblok\Bundle\ContentType\Listener\ResolveControllerListener;
+use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
+use Storyblok\Bundle\Controller\WebhookController;
+use Storyblok\Bundle\DataCollector\StoryblokCollector;
+use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Tiptap\DefaultEditorBuilder;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Storyblok\Bundle\Twig\BlockExtension;
 use Storyblok\Bundle\Twig\RichTextExtension;
+use Storyblok\Bundle\ValueResolver\ContentTypeValueResolver;
 use Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\ScopingHttpClient;
@@ -100,6 +107,43 @@ return static function (ContainerConfigurator $container): void {
                 'priority' => -255,
             ])
 
+        ->set(ResolveControllerListener::class)
+            ->args([
+                '$container' => tagged_locator('storyblok.content_type.controller'),
+                '$version' => param('storyblok_api.version'),
+            ])
+            ->tag('kernel.event_listener', [
+                'priority' => 0,
+            ])
+
+        ->set(StoryNotFoundExceptionListener::class)
+            ->args([
+                '$version' => param('storyblok_api.version'),
+            ])
+            ->tag('kernel.event_listener', [
+                'priority' => 0,
+            ])
+
+        ->set(GlobalCachingListener::class)
+            ->args([
+                '$storage' => service(ContentTypeStorageInterface::class),
+                '$public' => abstract_arg('public cache directive'),
+                '$mustRevalidate' => abstract_arg('must-revalidate cache directive'),
+                '$maxAge' => abstract_arg('max-age cache directive'),
+                '$smaxAge' => abstract_arg('smaxage cache directive'),
+            ])
+            ->tag('kernel.event_listener', [
+                'priority' => -255,
+            ])
+
+        ->set(ContentTypeValueResolver::class)
+            ->tag('controller.argument_value_resolver', [
+                'priority' => 150,
+            ])
+
+        ->set(ContentTypeStorage::class)
+            ->alias(ContentTypeStorageInterface::class, ContentTypeStorage::class)
+
         ->set(BlockRenderer::class)
             ->alias(RendererInterface::class, BlockRenderer::class)
 
@@ -113,5 +157,7 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(RichTextExtension::class)
             ->tag('twig.extension')
+
+        ->set(ContentTypeControllerRegistry::class)
     ;
 };

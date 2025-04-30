@@ -164,7 +164,6 @@ final class PurgeVarnishHandler implements WebhookHandlerInterface
 
 #### Auto resolve relations
 
-
 If you want to update relations automatically, you can enable this with the following configuration:
 
 ```yaml
@@ -180,6 +179,164 @@ This will replace `StoriesApi` to `StoriesResolvedApi`. The `StoriesResolvedApi`
 > Maximum 50 different relations can be resolved in one request. See
 > [Storyblok docs](https://www.storyblok.com/docs/api/content-delivery/v2/stories/retrieve-a-single-story)
 > for more information
+
+## Content Type Handling & Routing
+
+The bundle provides a convenient way to handle Storyblok content types and integrate them into your Symfony routing.
+
+### Create a Content Type object
+
+A content type object is a PHP class that represents a Storyblok content type. For example the following code
+
+```php
+// ...
+use Storyblok\Bundle\ContentType\ContentType;
+
+final readonly class Page extends ContentType
+{
+    public string $uuid;
+    public string $title;
+    private \DateTimeImmutable $publishedAt;
+
+    public function __construct(array $values)
+    {
+        $this->uuid = $values['uuid'];
+        $this->title = $values['content']['title'];
+        $this->publishedAt = new \DateTimeImmutable($values['published_at']);
+    }
+
+    public function publishedAt(): \DateTimeImmutable
+    {
+        return $this->publishedAt;
+    }
+}
+```
+
+### Register your Symfony controller
+
+To register your Symfony controller as a Storyblok content type controller, use the `#[AsContentTypeController]`
+attribute.
+
+```php
+// ...
+use App\ContentType\Page\Page;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AsContentTypeController(contentType: Page::class)]
+final readonly class DefaultPageController
+{
+    public function __invoke(Request $request, Page $page): Response
+    {
+        return new Response('I am on page ' . $page->title . ' with locale ' . $request->getLocale());
+    }
+}
+```
+
+In case you need a dedicated controller for a specific slug but also need one for the content type itself you can add
+the `slug` argument to the `#[AsContentTypeController]` attribute.
+
+```php
+// ...
+use App\ContentType\Page\Page;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AsContentTypeController(contentType: Page::class, slug: 'legal/imprint')]
+final readonly class ImprintController
+{
+    public function __invoke(Request $request): Response
+    {
+        return new Response('I am on the legal page with locale ' . $request->getLocale());
+    }
+}
+```
+
+Controllers marked with the `#[AsContentTypeController]` attribute will be tagged with
+`storyblok.content_type.controller` and `controller.service_arguments`.
+
+### Caching
+
+The bundle provides a global caching configuration to enable HTTP caching directives, which
+are disabled by default. We strongly recommend enabling these in `prod` environment. When you use symfony flex your
+configuration should be automatically added to your `config/packages/storyblok.yaml` file.
+
+```yaml
+storyblok:
+    # ...
+
+when@prod:
+    storyblok:
+        controller:
+            cache:
+                public: true
+                max_age: 3600
+                smax_age: 3600
+                must_revalidate: true
+```
+
+In case you need a specific caching configuration for a specific controller you can use Symfony's `#[Cache]` attribute
+or modifying the `Response` object directly. This will cause that the global configuration is being ignored.
+
+```php
+// ...
+use App\ContentType\Page\Page;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\Cache;
+
+#[AsContentTypeController(contentType: Page::class)]
+#[Cache(
+    maxage: 9000,
+    public: true,
+    smaxage: 9000,
+    mustRevalidate: false
+)]
+final readonly class SpecialController
+{
+    public function __invoke(): Response
+    {
+        // ...
+    }
+}
+```
+
+### Fallback to Parent Routes (ascending_redirect_fallback)
+
+When working with nested Storyblok content structures, it’s possible that users might request a URL path that doesn’t
+correspond to a specific published content entry—for example, a section overview like `/blog/author`.
+
+To provide a more graceful fallback behavior, the Storyblok Symfony Bundle introduces an ascending redirect fallback
+feature that can be enabled via configuration:
+
+```yaml
+storyblok:
+    # ...
+    controller:
+        ascending_redirect_fallback: true # Default false
+```
+
+When this option is enabled, the bundle will automatically redirect upward in the content tree until it finds a valid
+route, instead of immediately returning a 404 Not Found.
+
+Given the following content structure in Storyblok:
+
+```text
+/blog
+/blog/my-fancy-post
+/blog/categories
+/blog/categories/my-category
+/blog/author/kent-clark
+```
+
+If a user visits /blog/author, and this route does not exist, the bundle will attempt to redirect to its closest
+existing parent route. In this case, it would redirect to `/blog`.
+
+This provides a smoother user experience by guiding users to relevant content rather than showing a 404 error.
+
+If no valid parent route can be found, a standard 404 response will still be returned.
 
 ## Block Registration with `#[AsBlock]`
 

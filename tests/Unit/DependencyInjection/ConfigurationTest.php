@@ -35,6 +35,8 @@ final class ConfigurationTest extends TestCase
         $version = $faker->randomElement(['draft', 'published']);
         $autoResolve = $faker->boolean();
         $templatePath = $faker->word();
+        $maxAge = $faker->numberBetween(3600);
+        $public = $faker->boolean();
 
         self::assertProcessedConfigurationEquals([
             ['base_uri' => $url],
@@ -43,6 +45,15 @@ final class ConfigurationTest extends TestCase
             ['version' => $version],
             ['auto_resolve_relations' => $autoResolve],
             ['blocks_template_path' => $templatePath],
+            [
+                'controller' => [
+                    'ascending_redirect_fallback' => false,
+                    'cache' => [
+                        'public' => $public,
+                        'max_age' => $maxAge,
+                    ],
+                ],
+            ],
         ], [
             'base_uri' => $url,
             'token' => $token,
@@ -50,6 +61,15 @@ final class ConfigurationTest extends TestCase
             'version' => $version,
             'auto_resolve_relations' => $autoResolve,
             'blocks_template_path' => $templatePath,
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => $public,
+                    'must_revalidate' => null,
+                    'max_age' => $maxAge,
+                    'smax_age' => null,
+                ],
+            ],
         ]);
     }
 
@@ -70,6 +90,15 @@ final class ConfigurationTest extends TestCase
             'version' => 'published',
             'auto_resolve_relations' => false,
             'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
         ]);
     }
 
