@@ -49,6 +49,7 @@ final class ResolveControllerListenerTest extends TestCase
                     'content' => [
                         'component' => SampleContentType::type(),
                     ],
+                    'default_full_slug' => SampleWithSlugController::SLUG,
                 ],
                 'cv' => 0,
                 'rels' => [],
@@ -92,6 +93,7 @@ final class ResolveControllerListenerTest extends TestCase
                     'content' => [
                         'component' => SampleContentType::type(),
                     ],
+                    'default_full_slug' => SampleWithSlugController::SLUG,
                 ],
                 'cv' => 0,
                 'rels' => [],
