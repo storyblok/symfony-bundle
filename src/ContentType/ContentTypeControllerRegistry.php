@@ -70,7 +70,7 @@ final class ContentTypeControllerRegistry implements \Countable
     {
         $definitions = \array_values(\array_filter(
             $this->controllers,
-            static fn (ContentTypeControllerDefinition $definition) => $definition->type === $type,
+            static fn (ContentTypeControllerDefinition $definition) => $definition->type === $type && null === $definition->slug,
         ));
 
         if (0 === \count($definitions)) {

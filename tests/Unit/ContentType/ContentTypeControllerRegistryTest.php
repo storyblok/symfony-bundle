@@ -93,6 +93,20 @@ final class ContentTypeControllerRegistryTest extends TestCase
     }
 
     #[Test]
+    public function byTypeThrowsWhenDefinitionExistsButHasSlug(): void
+    {
+        $faker = self::faker();
+
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add(new ContentTypeControllerDefinition(SampleController::class, $type = SampleContentType::class, $faker->word(), $faker->slug()));
+
+        self::expectException(ContentTypeControllerNotFoundException::class);
+        self::expectExceptionMessage(\sprintf('ContentTypeController by type "%s" not found.', $type));
+
+        $collection->byType($type);
+    }
+
+    #[Test]
     public function bySlug(): void
     {
         $faker = self::faker();
