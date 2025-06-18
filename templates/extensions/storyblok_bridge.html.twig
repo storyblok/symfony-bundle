@@ -1,0 +1,13 @@
+{%- if version.value == 'draft' -%}
+    <script src="https://app.storyblok.com/f/storyblok-v2-latest.js" async onload="initialize()" type="text/javascript"></script>
+    <script>
+        function initialize() {
+            const {StoryblokBridge} = window
+            const storyblokInstance = new StoryblokBridge()
+
+            storyblokInstance.on(['published', 'change'], () => {
+                window.location.reload()
+            })
+        }
+    </script>
+{%- endif -%}

@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\ContentType;
 
+use Storyblok\Bundle\Domain\Value\Editable;
+
 interface ContentTypeInterface
 {
     /**
@@ -31,4 +33,6 @@ interface ContentTypeInterface
     public static function type(): string;
 
     public function publishedAt(): \DateTimeInterface;
+
+    public function editable(): Editable|null;
 }
