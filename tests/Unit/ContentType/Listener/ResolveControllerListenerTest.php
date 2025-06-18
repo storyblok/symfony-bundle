@@ -21,9 +21,11 @@ use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Bundle\ContentType\ContentTypeControllerDefinition;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeStorage;
+use Storyblok\Bundle\ContentType\Exception\InvalidStoryException;
 use Storyblok\Bundle\ContentType\Exception\StoryNotFoundException;
 use Storyblok\Bundle\ContentType\Listener\ResolveControllerListener;
 use Storyblok\Bundle\Routing\Route;
+use Storyblok\Bundle\Tests\Double\ContentType\FailingContentType;
 use Storyblok\Bundle\Tests\Double\ContentType\SampleContentType;
 use Storyblok\Bundle\Tests\Double\Controller\SampleController;
 use Storyblok\Bundle\Tests\Double\Controller\SampleWithSlugController;
@@ -213,6 +215,48 @@ final class ResolveControllerListenerTest extends TestCase
         $request->attributes->set('_route_params', ['slug' => self::faker()->slug()]);
 
         self::expectException(StoryNotFoundException::class);
+
+        $listener(new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
+    }
+
+    #[Test]
+    public function resolvesControllerThrowsInvalidStoryExceptionWhenContentTypeCanNotBeConstructed(): void
+    {
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects(self::once())
+            ->method('bySlug')
+            ->willReturn(new StoryResponse([
+                'story' => [
+                    'content' => [
+                        'component' => SampleContentType::type(),
+                    ],
+                    'default_full_slug' => SampleWithSlugController::SLUG,
+                ],
+                'cv' => 0,
+                'rels' => [],
+                'links' => [],
+            ]));
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(SampleController::class, FailingContentType::class, 'sample_content_type'));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => self::faker()->slug()]);
+
+        self::expectException(InvalidStoryException::class);
 
         $listener(new ControllerEvent(
             TestKernel::create([], self::class, static fn () => ''),

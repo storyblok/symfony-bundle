@@ -23,6 +23,7 @@ use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeInterface;
 use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
 use Storyblok\Bundle\ContentType\Exception\ContentTypeControllerNotFoundException;
+use Storyblok\Bundle\ContentType\Exception\InvalidStoryException;
 use Storyblok\Bundle\ContentType\Exception\StoryNotFoundException;
 use Storyblok\Bundle\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -97,8 +98,12 @@ final readonly class ResolveControllerListener
         /** @var callable(Request, ContentTypeInterface): Response $controller */
         $controller = $this->container->get($definition->className);
 
-        /** @var ContentTypeInterface $contentType */
-        $contentType = new $definition->contentType($story);
+        try {
+            /** @var ContentTypeInterface $contentType */
+            $contentType = new $definition->contentType($story);
+        } catch (\Throwable $e) {
+            throw new InvalidStoryException($e->getMessage());
+        }
 
         $this->storage->setContentType($contentType);
 
