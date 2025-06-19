@@ -52,6 +52,7 @@ final class ResolveControllerListenerTest extends TestCase
                         'component' => SampleContentType::type(),
                     ],
                     'default_full_slug' => SampleWithSlugController::SLUG,
+                    'full_slug' => SampleWithSlugController::SLUG,
                 ],
                 'cv' => 0,
                 'rels' => [],
@@ -96,6 +97,54 @@ final class ResolveControllerListenerTest extends TestCase
                         'component' => SampleContentType::type(),
                     ],
                     'default_full_slug' => SampleWithSlugController::SLUG,
+                    'full_slug' => SampleWithSlugController::SLUG,
+                ],
+                'cv' => 0,
+                'rels' => [],
+                'links' => [],
+            ]));
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+        $container->set(SampleWithSlugController::class, new SampleWithSlugController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(SampleController::class, SampleContentType::class, 'sample_content_type'));
+        $registry->add(new ContentTypeControllerDefinition(SampleWithSlugController::class, SampleContentType::class, 'sample_content_type', '/'.SampleWithSlugController::SLUG));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => SampleWithSlugController::SLUG]);
+
+        $listener($event = new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
+
+        self::assertSame(SampleWithSlugController::class, $event->getController()::class);
+        self::assertSame(SampleContentType::class, $request->attributes->get('_storyblok_content_type'));
+        self::assertNotNull($storage->getContentType());
+    }
+
+    #[Test]
+    public function resolvesControllerBySlugWithoutLocalizedSlugAppInstalled(): void
+    {
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects(self::once())
+            ->method('bySlug')
+            ->willReturn(new StoryResponse([
+                'story' => [
+                    'content' => [
+                        'component' => SampleContentType::type(),
+                    ],
+                    'default_full_slug' => null,
+                    'full_slug' => SampleWithSlugController::SLUG,
                 ],
                 'cv' => 0,
                 'rels' => [],
@@ -236,6 +285,7 @@ final class ResolveControllerListenerTest extends TestCase
                         'component' => SampleContentType::type(),
                     ],
                     'default_full_slug' => SampleWithSlugController::SLUG,
+                    'full_slug' => SampleWithSlugController::SLUG,
                 ],
                 'cv' => 0,
                 'rels' => [],

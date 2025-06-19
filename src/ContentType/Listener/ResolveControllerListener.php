@@ -72,7 +72,8 @@ final readonly class ResolveControllerListener
 
             $story = $response->story;
             Assert::keyExists($story, 'default_full_slug');
-            $slug = $story['default_full_slug'];
+            Assert::keyExists($story, 'full_slug');
+            $slug = $story['default_full_slug'] ?? $story['full_slug'];
 
             Assert::keyExists($story, 'content');
             Assert::keyExists($story['content'], 'component');
