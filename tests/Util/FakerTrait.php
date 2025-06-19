@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Storyblok\Bundle\Tests\Util;
 
 use Storyblok\Api\Bridge\Faker\Generator;
+use Storyblok\Bundle\Faker\Provider\EditableProvider;
 
 trait FakerTrait
 {
@@ -23,7 +24,10 @@ trait FakerTrait
         static $fakers = [];
 
         if (!\array_key_exists($locale, $fakers)) {
-            $fakers[$locale] = new Generator();
+            $generator = new Generator();
+            $generator->addProvider(new EditableProvider($generator));
+
+            $fakers[$locale] = $generator;
         }
 
         return $fakers[$locale];

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storyblok\Bundle\Twig;
 
 use Storyblok\Api\Domain\Value\Dto\Version;
-use Storyblok\Bundle\Domain\Value\Editable;
+use Storyblok\Bundle\Editable\Domain\Editable;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;

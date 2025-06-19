@@ -29,6 +29,7 @@ use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Tiptap\DefaultEditorBuilder;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Storyblok\Bundle\Twig\BlockExtension;
+use Storyblok\Bundle\Twig\LiveEditorExtension;
 use Storyblok\Bundle\Twig\RichTextExtension;
 use Storyblok\Bundle\ValueResolver\ContentTypeValueResolver;
 use Storyblok\Bundle\Webhook\WebhookEventHandlerChain;
@@ -156,6 +157,12 @@ return static function (ContainerConfigurator $container): void {
             ->tag('twig.extension')
 
         ->set(RichTextExtension::class)
+            ->tag('twig.extension')
+
+        ->set(LiveEditorExtension::class)
+            ->args([
+                '$version' => param('storyblok_api.version'),
+            ])
             ->tag('twig.extension')
 
         ->set(ContentTypeControllerRegistry::class)

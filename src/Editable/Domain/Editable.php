@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Storyblok\Bundle\Domain\Value;
+namespace Storyblok\Bundle\Editable\Domain;
 
 use OskarStark\Value\TrimmedNonEmptyString;
 use Storyblok\Api\Domain\Value\Id;
 use Storyblok\Api\Domain\Value\Uuid;
 use Webmozart\Assert\Assert;
 use function Safe\json_decode;
+use function Safe\json_encode;
 use function Symfony\Component\String\u;
 
 final readonly class Editable
@@ -41,6 +42,11 @@ final readonly class Editable
 
         Assert::keyExists($values, 'space');
         $this->space = $values['space'];
+    }
+
+    public function __toString(): string
+    {
+        return \sprintf('<!--#storyblok#%s-->', json_encode($this->toArray()));
     }
 
     /**
