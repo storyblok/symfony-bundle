@@ -54,7 +54,7 @@ If `symfony/flex` is not available, or you prefer manual setup, follow these ste
    Define the necessary environment variables in your `.env` file:
 
     ```dotenv
-    STORYBLOK_API_BASE_URI=https://api.storyblok.com/v1
+    STORYBLOK_API_BASE_URI=https://api.storyblok.com
     STORYBLOK_API_TOKEN=your_storyblok_api_token
     ```
 
