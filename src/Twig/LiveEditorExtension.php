@@ -46,7 +46,7 @@ final class LiveEditorExtension extends AbstractExtension
 
     public function includeStoryblokBridge(Environment $twig): string
     {
-        return $twig->render('extensions/storyblok_bridge.html.twig', [
+        return $twig->render('@Storyblok/extensions/storyblok_bridge.html.twig', [
             'version' => $this->version,
         ]);
     }
@@ -67,7 +67,7 @@ final class LiveEditorExtension extends AbstractExtension
             return '';
         }
 
-        return $twig->render('extensions/storyblok_attributes.html.twig', [
+        return $twig->render('@Storyblok/extensions/storyblok_attributes.html.twig', [
             'editable' => $editable->editable(),
         ]);
     }

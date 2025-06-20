@@ -49,9 +49,10 @@ final class LiveEditorExtensionTest extends TestCase
     public function attributes(): void
     {
         $faker = self::faker();
-        $twig = new Environment(new FilesystemLoader([
-            __DIR__.'/../../../templates',
-        ]));
+        $loader = new FilesystemLoader();
+        $loader->setPaths(__DIR__.'/../../../templates', 'Storyblok');
+
+        $twig = new Environment($loader);
 
         $block = new EditableBlock([
             '_editable' => $faker->editable(
@@ -69,9 +70,10 @@ final class LiveEditorExtensionTest extends TestCase
     #[Test]
     public function includeStoryblokBridgeWithVersionPublished(): void
     {
-        $twig = new Environment(new FilesystemLoader([
-            __DIR__.'/../../../templates',
-        ]));
+        $loader = new FilesystemLoader();
+        $loader->setPaths(__DIR__.'/../../../templates', 'Storyblok');
+
+        $twig = new Environment($loader);
 
         self::assertEmpty((new LiveEditorExtension('published'))->includeStoryblokBridge($twig));
     }
@@ -79,9 +81,10 @@ final class LiveEditorExtensionTest extends TestCase
     #[Test]
     public function includeStoryblokBridgeWithVersionDraft(): void
     {
-        $twig = new Environment(new FilesystemLoader([
-            __DIR__.'/../../../templates',
-        ]));
+        $loader = new FilesystemLoader();
+        $loader->setPaths(__DIR__.'/../../../templates', 'Storyblok');
+
+        $twig = new Environment($loader);
 
         self::assertSame(<<<'HTML'
 <script src="https://app.storyblok.com/f/storyblok-v2-latest.js" async onload="initialize()" type="text/javascript"></script>
