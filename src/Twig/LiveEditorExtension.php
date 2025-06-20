@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Twig;
 
+use Storyblok\Api\Domain\Type\Editable;
 use Storyblok\Api\Domain\Value\Dto\Version;
-use Storyblok\Bundle\Editable\Domain\Editable;
+use Storyblok\Bundle\Editable\EditableInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -51,14 +52,14 @@ final class LiveEditorExtension extends AbstractExtension
         ];
     }
 
-    public function attributes(Environment $twig, ?Editable $editable = null): string
+    public function attributes(Environment $twig, EditableInterface $editable): string
     {
-        if (null === $editable || Version::Published->equals($this->version)) {
+        if (null === $editable->editable() || Version::Published->equals($this->version)) {
             return '';
         }
 
         return $twig->render('extensions/storyblok_attributes.html.twig', [
-            'editable' => $editable,
+            'editable' => $editable->editable(),
         ]);
     }
 }
