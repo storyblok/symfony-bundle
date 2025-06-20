@@ -21,10 +21,10 @@ use Storyblok\Api\Domain\Type\Editable;
  */
 trait EditableTrait
 {
-    private readonly ?Editable $editable;
+    protected readonly ?Editable $editable;
 
     public function editable(): ?Editable
     {
-        return $this->editable;
+        return $this->editable ?? null;
     }
 }
