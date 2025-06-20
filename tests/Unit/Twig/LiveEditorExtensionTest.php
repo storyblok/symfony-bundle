@@ -21,6 +21,7 @@ use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Storyblok\Bundle\Twig\LiveEditorExtension;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use function Safe\json_encode;
 
 final class LiveEditorExtensionTest extends TestCase
 {
@@ -60,7 +61,7 @@ final class LiveEditorExtensionTest extends TestCase
         ]);
 
         self::assertSame(
-            \sprintf('data-blok-c="%s" data-blok-uid="%d-%s"', htmlspecialchars(\json_encode($block->editable()?->toArray())), $id, $uid),
+            \sprintf('data-blok-c="%s" data-blok-uid="%d-%s"', htmlspecialchars(json_encode($block->editable()?->toArray())), $id, $uid),
             (new LiveEditorExtension())->attributes($twig, $block),
         );
     }
