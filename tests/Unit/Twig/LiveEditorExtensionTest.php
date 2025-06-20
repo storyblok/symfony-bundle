@@ -36,6 +36,15 @@ final class LiveEditorExtensionTest extends TestCase
     }
 
     #[Test]
+    public function getFunctions(): void
+    {
+        $functions = (new LiveEditorExtension())->getFunctions();
+
+        self::assertCount(1, $functions);
+        self::assertSame('storyblok_js_bridge_scripts', $functions[0]->getName());
+    }
+
+    #[Test]
     public function attributes(): void
     {
         $faker = self::faker();
@@ -54,5 +63,37 @@ final class LiveEditorExtensionTest extends TestCase
             \sprintf('data-blok-c="%s" data-blok-uid="%d-%s"', htmlspecialchars(\json_encode($block->editable()?->toArray())), $id, $uid),
             (new LiveEditorExtension())->attributes($twig, $block),
         );
+    }
+
+    #[Test]
+    public function includeStoryblokBridgeWithVersionPublished(): void
+    {
+        $twig = new Environment(new FilesystemLoader([
+            __DIR__.'/../../../templates',
+        ]));
+
+        self::assertEmpty((new LiveEditorExtension('published'))->includeStoryblokBridge($twig));
+    }
+
+    #[Test]
+    public function includeStoryblokBridgeWithVersionDraft(): void
+    {
+        $twig = new Environment(new FilesystemLoader([
+            __DIR__.'/../../../templates',
+        ]));
+
+        self::assertSame(<<<'HTML'
+<script src="https://app.storyblok.com/f/storyblok-v2-latest.js" async onload="initialize()" type="text/javascript"></script>
+    <script>
+        function initialize() {
+            const {StoryblokBridge} = window
+            const storyblokInstance = new StoryblokBridge()
+
+            storyblokInstance.on(['published', 'change'], () => {
+                window.location.reload()
+            })
+        }
+    </script>
+HTML, (new LiveEditorExtension())->includeStoryblokBridge($twig));
     }
 }
