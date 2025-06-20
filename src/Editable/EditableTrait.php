@@ -25,6 +25,6 @@ trait EditableTrait
 
     public function editable(): ?Editable
     {
-        return $this->editable;
+        return $this->editable ?? null;
     }
 }
