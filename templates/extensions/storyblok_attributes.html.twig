@@ -1,0 +1,4 @@
+{%- if editable -%}
+    data-blok-c="{{ editable.toArray|json_encode }}" data-blok-uid="{{ editable.id.value }}-{{ editable.uuid.value }}"
+{%- endif -%}
+
