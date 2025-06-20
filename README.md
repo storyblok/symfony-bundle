@@ -484,8 +484,12 @@ allowing them to receive Storyblok’s `_editable` metadata:
      */
     public function __construct(array $values)
     {
-        // ...
-+        $this->editable = new Editable($values['_editable']);
+         // ...
++        $editable = null;
++        if (\array_key_exists('_editable', $values)) {
++            $editable = new Editable($values['_editable']);
++        }
++        $this->editable = $editable;
     }
 }
 ```
