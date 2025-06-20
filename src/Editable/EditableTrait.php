@@ -17,9 +17,9 @@ use Storyblok\Api\Domain\Type\Editable;
 
 trait EditableTrait
 {
-    private ?Editable $editable = null;
+    private readonly ?Editable $editable;
 
-    public function editable(): Editable|null
+    public function editable(): ?Editable
     {
         return $this->editable;
     }

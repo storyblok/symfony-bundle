@@ -17,5 +17,5 @@ use Storyblok\Api\Domain\Type\Editable;
 
 interface EditableInterface
 {
-    public function editable(): Editable|null;
+    public function editable(): ?Editable;
 }
