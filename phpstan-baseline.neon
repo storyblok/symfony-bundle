@@ -31,6 +31,12 @@ parameters:
 			path: src/DependencyInjection/StoryblokExtension.php
 
 		-
+			message: '#^Trait Storyblok\\Bundle\\Editable\\EditableTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Editable/EditableTrait.php
+
+		-
 			message: '#^Parameter \#2 \$className of class Storyblok\\Bundle\\Block\\BlockDefinition constructor expects class\-string, string given\.$#'
 			identifier: argument.type
 			count: 2
