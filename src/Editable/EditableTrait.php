@@ -16,6 +16,9 @@ namespace Storyblok\Bundle\Editable;
 
 use Storyblok\Api\Domain\Type\Editable;
 
+/**
+ * @experimental
+ */
 trait EditableTrait
 {
     private readonly ?Editable $editable;
