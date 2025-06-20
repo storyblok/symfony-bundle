@@ -162,6 +162,19 @@ final class PurgeVarnishHandler implements WebhookHandlerInterface
 }
 ```
 
+#### Best Practices
+
+- **Handle Only Necessary Events**: Use the `supports` method to filter only the Webhook events your handler should
+  process.
+- **Prioritize Handlers**: If you have multiple handlers, set the priority appropriately. Handlers with higher
+  priority (lower integer value) are executed first.
+- **Add Logging**: It's a good idea to log incoming Webhooks and any actions performed, especially for debugging and
+  monitoring.
+
+This approach provides a streamlined and secure way to handle Webhooks from Storyblok, allowing your Symfony application
+to react to changes effectively. For more details and use cases, you can always refer to
+the [Storyblok API SDK documentation](https://github.com/storyblok/php-content-api-client).
+
 #### Auto resolve relations
 
 If you want to update relations automatically, you can enable this with the following configuration:
@@ -422,7 +435,11 @@ This integration lets the Storyblok Visual Editor highlight components directly 
 
 1. **Load the Storyblok bridge script**
 
-In your `base.html.twig` layout, include the Storyblok JavaScript bridge — **but only in draft mode**:
+> [!IMPORTANT]
+> The javascript bridge is only loaded when the parameter `storyblok.version` is set to `draft`.
+
+In your `base.html.twig` layout, include the Storyblok JavaScript bridge:
+
 
 ```diff
 <!DOCTYPE html>
@@ -448,16 +465,10 @@ Every block you want editable in the Live Editor must implement the `EditableInt
 allowing them to receive Storyblok’s `_editable` metadata:
 
 ```diff
-<?php
-
-declare(strict_types=1);
-
-namespace App\Bridge\Storyblok\Value\Block\Alert;
-
+// ...
 + use Storyblok\Api\Domain\Type\Editable;
 + use Storyblok\Bundle\Editable\EditableInterface;
 + use Storyblok\Bundle\Editable\EditableTrait;
-use Storyblok\Bundle\Block\Attribute\AsBlock;
 
 #[AsBlock]
 -final readonly class MyBlock
@@ -491,19 +502,7 @@ editable block is located:
 
 With this in place, components are “highlightable” in the Live Editor — clicking them opens the edit form seamlessly.
 
-#### Best Practices
-
-- **Handle Only Necessary Events**: Use the `supports` method to filter only the Webhook events your handler should
-  process.
-- **Prioritize Handlers**: If you have multiple handlers, set the priority appropriately. Handlers with higher
-  priority (lower integer value) are executed first.
-- **Add Logging**: It's a good idea to log incoming Webhooks and any actions performed, especially for debugging and
-  monitoring.
-
-This approach provides a streamlined and secure way to handle Webhooks from Storyblok, allowing your Symfony application
-to react to changes effectively. For more details and use cases, you can always refer to
-the [Storyblok API SDK documentation](https://github.com/storyblok/php-content-api-client).
-
+![Live Editor Example](docs/live-editor.webp)
 
 ## License
 
