@@ -90,8 +90,11 @@ To enable Webhooks, add the following route to your application:
 
 ```yaml
 # config/routes/storyblok.yaml
-storyblok:
-    resource: '@StoryblokBundle/config/routes.php'
+storyblok_webhook:
+    resource: '@StoryblokBundle/config/routes/webhook.php'
+
+storyblok_content_type:
+    resource: '@StoryblokBundle/config/routes/content_type.php'
 ```
 
 This will make a route available at `/storyblok/webhook` to receive Webhook requests. For more details on how Webhooks
