@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Editable;
 
-use Storyblok\Bundle\Editable\Domain\Editable;
+use Storyblok\Api\Domain\Type\Editable;
 
 trait EditableTrait
 {
