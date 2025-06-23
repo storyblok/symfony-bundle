@@ -228,7 +228,7 @@ final readonly class Page extends ContentType
 }
 ```
 
-By default, the content type technical name is derived from the class name, converted to snake_case.
+By default, the content type technical name is derived from the class name, converted to `snake_case`.
 If you want to use a different name, you can override the `type()` static method:
 
 ```php
