@@ -228,6 +228,23 @@ final readonly class Page extends ContentType
 }
 ```
 
+By default, the content type technical name is derived from the class name, converted to `snake_case`.
+If you want to use a different name, you can override the `type()` static method:
+
+```php
+// ...
+    public static function type(): string
+    {
+        return 'my-custom-type-name';
+    }
+```
+
+This will affect the request to the Storyblok API, which will now look for the content type with the technical name `my-custom-type-name`.
+
+> [!WARNING]
+> Be sure that your content type in Storyblok has the same technical name as defined in your class, otherwise
+> the controller will not be able to resolve the content type correctly and will return a 404 error.
+
 ### Register your Symfony controller
 
 To register your Symfony controller as a Storyblok content type controller, use the `#[AsContentTypeController]`
