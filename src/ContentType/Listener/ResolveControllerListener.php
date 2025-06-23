@@ -26,6 +26,7 @@ use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
 use Storyblok\Bundle\ContentType\Exception\ContentTypeControllerNotFoundException;
 use Storyblok\Bundle\ContentType\Exception\InvalidStoryException;
 use Storyblok\Bundle\ContentType\Exception\StoryNotFoundException;
+use Storyblok\Bundle\ContentType\UnicodeSlug;
 use Storyblok\Bundle\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -63,10 +64,10 @@ final readonly class ResolveControllerListener
             return;
         }
 
-        $slug = $params['slug'];
+        $slug = new UnicodeSlug($params['slug']);
 
         try {
-            $response = $this->stories->bySlug($slug, new StoryRequest(
+            $response = $this->stories->bySlug($slug->toString(), new StoryRequest(
                 language: $request->getLocale(),
                 version: Version::from($this->version),
             ));
