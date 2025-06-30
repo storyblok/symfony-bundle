@@ -367,12 +367,10 @@ trait HelperTrait
     }
 
     /**
-     * @template T of object
-     *
      * @param array<mixed>     $values
      * @param non-empty-string $key
      *
-     * @return list<T>
+     * @return list<object>
      */
     final protected static function Blocks(array $values, string $key, ?int $min = null, ?int $max = null, ?int $count = null): array
     {
@@ -406,9 +404,7 @@ trait HelperTrait
 
         foreach ($values[$key] as $value) {
             try {
-                /** @var T $block */
-                $block = new (BlockRegistry::byName($value['component'])->className)($value);
-                $blocks[] = $block;
+                $blocks[] = new (BlockRegistry::byName($value['component'])->className)($value);
             } catch (BlockNotFoundException) {
                 // Ignore the block if it is not found to not raise an exception and interrupt the construction.
             }
