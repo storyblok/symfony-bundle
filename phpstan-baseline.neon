@@ -31,6 +31,12 @@ parameters:
 			path: src/DependencyInjection/StoryblokExtension.php
 
 		-
+			message: '#^Template type T of method Storyblok\\Bundle\\Tests\\Double\\Block\\BlockUsingHelperTrait\:\:Blocks\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
+			count: 1
+			path: tests/Double/Block/BlockUsingHelperTrait.php
+
+		-
 			message: '#^Parameter \#2 \$className of class Storyblok\\Bundle\\Block\\BlockDefinition constructor expects class\-string, string given\.$#'
 			identifier: argument.type
 			count: 2

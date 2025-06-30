@@ -406,7 +406,9 @@ trait HelperTrait
 
         foreach ($values[$key] as $value) {
             try {
-                $blocks[] = new (BlockRegistry::byName($value['component'])->className)($value);
+                /** @var T $block */
+                $block = new (BlockRegistry::byName($value['component'])->className)($value);
+                $blocks[] = $block;
             } catch (BlockNotFoundException) {
                 // Ignore the block if it is not found to not raise an exception and interrupt the construction.
             }
