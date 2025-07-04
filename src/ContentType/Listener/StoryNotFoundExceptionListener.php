@@ -22,6 +22,7 @@ use Storyblok\Bundle\Routing\Route;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 
@@ -59,7 +60,7 @@ final readonly class StoryNotFoundExceptionListener
         $slug = $params['slug'];
 
         if (1 === \count($parts = \explode('/', $slug))) {
-            throw new StoryNotFoundException(\sprintf('Story with slug "%s" not found.', $slug));
+            return;
         }
 
         try {
@@ -73,7 +74,9 @@ final readonly class StoryNotFoundExceptionListener
                 url: $this->urlGenerator->generate(Route::CONTENT_TYPE, ['slug' => $parentSlug]),
                 status: Response::HTTP_FOUND,
             ));
-        } catch (ClientExceptionInterface|\InvalidArgumentException|\ValueError) {
+        } catch (ClientExceptionInterface $e) {
+            throw new NotFoundHttpException($e->getMessage(), $e);
+        } catch (\InvalidArgumentException|\ValueError) {
             throw new StoryNotFoundException(\sprintf('Story with slug "%s" not found.', $slug));
         }
     }
