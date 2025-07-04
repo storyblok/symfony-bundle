@@ -204,21 +204,33 @@ The bundle provides a convenient way to handle Storyblok content types and integ
 
 A content type object is a PHP class that represents a Storyblok content type. For example the following code
 
+> [!TIP]
+> Consider using the `HelperTrait` included in this bundle to streamline the handling of Storyblok API responses.
+> Real-world content data is often inconsistent — keys may be missing, values may have unexpected formats, or fields might be empty.
+> The helper methods in this trait handle these edge cases for you, allowing you to write clean, defensive, and readable code with minimal boilerplate.
+>
+> [Read more →](#helpers)
+
 ```php
 // ...
 use Storyblok\Bundle\ContentType\ContentType;
+use Storyblok\Bundle\Util\HelperTrait;
 
 final readonly class Page extends ContentType
 {
+    use HelperTrait;
+
     public string $uuid;
     public string $title;
     private \DateTimeImmutable $publishedAt;
 
     public function __construct(array $values)
     {
-        $this->uuid = $values['uuid'];
-        $this->title = $values['content']['title'];
-        $this->publishedAt = new \DateTimeImmutable($values['published_at']);
+        $this->uuid = self::string($values, 'uuid');
+        $this->publishedAt = self::DateTimeImmutable($values, 'published_at');
+
+        $content = $values['content']
+        $this->title = self::string($content, 'title');
     }
 
     public function publishedAt(): \DateTimeImmutable
@@ -379,6 +391,13 @@ The `name` and `template` parameters are optional, you will find their defaults 
 
 ### Usage
 
+> [!TIP]
+> Consider using the `HelperTrait` included in this bundle to streamline the handling of Storyblok API responses.
+> Real-world content data is often inconsistent — keys may be missing, values may have unexpected formats, or fields might be empty.
+> The helper methods in this trait handle these edge cases for you, allowing you to write clean, defensive, and readable code with minimal boilerplate.
+>
+> [Read more →](#helpers)
+
 To define a block, use the attribute on a class:
 
 ```php
@@ -511,6 +530,13 @@ allowing them to receive Storyblok’s `_editable` metadata:
 }
 ```
 
+> [!TIP]
+> Consider using the `HelperTrait` included in this bundle to streamline the handling of Storyblok API responses.
+> Real-world content data is often inconsistent — keys may be missing, values may have unexpected formats, or fields might be empty.
+> The helper methods in this trait handle these edge cases for you, allowing you to write clean, defensive, and readable code with minimal boilerplate.
+>
+> [Read more →](#helpers)
+
 This setup ensures Storyblok provides the necessary metadata to each block instance.
 
 3. **Render editable markers in your templates**
@@ -527,6 +553,37 @@ editable block is located:
 With this in place, components are “highlightable” in the Live Editor — clicking them opens the edit form seamlessly.
 
 ![Live Editor Example](docs/live-editor.webp)
+
+
+### Helpers
+
+The `Storyblok\Bundle\Util\HelperTrait` provides utility methods for mapping raw Storyblok data arrays into strong PHP value objects, enums, and domain models. These helpers reduce boilerplate code and improve readability in DTO constructors or factory methods.
+
+Use this trait in your value objects or models to simplify the parsing and validation of Storyblok field values.
+
+#### Available Methods
+
+| Method                | Description                                                                                                      |
+|-----------------------|------------------------------------------------------------------------------------------------------------------|
+| `one()`               | Expects exactly one item (e.g. from a `blocks` field). Instantiates one object from it.                          |
+| `list()`              | Maps a list of items to objects. Allows setting `$min`, `$max`, or exact `$count` constraints.                   |
+| `nullOrOne()`         | Same as `one()`, but allows the field to be optional (returns `null` if empty).                                  |
+| `Blocks()`            | Resolves a list of blocks using the `BlockRegistry`. Returns instances of block classes. Ignores unknown blocks. |
+| `enum()`              | Maps a string value to a backed enum. Supports default value and whitelisting of allowed values.                 |
+| `DateTimeImmutable()` | Returns a `Safe\DateTimeImmutable` object from a given date string.                                              |
+| `Uuid()`              | Returns a `Storyblok\Api\Domain\Value\Uuid` instance from a string.                                              |
+| `Asset()`             | Maps an asset array to a `Storyblok\Api\Domain\Type\Asset` object.                                               |
+| `nullOrAsset()`       | Same as `Asset()`, but allows null or invalid input.                                                             |
+| `MultiLink()`         | Maps a multilink array to a `Storyblok\Api\Domain\Type\MultiLink` object.                                        |
+| `nullOrMultiLink()`   | Same as `MultiLink()`, but returns `null` if `url` and `id` are missing or empty.                                |
+| `RichText()`          | Maps rich text content to a `Storyblok\Api\Domain\Type\RichText` object.                                         |
+| `nullOrRichText()`    | Same as `RichText()`, but returns `null` if content is empty or only contains whitespace.                        |
+| `boolean()`           | Returns `true` if the key exists and its value is `true`, otherwise `false`.                                     |
+| `zeroOrInteger()`     | Returns an integer from the field, or `0` if missing.                                                            |
+| `zeroOrFloat()`       | Returns a float from the field, or `0.0` if missing.                                                             |
+| `string()`            | Returns a trimmed non-empty string (using `TrimmedNonEmptyString`). Optional max length check.                   |
+| `nullOrString()`      | Same as `string()`, but returns `null` if missing or invalid.                                                    |
+| `nullOrEditable()`    | Returns an `Editable` instance or `null`.                                                                        |
 
 ## License
 
