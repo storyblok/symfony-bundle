@@ -9,6 +9,12 @@ use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Exception\BlockNotFoundException;
 use Webmozart\Assert\Assert;
 
+/**
+ * @experimental This trait is experimental and may change in future versions.
+ *
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Edo Dusi <edo@edoardodusi.com>
+ */
 trait ValueObjectTrait
 {
     use BaseValueObjectTrait;
