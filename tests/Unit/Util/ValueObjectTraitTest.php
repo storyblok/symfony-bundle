@@ -19,13 +19,10 @@ use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\BlockDefinition;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Tests\Double\Block\SampleBlock;
-use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Storyblok\Bundle\Util\ValueObjectTrait;
 
 final class ValueObjectTraitTest extends TestCase
 {
-    use FakerTrait;
-
     protected function setUp(): void
     {
         // Clear the static registry before each test
