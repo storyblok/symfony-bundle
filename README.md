@@ -204,21 +204,33 @@ The bundle provides a convenient way to handle Storyblok content types and integ
 
 A content type object is a PHP class that represents a Storyblok content type. For example the following code
 
+> [!TIP]
+> Consider using the `ValueObjectTrait` included in this bundle to streamline the handling of Storyblok API responses.
+> Real-world content data is often inconsistent — keys may be missing, values may have unexpected formats, or fields might be empty.
+> The helper methods in this trait handle these edge cases for you, allowing you to write clean, defensive, and readable code with minimal boilerplate.
+>
+> [Read more →](#helpers)
+
 ```php
 // ...
 use Storyblok\Bundle\ContentType\ContentType;
+use Storyblok\Bundle\Util\ValueObjectTrait;
 
 final readonly class Page extends ContentType
 {
+    use ValueObjectTrait;
+
     public string $uuid;
     public string $title;
     private \DateTimeImmutable $publishedAt;
 
     public function __construct(array $values)
     {
-        $this->uuid = $values['uuid'];
-        $this->title = $values['content']['title'];
-        $this->publishedAt = new \DateTimeImmutable($values['published_at']);
+        $this->uuid = self::string($values, 'uuid');
+        $this->publishedAt = self::DateTimeImmutable($values, 'published_at');
+
+        $content = $values['content']
+        $this->title = self::string($content, 'title');
     }
 
     public function publishedAt(): \DateTimeImmutable
@@ -379,6 +391,13 @@ The `name` and `template` parameters are optional, you will find their defaults 
 
 ### Usage
 
+> [!TIP]
+> Consider using the `ValueObjectTrait` included in this bundle to streamline the handling of Storyblok API responses.
+> Real-world content data is often inconsistent — keys may be missing, values may have unexpected formats, or fields might be empty.
+> The helper methods in this trait handle these edge cases for you, allowing you to write clean, defensive, and readable code with minimal boilerplate.
+>
+> [Read more →](#helpers)
+
 To define a block, use the attribute on a class:
 
 ```php
@@ -511,6 +530,13 @@ allowing them to receive Storyblok’s `_editable` metadata:
 }
 ```
 
+> [!TIP]
+> Consider using the `ValueObjectTrait` included in this bundle to streamline the handling of Storyblok API responses.
+> Real-world content data is often inconsistent — keys may be missing, values may have unexpected formats, or fields might be empty.
+> The helper methods in this trait handle these edge cases for you, allowing you to write clean, defensive, and readable code with minimal boilerplate.
+>
+> [Read more →](#helpers)
+
 This setup ensures Storyblok provides the necessary metadata to each block instance.
 
 3. **Render editable markers in your templates**
@@ -527,6 +553,20 @@ editable block is located:
 With this in place, components are “highlightable” in the Live Editor — clicking them opens the edit form seamlessly.
 
 ![Live Editor Example](docs/live-editor.webp)
+
+### Helpers
+
+The `Storyblok\Bundle\Util\ValueObjectTrait` provides utility methods for mapping raw Storyblok data arrays into strong PHP value objects, enums, and domain models. These helpers reduce boilerplate code and improve readability in DTO constructors or factory methods.
+
+Use this trait in your value objects or models to simplify the parsing and validation of Storyblok field values.
+
+#### Available Methods
+
+| Method                | Description                                                                                                      |
+|-----------------------|------------------------------------------------------------------------------------------------------------------|
+| `Blocks()`            | Resolves a list of blocks using the `BlockRegistry`. Returns instances of block classes. Ignores unknown blocks. |
+
+For a full list of available methods see this [Documentation](https://github.com/storyblok/php-content-api-client?tab=readme-ov-file#helpers)
 
 ## License
 

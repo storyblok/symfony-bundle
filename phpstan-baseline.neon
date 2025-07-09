@@ -61,6 +61,12 @@ parameters:
 			path: tests/Unit/Listener/UpdateProfilerListenerTest.php
 
 		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertIsArray\(\) with list\<object\> will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Unit/Util/ValueObjectTraitTest.php
+
+		-
 			message: '#^Method Storyblok\\Bundle\\Tests\\Util\\TestKernel\:\:create\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
