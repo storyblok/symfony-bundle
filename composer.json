@@ -28,7 +28,7 @@
   },
   "require-dev": {
     "ergebnis/composer-normalize": "^2.2",
-    "ergebnis/data-provider": "^3.2",
+    "ergebnis/data-provider": "^3.4",
     "ergebnis/php-cs-fixer-config": "^6.28",
     "ergebnis/test-util": "^1.5",
     "matthiasnoback/symfony-config-test": "^6.0",
