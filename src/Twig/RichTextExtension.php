@@ -37,7 +37,7 @@ final class RichTextExtension extends AbstractExtension
     }
 
     /**
-     * @param RichText|array{type: 'doc', content: list<array<string, mixed>>} $richText
+     * @param RichText|array{type: 'doc', content: list<mixed[]>} $richText
      */
     public function richText(RichText|array $richText): string
     {

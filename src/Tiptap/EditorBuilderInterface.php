@@ -21,7 +21,7 @@ interface EditorBuilderInterface
     /**
      * @param array{
      *     type: 'doc',
-     *     content: list<array<string, mixed>>
+     *     content: list<mixed[]>
      * } $values
      */
     public function getEditor(array $values): Editor;
