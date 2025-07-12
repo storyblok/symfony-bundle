@@ -48,6 +48,6 @@ final readonly class ContentTypeRegistry implements ContentTypeRegistryInterface
 
     public function has(string $class): bool
     {
-        return [] !== \array_filter($this->contentTypes, static fn(string $existingClass) => $existingClass === $class);
+        return [] !== \array_filter($this->contentTypes, static fn (string $existingClass) => $existingClass === $class);
     }
 }
