@@ -18,10 +18,10 @@ return function (RoutingConfigurator $routes): void {
              *  \p{L} → Matches any letter (Latin, Kanji, Hiragana, Katakana, etc.)
              *  \p{N} → Matches any number (so numbers remain valid in slugs)
              *  (?:-[\p{L}\p{N}]+)* → Allows hyphenated words (e.g., hello-world)
-             *  (?:\/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*)*\/? → Allows slashes for hierarchical paths
+             *  (?:\/[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*)*\/? → Allows slashes for hierarchical paths
              *  Trailing slash (\/?) → Optional to allow both /slug and /slug/.
              */
-            'slug' => '([\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*(?:\/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*)*\/?)$',
+            'slug' => '([\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*(?:\/[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*)*\/?)$',
         ])
         ->options([
             'priority' => -10000,
