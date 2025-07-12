@@ -62,7 +62,7 @@ final class StoryblokExtension extends Extension
 
         if (\array_key_exists('assets_token', $config)) {
             $container->setParameter('storyblok_api.assets_token', $config['assets_token']);
-            $this->configureAssetsApi($container);
+            self::configureAssetsApi($container);
             $container->setAlias(StoryblokClientInterface::class, StoryblokClient::class);
         }
 
@@ -115,7 +115,7 @@ final class StoryblokExtension extends Extension
         $this->registerAttributes($container, $config);
     }
 
-    private function configureAssetsApi(ContainerBuilder $container): void
+    private static function configureAssetsApi(ContainerBuilder $container): void
     {
         $client = new Definition(ScopingHttpClient::class);
         $client->setFactory([ScopingHttpClient::class, 'forBaseUri']);
