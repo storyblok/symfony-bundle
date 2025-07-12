@@ -52,9 +52,9 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block',
-                    'description' => 'Test description'
-                ]
-            ]
+                    'description' => 'Test description',
+                ],
+            ],
         ];
 
         $result = $class::Blocks($values, 'blocks');
@@ -97,14 +97,14 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 1',
-                    'description' => 'Test description 1'
+                    'description' => 'Test description 1',
                 ],
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 2',
-                    'description' => 'Test description 2'
-                ]
-            ]
+                    'description' => 'Test description 2',
+                ],
+            ],
         ];
 
         $result = $class::Blocks($values, 'blocks', count: 2);
@@ -126,9 +126,9 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block',
-                    'description' => 'Test description'
-                ]
-            ]
+                    'description' => 'Test description',
+                ],
+            ],
         ];
 
         $this->expectException(\InvalidArgumentException::class);
@@ -153,14 +153,14 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 1',
-                    'description' => 'Test description 1'
+                    'description' => 'Test description 1',
                 ],
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 2',
-                    'description' => 'Test description 2'
-                ]
-            ]
+                    'description' => 'Test description 2',
+                ],
+            ],
         ];
 
         $result = $class::Blocks($values, 'blocks', min: 1);
@@ -182,9 +182,9 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block',
-                    'description' => 'Test description'
-                ]
-            ]
+                    'description' => 'Test description',
+                ],
+            ],
         ];
 
         $this->expectException(\InvalidArgumentException::class);
@@ -209,9 +209,9 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block',
-                    'description' => 'Test description'
-                ]
-            ]
+                    'description' => 'Test description',
+                ],
+            ],
         ];
 
         $result = $class::Blocks($values, 'blocks', max: 2);
@@ -233,19 +233,19 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 1',
-                    'description' => 'Test description 1'
+                    'description' => 'Test description 1',
                 ],
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 2',
-                    'description' => 'Test description 2'
+                    'description' => 'Test description 2',
                 ],
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 3',
-                    'description' => 'Test description 3'
-                ]
-            ]
+                    'description' => 'Test description 3',
+                ],
+            ],
         ];
 
         $this->expectException(\InvalidArgumentException::class);
@@ -267,9 +267,9 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block',
-                    'description' => 'Test description'
-                ]
-            ]
+                    'description' => 'Test description',
+                ],
+            ],
         ];
 
         $this->expectException(\InvalidArgumentException::class);
@@ -307,9 +307,9 @@ final class ValueObjectTraitTest extends TestCase
             'blocks' => [
                 [
                     'title' => 'Test Block without component',
-                    'description' => 'Test description'
-                ]
-            ]
+                    'description' => 'Test description',
+                ],
+            ],
         ];
 
         $this->expectException(\InvalidArgumentException::class);
@@ -332,9 +332,9 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'unknown_block',
                     'title' => 'Unknown Block',
-                    'description' => 'Unknown description'
-                ]
-            ]
+                    'description' => 'Unknown description',
+                ],
+            ],
         ];
 
         $result = $class::Blocks($values, 'blocks');
@@ -360,14 +360,14 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Valid Block',
-                    'description' => 'Valid description'
+                    'description' => 'Valid description',
                 ],
                 [
                     'component' => 'unknown_block',
                     'title' => 'Invalid Block',
-                    'description' => 'Invalid description'
-                ]
-            ]
+                    'description' => 'Invalid description',
+                ],
+            ],
         ];
 
         $result = $class::Blocks($values, 'blocks');
@@ -383,7 +383,7 @@ final class ValueObjectTraitTest extends TestCase
         $class = new class() {
             use ValueObjectTrait;
         };
-        
+
         $reflection = new \ReflectionClass($class);
         $method = $reflection->getMethod('Blocks');
 
@@ -409,14 +409,14 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 1',
-                    'description' => 'Test description 1'
+                    'description' => 'Test description 1',
                 ],
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block 2',
-                    'description' => 'Test description 2'
-                ]
-            ]
+                    'description' => 'Test description 2',
+                ],
+            ],
         ];
 
         $result = $class::Blocks($values, 'blocks', min: 1, max: 3);
@@ -438,9 +438,9 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block',
-                    'description' => 'Test description'
-                ]
-            ]
+                    'description' => 'Test description',
+                ],
+            ],
         ];
 
         $this->expectException(\InvalidArgumentException::class);
@@ -466,9 +466,9 @@ final class ValueObjectTraitTest extends TestCase
                 [
                     'component' => 'sample_block',
                     'title' => 'Test Block',
-                    'description' => 'Test description'
-                ]
-            ]
+                    'description' => 'Test description',
+                ],
+            ],
         ];
 
         $result = $class::Blocks($values, 'blocks');
