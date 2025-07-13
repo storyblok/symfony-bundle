@@ -16,6 +16,7 @@ namespace Storyblok\Bundle\Routing;
 
 /**
  * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Kristian Hempel <protykhybrid@googlemail.com>
  */
 enum Requirement
 {
