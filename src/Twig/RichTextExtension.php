@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Twig;
 
+use Storyblok\Api\Domain\Type\RichText;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -35,11 +36,8 @@ final class RichTextExtension extends AbstractExtension
         ];
     }
 
-    /**
-     * @param array{type: 'doc', content: list<array<string, mixed>>} $richText
-     */
-    public function richText(array $richText): string
+    public function richText(RichText $richText): string
     {
-        return $this->builder->getEditor($richText)->getHTML();
+        return $this->builder->getEditor($richText->toArray())->getHTML();
     }
 }
