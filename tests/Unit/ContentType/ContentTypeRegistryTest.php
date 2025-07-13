@@ -18,23 +18,23 @@ use Storyblok\Bundle\Tests\Double\Controller\SampleWithSlugController;
 final class ContentTypeRegistryTest extends TestCase
 {
     #[Test]
-    public function hasWithExistingContentTypeReturnsTrue(): void
+    public function existsWithExistingContentTypeReturnsTrue(): void
     {
         $registry = new ContentTypeRegistry(new ContentTypeControllerRegistry([
             SampleController::class => new ContentTypeControllerDefinition(SampleController::class, SampleContentType::class, SampleContentType::type()),
         ]));
 
-        self::assertTrue($registry->has(SampleContentType::class));
+        self::assertTrue($registry->exists(SampleContentType::class));
     }
 
     #[Test]
-    public function hasWithNonExistingContentTypeReturnsFalse(): void
+    public function existsWithNonExistingContentTypeReturnsFalse(): void
     {
         $registry = new ContentTypeRegistry(new ContentTypeControllerRegistry([
             SampleController::class => new ContentTypeControllerDefinition(SampleController::class, SampleContentType::class, SampleContentType::type()),
         ]));
 
-        self::assertFalse($registry->has(FailingContentType::class));
+        self::assertFalse($registry->exists(FailingContentType::class));
     }
 
     #[Test]

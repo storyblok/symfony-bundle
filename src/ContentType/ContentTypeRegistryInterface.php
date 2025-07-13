@@ -27,5 +27,5 @@ interface ContentTypeRegistryInterface
     /**
      * @param class-string<ContentTypeInterface> $class
      */
-    public function has(string $class): bool;
+    public function exists(string $class): bool;
 }
