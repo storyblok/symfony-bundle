@@ -14,6 +14,9 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Routing;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ */
 enum Requirement
 {
     /**

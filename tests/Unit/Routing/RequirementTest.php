@@ -25,7 +25,7 @@ final class RequirementTest extends TestCase
     #[DataProvider('slugs')]
     public function slugRegexMatches(string $value): void
     {
-        self::assertMatchesRegularExpression(\sprintf('/%s/u', Requirement::SLUG), $value);
+        self::assertMatchesRegularExpression(\sprintf('#%s#u', Requirement::SLUG), $value);
     }
 
     /**
@@ -34,7 +34,9 @@ final class RequirementTest extends TestCase
     public static function slugs(): iterable
     {
         yield 'dash' => ['valid-slug'];
+        yield 'only dash' => ['/-/test'];
         yield 'underscore' => ['valid_slug'];
+        yield 'only underscore' => ['/_/test'];
         yield 'complete path with underscores' => ['my/path_to/a_valid_slug'];
         yield 'complete path with dashes' => ['my/path-to/a-valid-slug'];
         yield 'with trailing slash' => ['my/test/'];
