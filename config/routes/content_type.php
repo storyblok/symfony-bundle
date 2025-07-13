@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Symfony\Component\Routing\Loader\Configurator;
 
 use Storyblok\Bundle\ContentType\Listener\ResolveControllerListener;
+use Storyblok\Bundle\Routing\Requirement;
 use Storyblok\Bundle\Routing\Route;
 
 return function (RoutingConfigurator $routes): void {
@@ -14,14 +15,7 @@ return function (RoutingConfigurator $routes): void {
          */
         ->controller(\sprintf('%s::noop', ResolveControllerListener::class))
         ->requirements([
-            /**
-             *  \p{L} → Matches any letter (Latin, Kanji, Hiragana, Katakana, etc.)
-             *  \p{N} → Matches any number (so numbers remain valid in slugs)
-             *  (?:-[\p{L}\p{N}]+)* → Allows hyphenated words (e.g., hello-world)
-             *  (?:\/[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*)*\/? → Allows slashes for hierarchical paths
-             *  Trailing slash (\/?) → Optional to allow both /slug and /slug/.
-             */
-            'slug' => '([\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*(?:\/[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*)*\/?)$',
+            'slug' => Requirement::SLUG,
         ])
         ->options([
             'priority' => -10000,
