@@ -21,8 +21,8 @@ use Storyblok\Bundle\Routing\Requirement;
 
 final class RequirementTest extends TestCase
 {
-    #[Test]
     #[DataProvider('slugs')]
+    #[Test]
     public function slugRegexMatches(string $value): void
     {
         self::assertMatchesRegularExpression(\sprintf('#%s#u', Requirement::SLUG), $value);

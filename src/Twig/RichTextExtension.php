@@ -37,9 +37,9 @@ final class RichTextExtension extends AbstractExtension
     }
 
     /**
-     * @param RichText|array{type: 'doc', content: list<mixed[]>} $richText
+     * @param array{type: 'doc', content: list<mixed[]>}|RichText $richText
      */
-    public function richText(RichText|array $richText): string
+    public function richText(array|RichText $richText): string
     {
         if (\is_array($richText)) {
             @trigger_deprecation('storyblok/symfony-bundle', '1.4', 'Passing an array to "%s" is deprecated, use "%s" instead.', __METHOD__, RichText::class);
