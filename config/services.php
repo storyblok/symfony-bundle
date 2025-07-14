@@ -18,6 +18,8 @@ use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
+use Storyblok\Bundle\ContentType\ContentTypeRegistry;
+use Storyblok\Bundle\ContentType\ContentTypeRegistryInterface;
 use Storyblok\Bundle\ContentType\ContentTypeStorage;
 use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
 use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
@@ -166,5 +168,8 @@ return static function (ContainerConfigurator $container): void {
             ->tag('twig.extension')
 
         ->set(ContentTypeControllerRegistry::class)
+
+        ->set(ContentTypeRegistry::class)
+            ->alias(ContentTypeRegistryInterface::class, ContentTypeRegistry::class)
     ;
 };

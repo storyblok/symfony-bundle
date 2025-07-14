@@ -85,4 +85,12 @@ final class ContentTypeControllerRegistry implements \Countable
     {
         return \count($this->controllers);
     }
+
+    /**
+     * @return array<class-string, ContentTypeControllerDefinition>
+     */
+    public function all(): array
+    {
+        return $this->controllers;
+    }
 }

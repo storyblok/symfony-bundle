@@ -133,4 +133,15 @@ final class ContentTypeControllerRegistryTest extends TestCase
 
         $collection->bySlug($slug);
     }
+
+    #[Test]
+    public function all(): void
+    {
+        $faker = self::faker();
+
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add(new ContentTypeControllerDefinition(SampleController::class, SampleContentType::class, $faker->word(), $slug = $faker->slug()));
+
+        self::assertCount(1, $collection->all());
+    }
 }
