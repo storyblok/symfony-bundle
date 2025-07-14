@@ -27,5 +27,5 @@ enum Requirement
      *  (?:\/[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*)*\/? → Allows slashes for hierarchical paths
      *  Trailing slash (\/?) → Optional to allow both /slug and /slug/.
      */
-    public const string SLUG = '([\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*(?:\/[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*)*\/?)$';
+    public const string SLUG = '([/_-]/)?([\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*(?:\/[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*)*\/?)$';
 }
