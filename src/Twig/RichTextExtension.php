@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Twig;
 
+use Storyblok\Api\Domain\Type\RichText;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -36,10 +37,15 @@ final class RichTextExtension extends AbstractExtension
     }
 
     /**
-     * @param array{type: 'doc', content: list<array<string, mixed>>} $richText
+     * @param RichText|array{type: 'doc', content: list<mixed[]>} $richText
      */
-    public function richText(array $richText): string
+    public function richText(RichText|array $richText): string
     {
-        return $this->builder->getEditor($richText)->getHTML();
+        if (\is_array($richText)) {
+            @trigger_deprecation('storyblok/symfony-bundle', '1.4', 'Passing an array to "%s" is deprecated, use "%s" instead.', __METHOD__, RichText::class);
+            $richText = new RichText($richText);
+        }
+
+        return $this->builder->getEditor($richText->toArray())->getHTML();
     }
 }
