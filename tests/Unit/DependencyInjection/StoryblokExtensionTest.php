@@ -188,6 +188,30 @@ final class StoryblokExtensionTest extends TestCase
     }
 
     #[Test]
+    public function loadWithAutoResolveLinksTrue(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['auto_resolve_links' => true],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        self::assertTrue($builder->hasAlias(ResolverInterface::class));
+        self::assertTrue($builder->hasDefinition(StoriesResolvedApi::class));
+    }
+
+    #[Test]
     public function loadWithoutAscendingRedirectFallbackWillRemoveTheServiceDefinition(): void
     {
         $faker = self::faker();

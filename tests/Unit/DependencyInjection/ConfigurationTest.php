@@ -33,7 +33,8 @@ final class ConfigurationTest extends TestCase
         $token = $faker->uuid();
         $secret = $faker->uuid();
         $version = $faker->randomElement(['draft', 'published']);
-        $autoResolve = $faker->boolean();
+        $autoResolveRelations = $faker->boolean();
+        $autoResolveLinks = $faker->boolean();
         $templatePath = $faker->word();
         $maxAge = $faker->numberBetween(3600);
         $public = $faker->boolean();
@@ -43,7 +44,8 @@ final class ConfigurationTest extends TestCase
             ['token' => $token],
             ['webhook_secret' => $secret],
             ['version' => $version],
-            ['auto_resolve_relations' => $autoResolve],
+            ['auto_resolve_relations' => $autoResolveRelations],
+            ['auto_resolve_links' => $autoResolveLinks],
             ['blocks_template_path' => $templatePath],
             [
                 'controller' => [
@@ -59,7 +61,8 @@ final class ConfigurationTest extends TestCase
             'token' => $token,
             'webhook_secret' => $secret,
             'version' => $version,
-            'auto_resolve_relations' => $autoResolve,
+            'auto_resolve_relations' => $autoResolveRelations,
+            'auto_resolve_links' => $autoResolveLinks,
             'blocks_template_path' => $templatePath,
             'controller' => [
                 'ascending_redirect_fallback' => false,
@@ -89,6 +92,7 @@ final class ConfigurationTest extends TestCase
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
             'blocks_template_path' => 'blocks',
             'controller' => [
                 'ascending_redirect_fallback' => false,
