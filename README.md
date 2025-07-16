@@ -196,6 +196,24 @@ This will replace `StoriesApi` to `StoriesResolvedApi`. The `StoriesResolvedApi`
 > [Storyblok docs](https://www.storyblok.com/docs/api/content-delivery/v2/stories/retrieve-a-single-story)
 > for more information
 
+#### Auto resolve links
+
+If you want to update links automatically, you can enable this with the following configuration:
+
+```yaml
+# config/packages/storyblok.yaml
+storyblok:
+    # ...
+    auto_resolve_links: true
+```
+
+This will replace `StoriesApi` to `StoriesResolvedApi`. The `StoriesResolvedApi` will automatically resolve relations.
+
+> [!WARNING]
+> Maximum 500 different links can be resolved in one request depending also on the type you sent in the request. See
+> [Storyblok docs](https://www.storyblok.com/docs/guide/in-depth/rendering-the-link-field)
+> for more information
+
 ## Content Type Handling & Routing
 
 The bundle provides a convenient way to handle Storyblok content types and integrate them into your Symfony routing.
