@@ -28,6 +28,7 @@ use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\Controller\WebhookController;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
+use Storyblok\Bundle\Maker\MakeStoryblokBlock;
 use Storyblok\Bundle\Tiptap\DefaultEditorBuilder;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Storyblok\Bundle\Twig\BlockExtension;
@@ -171,5 +172,8 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(ContentTypeRegistry::class)
             ->alias(ContentTypeRegistryInterface::class, ContentTypeRegistry::class)
+
+        ->set(MakeStoryblokBlock::class)
+            ->tag('maker.command')
     ;
 };
