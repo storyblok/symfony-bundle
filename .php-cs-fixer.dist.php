@@ -86,7 +86,6 @@ $ruleSet = Php83::create()
                     'case' => 'none',
                 ],
             ],
-            'PhpCsFixerCustomFixers/phpdoc_tag_no_named_arguments' => false,
             'new_expression_parentheses' => false,
             'php_unit_data_provider_method_order' => true,
         ],
