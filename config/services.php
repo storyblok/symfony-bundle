@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Rector\Caching\ValueObject\Storage\MemoryCacheStorage;
+use Storyblok\Api\CacheVersion\CacheVersionStorageInterface;
 use Storyblok\Api\DatasourceEntriesApi;
 use Storyblok\Api\DatasourceEntriesApiInterface;
 use Storyblok\Api\LinksApi;
@@ -67,12 +69,16 @@ return static function (ContainerConfigurator $container): void {
                 ],
             ])
 
+        ->set(MemoryCacheStorage::class)
+            ->alias(CacheVersionStorageInterface::class, MemoryCacheStorage::class)
+
         ->set(StoryblokClient::class)
             ->args([
                 '$baseUri' => param('storyblok_api.base_uri'),
                 '$token' => param('storyblok_api.token'),
             ])
             ->call('withHttpClient', [service('storyblok.scoped_http_client')])
+            ->call('withCacheVersionStorage', [service(CacheVersionStorageInterface::class)])
             ->alias(StoryblokClientInterface::class, StoryblokClient::class)
 
         ->set(DatasourceEntriesApi::class)
