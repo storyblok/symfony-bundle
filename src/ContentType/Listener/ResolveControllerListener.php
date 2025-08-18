@@ -18,6 +18,8 @@ use OskarStark\Value\TrimmedNonEmptyString;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Storyblok\Api\Domain\Value\Dto\Version;
+use Storyblok\Api\Domain\Value\Resolver\LinkType;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
 use Storyblok\Api\Request\StoryRequest;
 use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
@@ -43,6 +45,7 @@ final readonly class ResolveControllerListener
         private ContentTypeStorageInterface $storage,
         private LoggerInterface $logger,
         private string $version,
+        private bool $autoResolveLinks,
     ) {
     }
 
@@ -65,12 +68,21 @@ final readonly class ResolveControllerListener
         }
 
         $slug = new UnicodeSlug($params['slug']);
+        $storyRequest = new StoryRequest(
+            language: $request->getLocale(),
+            version: Version::from($this->version),
+        );
 
-        try {
-            $response = $this->stories->bySlug($slug->toString(), new StoryRequest(
+        if ($this->autoResolveLinks) {
+            $storyRequest = new StoryRequest(
                 language: $request->getLocale(),
                 version: Version::from($this->version),
-            ));
+                resolveLinks: new ResolveLinks(LinkType::Story),
+            );
+        }
+
+        try {
+            $response = $this->stories->bySlug($slug->toString(), $storyRequest);
 
             $story = $response->story;
             Assert::keyExists($story, 'default_full_slug');
