@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Rector\Caching\ValueObject\Storage\MemoryCacheStorage;
 use Storyblok\Api\CacheVersion\CacheVersionStorageInterface;
+use Storyblok\Api\CacheVersion\InMemoryStorage;
 use Storyblok\Api\DatasourceEntriesApi;
 use Storyblok\Api\DatasourceEntriesApiInterface;
 use Storyblok\Api\LinksApi;
@@ -69,8 +69,8 @@ return static function (ContainerConfigurator $container): void {
                 ],
             ])
 
-        ->set(MemoryCacheStorage::class)
-            ->alias(CacheVersionStorageInterface::class, MemoryCacheStorage::class)
+        ->set(InMemoryStorage::class)
+            ->alias(CacheVersionStorageInterface::class, InMemoryStorage::class)
 
         ->set(StoryblokClient::class)
             ->args([
