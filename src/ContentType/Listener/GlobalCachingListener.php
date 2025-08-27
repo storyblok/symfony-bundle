@@ -44,7 +44,7 @@ final readonly class GlobalCachingListener
             }
         }
 
-        if (null !== $this->mustRevalidate && !$response->headers->hasCacheControlDirective('must-revalidate')) {
+        if (true === $this->mustRevalidate && !$response->headers->hasCacheControlDirective('must-revalidate')) {
             $response->headers->addCacheControlDirective('must-revalidate');
 
             $contentType = $this->storage->getContentType();
