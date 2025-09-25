@@ -18,8 +18,9 @@ interface RendererInterface
 {
     /**
      * @param array<string, mixed>|object $values The values of the block coming from Storyblok
+     * @param array<string, mixed> $context Additional context to pass to the template
      *
      * @return string Returns HTML
      */
-    public function render(array|object $values): string;
+    public function render(array|object $values, array $context = []): string;
 }
