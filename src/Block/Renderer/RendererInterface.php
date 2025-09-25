@@ -18,7 +18,7 @@ interface RendererInterface
 {
     /**
      * @param array<string, mixed>|object $values The values of the block coming from Storyblok
-     * @param array<string, mixed> $parameters Additional parameters to pass to the template
+     * @param array<string, mixed> $context Additional parameters to pass to the template
      *
      * @return string Returns HTML
      */
