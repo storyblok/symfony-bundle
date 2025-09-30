@@ -27,8 +27,12 @@ final readonly class BlockRenderer implements RendererInterface
     ) {
     }
 
-    public function render(array|object $values): string
+    public function render(array|object $values, array $context = []): string
     {
+        if (\array_key_exists('block', $context)) {
+            throw new \InvalidArgumentException('The "block" parameter is reserved and cannot be overridden.');
+        }
+
         try {
             if (\is_object($values)) {
                 $definition = $this->blocks::get($values::class);
@@ -42,7 +46,7 @@ final readonly class BlockRenderer implements RendererInterface
                 $block = new ($definition->className)($values);
             }
 
-            return $this->twig->render($definition->template, ['block' => $block]);
+            return $this->twig->render($definition->template, ['block' => $block] + $context);
         } catch (BlockNotFoundException) {
             return '';
         }
