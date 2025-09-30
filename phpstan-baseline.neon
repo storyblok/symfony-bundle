@@ -7,6 +7,18 @@ parameters:
 			path: src/Block/BlockDefinition.php
 
 		-
+			message: '#^Method Storyblok\\Bundle\\Block\\Renderer\\BlockRenderer\:\:render\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Block/Renderer/BlockRenderer.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$context$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Block/Renderer/RendererInterface.php
+
+		-
 			message: '#^Method Storyblok\\Bundle\\DataCollector\\StoryblokCollector\:\:collectOnClient\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
