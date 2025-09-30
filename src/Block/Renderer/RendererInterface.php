@@ -17,8 +17,6 @@ namespace Storyblok\Bundle\Block\Renderer;
 interface RendererInterface
 {
     /**
-     * @deprecated since version 1.10, to be changed in 2.0 to "render(array|object $values, array $context = []): string".
-     *
      * @param array<string, mixed>|object $values The values of the block coming from Storyblok
      *
      * @return string Returns HTML
