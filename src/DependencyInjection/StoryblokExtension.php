@@ -28,6 +28,7 @@ use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
+use Storyblok\Bundle\ContentType\Listener\ResolveControllerListener;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
@@ -98,6 +99,9 @@ final class StoryblokExtension extends Extension
 
             $container->setDefinition(StoriesResolvedApi::class, $resolvedStoriesApi);
             $container->setAlias(StoriesApiInterface::class, StoriesResolvedApi::class);
+
+            $container->getDefinition(ResolveControllerListener::class)
+                ->setArgument('$autoResolveLinks', $config['auto_resolve_links']);
         }
 
         if (false === $config['controller']['ascending_redirect_fallback']) {
