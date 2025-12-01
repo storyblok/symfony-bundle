@@ -36,8 +36,16 @@ final class RichTextExtension extends AbstractExtension
         ];
     }
 
-    public function richText(RichText $richText): string
+    /**
+     * @param array{type: 'doc', content: list<mixed[]>}|RichText $richText
+     */
+    public function richText(array|RichText $richText): string
     {
+        if (\is_array($richText)) {
+            @trigger_deprecation('storyblok/symfony-bundle', '1.4', 'Passing an array to "%s" is deprecated, use "%s" instead.', __METHOD__, RichText::class);
+            $richText = new RichText($richText);
+        }
+
         return $this->builder->getEditor($richText->toArray())->getHTML();
     }
 }
