@@ -25,8 +25,8 @@ parameters:
 			path: src/DataCollector/StoryblokCollector.php
 
 		-
-			message: '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'
-			identifier: method.notFound
+			message: '#^Method Storyblok\\Bundle\\DependencyInjection\\Configuration\:\:getConfigTreeBuilder\(\) return type with generic class Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder does not specify its types\: T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/DependencyInjection/Configuration.php
 
