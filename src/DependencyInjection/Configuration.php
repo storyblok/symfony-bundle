@@ -77,7 +77,7 @@ final class Configuration implements ConfigurationInterface
                                     ->defaultNull()
                                 ->end()
                                 ->integerNode('smax_age')
-                                    ->defaultNull(3600)
+                                    ->defaultValue(3600)
                                 ->end()
                             ->end()
                         ->end()
