@@ -120,6 +120,7 @@ return static function (ContainerConfigurator $container): void {
             ->args([
                 '$container' => tagged_locator('storyblok.content_type.controller'),
                 '$version' => param('storyblok_api.version'),
+                '$autoResolveLinks' => false,
             ])
             ->tag('kernel.event_listener', [
                 'priority' => 0,
