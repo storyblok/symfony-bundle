@@ -55,7 +55,7 @@ final class RichTextExtensionTest extends TestCase
             ->with($richText)
             ->willReturn($editor);
 
-        self::assertSame($expected, (new RichTextExtension($builder))->richText(new RichText($richText)));
+        self::assertSame($expected, (new RichTextExtension($builder))->richText($richText));
     }
 
     #[Test]

@@ -30,7 +30,7 @@ final readonly class GlobalCachingListener
 
     public function __invoke(ResponseEvent $event): void
     {
-        if ([] !== $event->getRequest()->attributes->get('_cache', [])) {
+        if ([] !== $event->getRequest()->get('_cache', [])) {
             return;
         }
 

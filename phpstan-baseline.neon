@@ -7,20 +7,26 @@ parameters:
 			path: src/Block/BlockDefinition.php
 
 		-
+			message: '#^Method Storyblok\\Bundle\\Block\\Renderer\\BlockRenderer\:\:render\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Block/Renderer/BlockRenderer.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$context$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Block/Renderer/RendererInterface.php
+
+		-
 			message: '#^Method Storyblok\\Bundle\\DataCollector\\StoryblokCollector\:\:collectOnClient\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/DataCollector/StoryblokCollector.php
 
 		-
-			message: '#^Method Storyblok\\Bundle\\DependencyInjection\\Configuration\:\:getConfigTreeBuilder\(\) return type with generic class Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/DependencyInjection/Configuration.php
-
-		-
-			message: '#^Method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\<Symfony\\Component\\Config\\Definition\\Builder\\NodeBuilder\<Symfony\\Component\\Config\\Definition\\Builder\\ArrayNodeDefinition\<Symfony\\Component\\Config\\Definition\\Builder\\NodeBuilder\<Symfony\\Component\\Config\\Definition\\Builder\\ArrayNodeDefinition\<Symfony\\Component\\Config\\Definition\\Builder\\NodeBuilder\<Symfony\\Component\\Config\\Definition\\Builder\\ArrayNodeDefinition\<Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder\<string\>\>\>\>\>\>\>\>\:\:defaultNull\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
+			message: '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: src/DependencyInjection/Configuration.php
 
