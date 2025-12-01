@@ -47,11 +47,11 @@ final readonly class StoryNotFoundExceptionListener
 
         $request = $event->getRequest();
 
-        if ($request->get('_route') !== Route::CONTENT_TYPE) {
+        if ($request->attributes->get('_route') !== Route::CONTENT_TYPE) {
             return;
         }
 
-        $params = $request->get('_route_params', []);
+        $params = $request->attributes->get('_route_params', []);
 
         if (!\array_key_exists('slug', $params)) {
             return;
