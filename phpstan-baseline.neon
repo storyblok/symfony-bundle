@@ -13,22 +13,10 @@ parameters:
 			path: src/Block/Renderer/BlockRenderer.php
 
 		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$context$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Block/Renderer/RendererInterface.php
-
-		-
 			message: '#^Method Storyblok\\Bundle\\DataCollector\\StoryblokCollector\:\:collectOnClient\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/DataCollector/StoryblokCollector.php
-
-		-
-			message: '#^Method Storyblok\\Bundle\\DependencyInjection\\Configuration\:\:getConfigTreeBuilder\(\) return type with generic class Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/DependencyInjection/Configuration.php
 
 		-
 			message: '#^Parameter \#2 \$configurator of method Symfony\\Component\\DependencyInjection\\ContainerBuilder\:\:registerAttributeForAutoconfiguration\(\) expects callable\(Symfony\\Component\\DependencyInjection\\ChildDefinition, Storyblok\\Bundle\\Block\\Attribute\\AsBlock, Reflector\)\: void, Closure\(Symfony\\Component\\DependencyInjection\\ChildDefinition, Storyblok\\Bundle\\Block\\Attribute\\AsBlock, ReflectionClass\)\: void given\.$#'
