@@ -20,8 +20,9 @@ interface RendererInterface
      * @deprecated since version 1.10, to be changed in 2.0 to "render(array|object $values, array $context = []): string".
      *
      * @param array<string, mixed>|object $values The values of the block coming from Storyblok
+     * @param array<string, mixed> $context Additional parameters to pass to the template
      *
      * @return string Returns HTML
      */
-    public function render(array|object $values/* , array $context = [] */): string;
+    public function render(array|object $values/*, array $context = [] */): string;
 }
