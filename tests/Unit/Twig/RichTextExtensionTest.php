@@ -43,14 +43,14 @@ final class RichTextExtensionTest extends TestCase
         $expected = self::faker()->randomHtml();
 
         $editor = self::createMock(Editor::class);
-        $editor->expects(self::once())
+        $editor->expects($this->once())
             ->method('getHTML')
             ->willReturn($expected);
 
         $richText = ['type' => 'doc', 'content' => []];
 
         $builder = self::createMock(EditorBuilderInterface::class);
-        $builder->expects(self::once())
+        $builder->expects($this->once())
             ->method('getEditor')
             ->with($richText)
             ->willReturn($editor);
@@ -64,14 +64,14 @@ final class RichTextExtensionTest extends TestCase
         $expected = self::faker()->randomHtml();
 
         $editor = self::createMock(Editor::class);
-        $editor->expects(self::once())
+        $editor->expects($this->once())
             ->method('getHTML')
             ->willReturn($expected);
 
         $richText = ['type' => 'doc', 'content' => []];
 
         $builder = self::createMock(EditorBuilderInterface::class);
-        $builder->expects(self::once())
+        $builder->expects($this->once())
             ->method('getEditor')
             ->with($richText)
             ->willReturn($editor);
