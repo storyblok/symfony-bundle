@@ -17,7 +17,7 @@ namespace Storyblok\Bundle\ContentType;
 interface ContentTypeInterface
 {
     /**
-     * @param array<string, array<string,mixed>&array{
+     * @param array<string, array<string, mixed>&array{
      *     content: array{
      *         component: non-empty-string,
      *     }
