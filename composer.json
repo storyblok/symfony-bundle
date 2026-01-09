@@ -1,8 +1,8 @@
 {
   "name": "storyblok/symfony-bundle",
-  "type": "symfony-bundle",
   "description": "Symfony bundle for storyblok/php-management-api-client and storyblok/php-content-api-client",
   "license": "MIT",
+  "type": "symfony-bundle",
   "authors": [
     {
       "name": "Silas Joisten",
@@ -39,16 +39,7 @@
     "symfony/event-dispatcher": "^6.0 || ^7.1 || ^8.0",
     "thecodingmachine/phpstan-safe-rule": "^1.4"
   },
-  "scripts": {
-    "license-check": "php license-checker.php"
-  },
-  "config": {
-    "sort-packages": true,
-    "allow-plugins": {
-      "ergebnis/composer-normalize": true,
-      "phpstan/extension-installer": true
-    }
-  },
+  "minimum-stability": "stable",
   "autoload": {
     "psr-4": {
       "Storyblok\\Bundle\\": "src/"
@@ -59,5 +50,14 @@
       "Storyblok\\Bundle\\Tests\\": "tests/"
     }
   },
-  "minimum-stability": "stable"
+  "config": {
+    "allow-plugins": {
+      "ergebnis/composer-normalize": true,
+      "phpstan/extension-installer": true
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "license-check": "php license-checker.php"
+  }
 }
