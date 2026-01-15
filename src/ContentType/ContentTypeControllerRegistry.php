@@ -22,7 +22,7 @@ use Storyblok\Bundle\ContentType\Exception\ContentTypeControllerNotFoundExceptio
 final class ContentTypeControllerRegistry implements \Countable
 {
     /**
-     * @param array<class-string, ContentTypeControllerDefinition> $controllers
+     * @param array<string, ContentTypeControllerDefinition> $controllers
      */
     public function __construct(
         private array $controllers = [],
@@ -38,7 +38,7 @@ final class ContentTypeControllerRegistry implements \Countable
             $definition = ContentTypeControllerDefinition::fromArray($definition);
         }
 
-        $this->controllers[$definition->className] = $definition;
+        $this->controllers[$definition->slug ?? $definition->type] = $definition;
     }
 
     /**
@@ -46,39 +46,40 @@ final class ContentTypeControllerRegistry implements \Countable
      */
     public function get(string $fqcn): ContentTypeControllerDefinition
     {
-        if (!\array_key_exists($fqcn, $this->controllers)) {
+        $definitions = \array_values(\array_filter(
+            $this->controllers,
+            static fn (ContentTypeControllerDefinition $definition) => $definition->className === $fqcn,
+        ));
+
+        if (0 === \count($definitions)) {
             throw new ContentTypeControllerNotFoundException(\sprintf('ContentTypeController "%s" not found.', $fqcn));
         }
 
-        return $this->controllers[$fqcn];
+        return $definitions[0];
     }
 
     public function bySlug(string $slug): ContentTypeControllerDefinition
     {
-        $definitions = \array_values(\array_filter(
-            $this->controllers,
-            static fn (ContentTypeControllerDefinition $definition) => $definition->slug === $slug,
-        ));
-
-        if (0 === \count($definitions)) {
+        if (!\array_key_exists($slug, $this->controllers)) {
             throw new ContentTypeControllerNotFoundException(\sprintf('ContentTypeController by slug "%s" not found.', $slug));
         }
 
-        return $definitions[0];
+        return $this->controllers[$slug];
     }
 
     public function byType(string $type): ContentTypeControllerDefinition
     {
-        $definitions = \array_values(\array_filter(
-            $this->controllers,
-            static fn (ContentTypeControllerDefinition $definition) => $definition->type === $type && null === $definition->slug,
-        ));
-
-        if (0 === \count($definitions)) {
+        if (!\array_key_exists($type, $this->controllers)) {
             throw new ContentTypeControllerNotFoundException(\sprintf('ContentTypeController by type "%s" not found.', $type));
         }
 
-        return $definitions[0];
+        $definition = $this->controllers[$type];
+
+        if (null !== $definition->slug) {
+            throw new ContentTypeControllerNotFoundException(\sprintf('ContentTypeController by type "%s" not found.', $type));
+        }
+
+        return $definition;
     }
 
     public function count(): int
@@ -87,7 +88,7 @@ final class ContentTypeControllerRegistry implements \Countable
     }
 
     /**
-     * @return array<class-string, ContentTypeControllerDefinition>
+     * @return array<string, ContentTypeControllerDefinition>
      */
     public function all(): array
     {

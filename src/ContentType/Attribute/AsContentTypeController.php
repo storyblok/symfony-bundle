@@ -16,7 +16,7 @@ namespace Storyblok\Bundle\ContentType\Attribute;
 
 use Storyblok\Bundle\ContentType\ContentTypeInterface;
 
-#[\Attribute(\Attribute::TARGET_CLASS)]
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
 final readonly class AsContentTypeController
 {
     /**

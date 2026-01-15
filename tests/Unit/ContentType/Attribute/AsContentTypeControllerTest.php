@@ -18,6 +18,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\Tests\Double\ContentType\SampleContentType;
+use Storyblok\Bundle\Tests\Double\Controller\MultipleContentTypesController;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 
 final class AsContentTypeControllerTest extends TestCase
@@ -51,5 +52,21 @@ final class AsContentTypeControllerTest extends TestCase
         );
 
         self::assertSame($expected, $attribute->slug);
+    }
+
+    #[Test]
+    public function isRepeatable(): void
+    {
+        $reflectionClass = new \ReflectionClass(MultipleContentTypesController::class);
+        $attributes = $reflectionClass->getAttributes(AsContentTypeController::class);
+
+        self::assertCount(3, $attributes);
+
+        $slugs = array_map(
+            static fn (\ReflectionAttribute $attr) => $attr->newInstance()->slug,
+            $attributes,
+        );
+
+        self::assertSame([null, '/legal/imprint', '/legal/privacy'], $slugs);
     }
 }

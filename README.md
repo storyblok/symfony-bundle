@@ -307,7 +307,7 @@ use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-#[AsContentTypeController(contentType: Page::class, slug: 'legal/imprint')]
+#[AsContentTypeController(contentType: Page::class, slug: '/legal/imprint')]
 final readonly class ImprintController
 {
     public function __invoke(Request $request): Response
@@ -316,6 +316,69 @@ final readonly class ImprintController
     }
 }
 ```
+
+### Repeatable Attribute
+
+The `#[AsContentTypeController]` attribute is repeatable, enabling two powerful patterns:
+
+#### Multiple Slugs with the Same Content Type
+
+Handle specific slugs with dedicated logic while using the same controller:
+
+```php
+use App\ContentType\LegalPage\LegalPage;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AsContentTypeController(contentType: LegalPage::class, slug: '/legal/imprint')]
+#[AsContentTypeController(contentType: LegalPage::class, slug: '/legal/privacy-policy')]
+#[AsContentTypeController(contentType: LegalPage::class, slug: '/legal/terms')]
+final readonly class LegalController
+{
+    public function __invoke(Request $request, LegalPage $legalPage): Response
+    {
+        return $this->render(
+            sprintf('content_types/legal/%s.html.twig', str_replace('/', '_', $legalPage->getSlug())),
+            ['legal_page' => $legalPage]
+        );
+    }
+}
+```
+
+#### Multiple Content Types with a Single Controller
+
+Handle different content types that share similar rendering logic:
+
+```php
+use App\ContentType\BlogPost\BlogPost;
+use App\ContentType\Event\Event;
+use App\ContentType\Page\Page;
+use App\ContentType\SuccessStory\SuccessStory;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AsContentTypeController(contentType: Page::class)]
+#[AsContentTypeController(contentType: BlogPost::class)]
+#[AsContentTypeController(contentType: SuccessStory::class)]
+#[AsContentTypeController(contentType: Event::class)]
+final readonly class DefaultController
+{
+    public function __invoke(Request $request, Page|BlogPost|SuccessStory|Event $contentType): Response
+    {
+        return $this->render(
+            sprintf('content_types/%s/detail.html.twig', $contentType::type()),
+            ['content_type' => $contentType]
+        );
+    }
+}
+```
+
+This approach allows you to:
+- Keep your code DRY when logic is shared across multiple pages or content types
+- Handle specific slugs with dedicated templates
+- Use a single controller for multiple content types with similar rendering patterns
 
 Controllers marked with the `#[AsContentTypeController]` attribute will be tagged with
 `storyblok.content_type.controller` and `controller.service_arguments`.
