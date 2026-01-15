@@ -33,7 +33,7 @@ final class AsContentTypeControllerTest extends TestCase
         $attribute = new AsContentTypeController(SampleContentType::class);
 
         self::assertNull($attribute->slug);
-        self::assertSame(0, $attribute->resolveRelations->count());
+        self::assertCount(0, $attribute->resolveRelations);
         self::assertNull($attribute->resolveLinks->type);
     }
 
@@ -67,7 +67,7 @@ final class AsContentTypeControllerTest extends TestCase
         );
 
         self::assertSame($expected, $attribute->resolveRelations);
-        self::assertSame(1, $attribute->resolveRelations->count());
+        self::assertCount(1, $attribute->resolveRelations);
     }
 
     #[Test]

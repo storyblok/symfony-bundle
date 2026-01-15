@@ -242,7 +242,7 @@ final class ContentTypeControllerDefinitionTest extends TestCase
             self::faker()->word(),
         );
 
-        self::assertSame(0, $definition->resolveRelations->count());
+        self::assertCount(0, $definition->resolveRelations);
     }
 
     #[Test]

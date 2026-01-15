@@ -40,6 +40,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 final class ResolveControllerListenerTest extends TestCase
 {
@@ -563,7 +564,7 @@ final class ResolveControllerListenerTest extends TestCase
                 }
 
                 throw new class() extends \Exception implements ClientExceptionInterface {
-                    public function getResponse(): \Symfony\Contracts\HttpClient\ResponseInterface
+                    public function getResponse(): ResponseInterface
                     {
                         throw new \LogicException('Not implemented');
                     }
