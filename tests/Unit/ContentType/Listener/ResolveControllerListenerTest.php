@@ -45,7 +45,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesController(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -90,7 +90,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerBySlug(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -137,7 +137,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerBySlugWithoutLocalizedSlugAppInstalled(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -184,7 +184,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function isNotMainRequest(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::never())
+        $api->expects($this->never())
             ->method('bySlug');
 
         $listener = new ResolveControllerListener($api, new Container(), new ContentTypeControllerRegistry(), $storage = new ContentTypeStorage(), new NullLogger(), 'draft');
@@ -205,7 +205,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function routeAttributeIsNotContentTypeRoute(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::never())
+        $api->expects($this->never())
             ->method('bySlug');
 
         $listener = new ResolveControllerListener($api, new Container(), new ContentTypeControllerRegistry(), $storage = new ContentTypeStorage(), new NullLogger(), 'draft');
@@ -229,7 +229,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function routeParamsAttributeHasNoSlug(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::never())
+        $api->expects($this->never())
             ->method('bySlug');
 
         $listener = new ResolveControllerListener($api, new Container(), new ContentTypeControllerRegistry(), $storage = new ContentTypeStorage(), new NullLogger(), 'draft');
@@ -254,7 +254,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function bySlugThrowsException(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willThrowException(new \InvalidArgumentException());
 
@@ -278,7 +278,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerThrowsInvalidStoryExceptionWhenContentTypeCanNotBeConstructed(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [

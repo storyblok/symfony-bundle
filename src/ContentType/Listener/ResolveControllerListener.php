@@ -105,7 +105,7 @@ final readonly class ResolveControllerListener
             /** @var ContentTypeInterface $contentType */
             $contentType = new $definition->contentType($story);
         } catch (\Throwable $e) {
-            throw new InvalidStoryException($e->getMessage());
+            throw new InvalidStoryException($e->getMessage(), $e->getCode(), $e);
         }
 
         $this->storage->setContentType($contentType);
