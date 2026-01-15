@@ -41,7 +41,7 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
     public function redirectToParentRoute(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects($this->once())
+        $api->expects(self::once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [],
@@ -52,7 +52,7 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('generate')
             ->with(Route::CONTENT_TYPE, ['slug' => 'path/to/parent'])
             ->willReturn('/path/to/parent');
@@ -78,13 +78,13 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
     public function willThrowNotFoundHttpException(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects($this->once())
+        $api->expects(self::once())
             ->method('bySlug')
             ->willThrowException(new ClientException(new MockResponse()));
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('generate');
 
         $listener = new StoryNotFoundExceptionListener($api, $urlGenerator, 'draft');
@@ -109,13 +109,13 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
     public function willThrowStoryNotFoundException(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects($this->once())
+        $api->expects(self::once())
             ->method('bySlug')
             ->willThrowException(new \InvalidArgumentException());
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('generate');
 
         $listener = new StoryNotFoundExceptionListener($api, $urlGenerator, 'draft');
@@ -141,12 +141,12 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
     public function willReturnWhenLimitReached(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects($this->never())
+        $api->expects(self::never())
             ->method('bySlug');
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('generate');
 
         $listener = new StoryNotFoundExceptionListener($api, $urlGenerator, 'draft');
@@ -169,12 +169,12 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
     public function isNotMainRequest(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects($this->never())
+        $api->expects(self::never())
             ->method('bySlug');
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('generate');
 
         $listener = new StoryNotFoundExceptionListener($api, $urlGenerator, 'draft');
@@ -191,12 +191,12 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
     public function isNotStoryNotFoundException(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects($this->never())
+        $api->expects(self::never())
             ->method('bySlug');
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('generate');
 
         $listener = new StoryNotFoundExceptionListener($api, $urlGenerator, 'draft');
@@ -213,12 +213,12 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
     public function routeAttributeIsNotContentTypeRoute(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects($this->never())
+        $api->expects(self::never())
             ->method('bySlug');
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('generate');
 
         $listener = new StoryNotFoundExceptionListener($api, $urlGenerator, 'draft');
@@ -238,12 +238,12 @@ final class StoryNotFoundExceptionListenerTest extends TestCase
     public function routeParamsAttributeDoesNotContainSlug(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects($this->never())
+        $api->expects(self::never())
             ->method('bySlug');
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects($this->never())
+            ->expects(self::never())
             ->method('generate');
 
         $listener = new StoryNotFoundExceptionListener($api, $urlGenerator, 'draft');

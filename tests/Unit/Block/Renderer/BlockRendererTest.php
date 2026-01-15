@@ -35,7 +35,7 @@ final class BlockRendererTest extends TestCase
         $expected = $faker->realText();
 
         $twig = self::createMock(Environment::class);
-        $twig->expects($this->once())
+        $twig->expects(self::once())
             ->method('render')
             ->willReturn($expected);
 
@@ -59,7 +59,7 @@ final class BlockRendererTest extends TestCase
         $expected = $faker->realText();
 
         $twig = self::createMock(Environment::class);
-        $twig->expects($this->once())
+        $twig->expects(self::once())
             ->method('render')
             ->willReturn($expected);
 
@@ -81,7 +81,7 @@ final class BlockRendererTest extends TestCase
         $faker = self::faker();
 
         $twig = self::createMock(Environment::class);
-        $twig->expects($this->never())
+        $twig->expects(self::never())
             ->method('render');
 
         $collection = new BlockRegistry();
@@ -103,7 +103,7 @@ final class BlockRendererTest extends TestCase
         $faker = self::faker();
 
         $twig = self::createMock(Environment::class);
-        $twig->expects($this->never())
+        $twig->expects(self::never())
             ->method('render');
 
         $collection = new BlockRegistry();
