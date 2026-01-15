@@ -16,7 +16,6 @@ namespace Storyblok\Bundle\ContentType;
 
 use Storyblok\Api\Domain\Value\Resolver\RelationCollection;
 use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
-use Storyblok\Api\Request\StoryRequest;
 use Webmozart\Assert\Assert;
 
 final readonly class ContentTypeControllerDefinition
