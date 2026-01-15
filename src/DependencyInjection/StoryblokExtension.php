@@ -187,6 +187,8 @@ final class StoryblokExtension extends Extension
                 'contentType' => $attribute->contentType,
                 'type' => $attribute->contentType::type(),
                 'slug' => $attribute->slug,
+                'resolveRelations' => $attribute->resolveRelations->toString(),
+                'resolveLinks' => $attribute->resolveLinks->toArray(),
             ]]);
 
             $definition->addTag('storyblok.content_type.controller');

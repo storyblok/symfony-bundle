@@ -18,6 +18,8 @@ use OskarStark\Value\TrimmedNonEmptyString;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Storyblok\Api\Domain\Value\Dto\Version;
+use Storyblok\Api\Domain\Value\Resolver\RelationCollection;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
 use Storyblok\Api\Request\StoryRequest;
 use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
@@ -102,8 +104,19 @@ final readonly class ResolveControllerListener
         $controller = $this->container->get($definition->className);
 
         try {
+            $response = $this->stories->bySlug($slug, new StoryRequest(
+                language: $request->getLocale(),
+                version: Version::from($this->version),
+                withRelations: $definition->resolveRelations,
+                resolveLinks: $definition->resolveLinks,
+            ));
+        } catch (ClientExceptionInterface) {
+            throw new StoryNotFoundException(\sprintf('Story with slug "%s" not found.', $slug));
+        }
+
+        try {
             /** @var ContentTypeInterface $contentType */
-            $contentType = new $definition->contentType($story);
+            $contentType = new $definition->contentType($response->story);
         } catch (\Throwable $e) {
             throw new InvalidStoryException($e->getMessage(), $e->getCode(), $e);
         }

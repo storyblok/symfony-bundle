@@ -14,6 +14,9 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\ContentType;
 
+use Storyblok\Api\Domain\Value\Resolver\RelationCollection;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
+use Storyblok\Api\Request\StoryRequest;
 use Webmozart\Assert\Assert;
 
 final readonly class ContentTypeControllerDefinition
@@ -27,6 +30,8 @@ final readonly class ContentTypeControllerDefinition
         public string $contentType,
         public string $type,
         public ?string $slug = null,
+        public RelationCollection $resolveRelations = new RelationCollection(),
+        public ResolveLinks $resolveLinks = new ResolveLinks(),
     ) {
         Assert::notWhitespaceOnly($className);
         Assert::classExists($className);
@@ -59,11 +64,19 @@ final readonly class ContentTypeControllerDefinition
         Assert::keyExists($values, 'type');
         Assert::string($values['type']);
 
+        Assert::keyExists($values, 'resolveRelations');
+        Assert::string($values['resolveRelations']);
+
+        Assert::keyExists($values, 'resolveLinks');
+        Assert::isArray($values['resolveLinks']);
+
         return new self(
             className: $values['className'],
             contentType: $values['contentType'],
             type: $values['type'],
             slug: $values['slug'] ?? null,
+            resolveRelations: RelationCollection::fromString($values['resolveRelations']),
+            resolveLinks: ResolveLinks::fromArray($values['resolveLinks']),
         );
     }
 }
