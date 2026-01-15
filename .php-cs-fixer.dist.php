@@ -97,6 +97,7 @@ $config->getFinder()
     ->append([
         __DIR__.'/.php-cs-fixer.dist.php',
     ])
+    ->notPath('Block/Renderer/RendererInterface.php')
     ->notPath('DependencyInjection/Configuration.php')
     ->in('src')
     ->in('tests');
