@@ -320,6 +320,46 @@ final readonly class ImprintController
 Controllers marked with the `#[AsContentTypeController]` attribute will be tagged with
 `storyblok.content_type.controller` and `controller.service_arguments`.
 
+### Resolving Relations and Links
+
+You can configure relation and link resolution directly in the `#[AsContentTypeController]` attribute using the
+`resolveRelations` and `resolveLinks` parameters:
+
+```php
+// ...
+use App\ContentType\Page\Page;
+use Storyblok\Api\Domain\Value\Resolver\Relation;
+use Storyblok\Api\Domain\Value\Resolver\RelationCollection;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinksType;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AsContentTypeController(
+    contentType: Page::class,
+    resolveRelations: new RelationCollection([
+        new Relation('page.featured_articles'),
+        new Relation('page.author'),
+    ]),
+    resolveLinks: new ResolveLinks(ResolveLinksType::Url),
+)]
+final readonly class PageController
+{
+    public function __invoke(Request $request, Page $page): Response
+    {
+        // Relations and links are already resolved in the $page object
+        return new Response('Page: ' . $page->title);
+    }
+}
+```
+
+> [!WARNING]
+> **Performance Impact**: When using `resolveRelations` or `resolveLinks`, a **second API request** is made to Storyblok
+> to fetch the story with resolved data. This may impact performance, especially on high-traffic pages. There is an open
+> support ticket to add a response header with the necessary information that would allow changing the first request to
+> a HEAD request, which would significantly reduce the overhead.
+
 ### Caching
 
 The bundle provides a global caching configuration to enable HTTP caching directives, which
