@@ -19,7 +19,7 @@ use Storyblok\Bundle\Block\Exception\BlockNotFoundException;
 final class BlockRegistry implements \Countable
 {
     /**
-     * @var array<class-string, BlockDefinition>
+     * @var array<string, BlockDefinition>
      */
     public static array $blocks = [];
 

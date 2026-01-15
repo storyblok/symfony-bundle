@@ -21,10 +21,13 @@ use Storyblok\Bundle\Block\Attribute\AsBlock;
 #[AsBlock(name: 'twitter_embed')]
 final readonly class MultipleAttributesBlock
 {
+    public string $url;
+
     /**
      * @param array<string, mixed> $values
      */
     public function __construct(array $values)
     {
+        $this->url = $values['url'] ?? '';
     }
 }
