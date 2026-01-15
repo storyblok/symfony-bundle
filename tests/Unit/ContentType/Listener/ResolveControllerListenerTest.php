@@ -39,6 +39,7 @@ use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 
 final class ResolveControllerListenerTest extends TestCase
 {
@@ -534,5 +535,68 @@ final class ResolveControllerListenerTest extends TestCase
         self::assertSame(SampleController::class, $event->getController()::class);
         self::assertSame(SampleContentType::class, $request->attributes->get('_storyblok_content_type'));
         self::assertNotNull($storage->getContentType());
+    }
+
+    #[Test]
+    public function resolvesControllerWithResolveRelationsThrowsStoryNotFoundExceptionOnSecondApiCall(): void
+    {
+        $callCount = 0;
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects(self::exactly(2))
+            ->method('bySlug')
+            ->willReturnCallback(static function () use (&$callCount): StoryResponse {
+                ++$callCount;
+
+                if (1 === $callCount) {
+                    return new StoryResponse([
+                        'story' => [
+                            'content' => [
+                                'component' => SampleContentType::type(),
+                            ],
+                            'default_full_slug' => SampleWithSlugController::SLUG,
+                            'full_slug' => SampleWithSlugController::SLUG,
+                        ],
+                        'cv' => 0,
+                        'rels' => [],
+                        'links' => [],
+                    ]);
+                }
+
+                throw new class() extends \Exception implements ClientExceptionInterface {
+                    public function getResponse(): \Symfony\Contracts\HttpClient\ResponseInterface
+                    {
+                        throw new \LogicException('Not implemented');
+                    }
+                };
+            });
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(
+            SampleController::class,
+            SampleContentType::class,
+            'sample_content_type',
+            null,
+            new RelationCollection(['component.field']),
+        ));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => self::faker()->slug()]);
+
+        self::expectException(StoryNotFoundException::class);
+
+        $listener(new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
     }
 }
