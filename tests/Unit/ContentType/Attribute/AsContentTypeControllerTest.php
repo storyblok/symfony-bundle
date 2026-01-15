@@ -16,6 +16,9 @@ namespace Storyblok\Bundle\Tests\Unit\ContentType\Attribute;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Storyblok\Api\Domain\Value\Resolver\LinkType;
+use Storyblok\Api\Domain\Value\Resolver\RelationCollection;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\Tests\Double\ContentType\SampleContentType;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
@@ -30,6 +33,8 @@ final class AsContentTypeControllerTest extends TestCase
         $attribute = new AsContentTypeController(SampleContentType::class);
 
         self::assertNull($attribute->slug);
+        self::assertSame(0, $attribute->resolveRelations->count());
+        self::assertNull($attribute->resolveLinks->type);
     }
 
     #[Test]
@@ -51,5 +56,29 @@ final class AsContentTypeControllerTest extends TestCase
         );
 
         self::assertSame($expected, $attribute->slug);
+    }
+
+    #[Test]
+    public function resolveRelations(): void
+    {
+        $attribute = new AsContentTypeController(
+            contentType: SampleContentType::class,
+            resolveRelations: $expected = new RelationCollection(['component.field']),
+        );
+
+        self::assertSame($expected, $attribute->resolveRelations);
+        self::assertSame(1, $attribute->resolveRelations->count());
+    }
+
+    #[Test]
+    public function resolveLinks(): void
+    {
+        $attribute = new AsContentTypeController(
+            contentType: SampleContentType::class,
+            resolveLinks: $expected = new ResolveLinks(LinkType::Story),
+        );
+
+        self::assertSame($expected, $attribute->resolveLinks);
+        self::assertSame(LinkType::Story, $attribute->resolveLinks->type);
     }
 }

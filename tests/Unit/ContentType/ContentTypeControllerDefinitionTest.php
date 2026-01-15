@@ -170,6 +170,90 @@ final class ContentTypeControllerDefinitionTest extends TestCase
     {
         $faker = self::faker();
 
-        self::assertNull(ContentTypeControllerDefinition::fromArray(['className' => SampleController::class, 'contentType' => SampleContentType::class, 'type' => $faker->word()])->slug);
+        self::assertNull(ContentTypeControllerDefinition::fromArray([
+            'className' => SampleController::class,
+            'contentType' => SampleContentType::class,
+            'type' => $faker->word(),
+            'resolveRelations' => '',
+            'resolveLinks' => ['type' => null, 'level' => 1],
+        ])->slug);
+    }
+
+    #[Test]
+    public function fromArrayResolveRelationsKeyDoesNotExist(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+
+        ContentTypeControllerDefinition::fromArray([
+            'className' => SampleController::class,
+            'contentType' => SampleContentType::class,
+            'type' => self::faker()->word(),
+            'resolveLinks' => [],
+        ]);
+    }
+
+    #[Test]
+    public function fromArrayResolveRelationsIsNotString(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+
+        ContentTypeControllerDefinition::fromArray([
+            'className' => SampleController::class,
+            'contentType' => SampleContentType::class,
+            'type' => self::faker()->word(),
+            'resolveRelations' => [],
+            'resolveLinks' => [],
+        ]);
+    }
+
+    #[Test]
+    public function fromArrayResolveLinksKeyDoesNotExist(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+
+        ContentTypeControllerDefinition::fromArray([
+            'className' => SampleController::class,
+            'contentType' => SampleContentType::class,
+            'type' => self::faker()->word(),
+            'resolveRelations' => '',
+        ]);
+    }
+
+    #[Test]
+    public function fromArrayResolveLinksIsNotArray(): void
+    {
+        self::expectException(\InvalidArgumentException::class);
+
+        ContentTypeControllerDefinition::fromArray([
+            'className' => SampleController::class,
+            'contentType' => SampleContentType::class,
+            'type' => self::faker()->word(),
+            'resolveRelations' => '',
+            'resolveLinks' => '',
+        ]);
+    }
+
+    #[Test]
+    public function resolveRelations(): void
+    {
+        $definition = new ContentTypeControllerDefinition(
+            SampleController::class,
+            SampleContentType::class,
+            self::faker()->word(),
+        );
+
+        self::assertSame(0, $definition->resolveRelations->count());
+    }
+
+    #[Test]
+    public function resolveLinks(): void
+    {
+        $definition = new ContentTypeControllerDefinition(
+            SampleController::class,
+            SampleContentType::class,
+            self::faker()->word(),
+        );
+
+        self::assertNull($definition->resolveLinks->type);
     }
 }

@@ -17,6 +17,9 @@ namespace Storyblok\Bundle\Tests\Unit\ContentType\Listener;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
+use Storyblok\Api\Domain\Value\Resolver\LinkType;
+use Storyblok\Api\Domain\Value\Resolver\RelationCollection;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
 use Storyblok\Api\Response\StoryResponse;
 use Storyblok\Api\StoriesApiInterface;
 use Storyblok\Bundle\ContentType\ContentTypeControllerDefinition;
@@ -324,5 +327,212 @@ final class ResolveControllerListenerTest extends TestCase
         self::expectExceptionMessage('This method should never be called. This method is only used for the route definition.');
 
         ResolveControllerListener::noop();
+    }
+
+    #[Test]
+    public function resolvesControllerWithResolveRelations(): void
+    {
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects(self::exactly(2))
+            ->method('bySlug')
+            ->willReturn(new StoryResponse([
+                'story' => [
+                    'content' => [
+                        'component' => SampleContentType::type(),
+                    ],
+                    'default_full_slug' => SampleWithSlugController::SLUG,
+                    'full_slug' => SampleWithSlugController::SLUG,
+                ],
+                'cv' => 0,
+                'rels' => [],
+                'links' => [],
+            ]));
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(
+            SampleController::class,
+            SampleContentType::class,
+            'sample_content_type',
+            null,
+            new RelationCollection(['component.field']),
+        ));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => self::faker()->slug()]);
+
+        $listener($event = new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
+
+        self::assertSame(SampleController::class, $event->getController()::class);
+        self::assertSame(SampleContentType::class, $request->attributes->get('_storyblok_content_type'));
+        self::assertNotNull($storage->getContentType());
+    }
+
+    #[Test]
+    public function resolvesControllerWithResolveLinks(): void
+    {
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects(self::exactly(2))
+            ->method('bySlug')
+            ->willReturn(new StoryResponse([
+                'story' => [
+                    'content' => [
+                        'component' => SampleContentType::type(),
+                    ],
+                    'default_full_slug' => SampleWithSlugController::SLUG,
+                    'full_slug' => SampleWithSlugController::SLUG,
+                ],
+                'cv' => 0,
+                'rels' => [],
+                'links' => [],
+            ]));
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(
+            SampleController::class,
+            SampleContentType::class,
+            'sample_content_type',
+            null,
+            new RelationCollection(),
+            new ResolveLinks(LinkType::Story),
+        ));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => self::faker()->slug()]);
+
+        $listener($event = new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
+
+        self::assertSame(SampleController::class, $event->getController()::class);
+        self::assertSame(SampleContentType::class, $request->attributes->get('_storyblok_content_type'));
+        self::assertNotNull($storage->getContentType());
+    }
+
+    #[Test]
+    public function resolvesControllerWithResolveRelationsAndResolveLinks(): void
+    {
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects(self::exactly(2))
+            ->method('bySlug')
+            ->willReturn(new StoryResponse([
+                'story' => [
+                    'content' => [
+                        'component' => SampleContentType::type(),
+                    ],
+                    'default_full_slug' => SampleWithSlugController::SLUG,
+                    'full_slug' => SampleWithSlugController::SLUG,
+                ],
+                'cv' => 0,
+                'rels' => [],
+                'links' => [],
+            ]));
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(
+            SampleController::class,
+            SampleContentType::class,
+            'sample_content_type',
+            null,
+            new RelationCollection(['component.field']),
+            new ResolveLinks(LinkType::Url),
+        ));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => self::faker()->slug()]);
+
+        $listener($event = new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
+
+        self::assertSame(SampleController::class, $event->getController()::class);
+        self::assertSame(SampleContentType::class, $request->attributes->get('_storyblok_content_type'));
+        self::assertNotNull($storage->getContentType());
+    }
+
+    #[Test]
+    public function resolvesControllerWithoutResolveRelationsAndResolveLinksCallsApiOnce(): void
+    {
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects(self::once())
+            ->method('bySlug')
+            ->willReturn(new StoryResponse([
+                'story' => [
+                    'content' => [
+                        'component' => SampleContentType::type(),
+                    ],
+                    'default_full_slug' => SampleWithSlugController::SLUG,
+                    'full_slug' => SampleWithSlugController::SLUG,
+                ],
+                'cv' => 0,
+                'rels' => [],
+                'links' => [],
+            ]));
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(
+            SampleController::class,
+            SampleContentType::class,
+            'sample_content_type',
+            null,
+            new RelationCollection(),
+            new ResolveLinks(),
+        ));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => self::faker()->slug()]);
+
+        $listener($event = new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
+
+        self::assertSame(SampleController::class, $event->getController()::class);
+        self::assertSame(SampleContentType::class, $request->attributes->get('_storyblok_content_type'));
+        self::assertNotNull($storage->getContentType());
     }
 }
