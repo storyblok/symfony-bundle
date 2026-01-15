@@ -101,6 +101,21 @@ final readonly class ResolveControllerListener
         /** @var callable(Request, ContentTypeInterface): Response $controller */
         $controller = $this->container->get($definition->className);
 
+        if ($definition->resolveRelations->count() > 0 || null !== $definition->resolveLinks->type) {
+            try {
+                $response = $this->stories->bySlug($slug, new StoryRequest(
+                    language: $request->getLocale(),
+                    version: Version::from($this->version),
+                    withRelations: $definition->resolveRelations,
+                    resolveLinks: $definition->resolveLinks,
+                ));
+
+                $story = $response->story;
+            } catch (ClientExceptionInterface) {
+                throw new StoryNotFoundException(\sprintf('Story with slug "%s" not found.', $slug));
+            }
+        }
+
         try {
             /** @var ContentTypeInterface $contentType */
             $contentType = new $definition->contentType($story);
