@@ -17,7 +17,7 @@ namespace Storyblok\Bundle\Tests\Unit\Block\Attribute;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\Attribute\AsBlock;
-use Storyblok\Bundle\Tests\Double\Block\MultipleAttributesBlock;
+use Storyblok\Bundle\Tests\Fixtures\MultipleAttributesBlock;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 
 final class AsBlockTest extends TestCase
@@ -59,13 +59,13 @@ final class AsBlockTest extends TestCase
         $reflectionClass = new \ReflectionClass(MultipleAttributesBlock::class);
         $attributes = $reflectionClass->getAttributes(AsBlock::class);
 
-        self::assertCount(3, $attributes);
+        self::assertCount(2, $attributes);
 
         $names = array_map(
             static fn (\ReflectionAttribute $attr) => $attr->newInstance()->name,
             $attributes,
         );
 
-        self::assertSame(['youtube_embed', 'vimeo_embed', 'twitter_embed'], $names);
+        self::assertSame(['youtube_embed', 'vimeo_embed'], $names);
     }
 }

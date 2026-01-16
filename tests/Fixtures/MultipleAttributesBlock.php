@@ -12,13 +12,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Storyblok\Bundle\Tests\Double\Block;
+namespace Storyblok\Bundle\Tests\Fixtures;
 
 use Storyblok\Bundle\Block\Attribute\AsBlock;
 
 #[AsBlock(name: 'youtube_embed')]
 #[AsBlock(name: 'vimeo_embed')]
-#[AsBlock(name: 'twitter_embed')]
 final readonly class MultipleAttributesBlock
 {
     public string $url;

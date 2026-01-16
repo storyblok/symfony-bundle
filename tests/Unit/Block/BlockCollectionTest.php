@@ -19,8 +19,8 @@ use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Block\BlockDefinition;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Exception\BlockNotFoundException;
-use Storyblok\Bundle\Tests\Double\Block\MultipleAttributesBlock;
 use Storyblok\Bundle\Tests\Double\Block\SampleBlock;
+use Storyblok\Bundle\Tests\Fixtures\MultipleAttributesBlock;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 
 final class BlockCollectionTest extends TestCase
@@ -113,9 +113,8 @@ final class BlockCollectionTest extends TestCase
         $collection = new BlockRegistry();
         $collection::add(new BlockDefinition('youtube_embed', MultipleAttributesBlock::class, $faker->word()));
         $collection::add(new BlockDefinition('vimeo_embed', MultipleAttributesBlock::class, $faker->word()));
-        $collection::add(new BlockDefinition('twitter_embed', MultipleAttributesBlock::class, $faker->word()));
 
-        self::assertCount(3, $collection);
+        self::assertCount(2, $collection);
     }
 
     #[Test]
@@ -126,7 +125,6 @@ final class BlockCollectionTest extends TestCase
         $collection = new BlockRegistry();
         $collection::add($first = new BlockDefinition('youtube_embed', MultipleAttributesBlock::class, $faker->word()));
         $collection::add(new BlockDefinition('vimeo_embed', MultipleAttributesBlock::class, $faker->word()));
-        $collection::add(new BlockDefinition('twitter_embed', MultipleAttributesBlock::class, $faker->word()));
 
         self::assertSame($first, $collection::get(MultipleAttributesBlock::class));
     }
@@ -139,7 +137,6 @@ final class BlockCollectionTest extends TestCase
         $collection = new BlockRegistry();
         $collection::add(new BlockDefinition('youtube_embed', MultipleAttributesBlock::class, $faker->word()));
         $collection::add($vimeoEmbed = new BlockDefinition('vimeo_embed', MultipleAttributesBlock::class, $faker->word()));
-        $collection::add(new BlockDefinition('twitter_embed', MultipleAttributesBlock::class, $faker->word()));
 
         self::assertSame($vimeoEmbed, $collection::byName('vimeo_embed'));
     }
