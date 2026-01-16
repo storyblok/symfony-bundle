@@ -446,6 +446,43 @@ final readonly class SampleBlock
 | `name`     | `string` | No | The block name used in Storyblok. Defaults to the class name converted to snake_case. |
 | `template` | `string` | No | The Twig template for rendering the block. Defaults to `blocks/{name}.html.twig`. |
 
+### Multiple Block Names for a Single Class
+
+The `#[AsBlock]` attribute is repeatable, allowing you to register the same PHP class under multiple Storyblok block names. This is useful when you have several Storyblok components that share the same structure and can be handled by the same class:
+
+```php
+use Storyblok\Bundle\Block\Attribute\AsBlock;
+
+#[AsBlock(name: 'youtube_embed')]
+#[AsBlock(name: 'vimeo_embed')]
+#[AsBlock(name: 'twitter_embed')]
+#[AsBlock(name: 'linkedin_embed')]
+final readonly class EmbedBlock
+{
+    public string $url;
+    public ?string $caption;
+
+    public function __construct(array $values)
+    {
+        $this->url = $values['url'] ?? '';
+        $this->caption = $values['caption'] ?? null;
+    }
+}
+```
+
+Each `#[AsBlock]` attribute registers the class separately in the `BlockRegistry`, making it accessible by its respective name. You can also specify different templates for each block name if needed:
+
+```php
+#[AsBlock(name: 'youtube_embed', template: 'blocks/embeds/youtube.html.twig')]
+#[AsBlock(name: 'vimeo_embed', template: 'blocks/embeds/vimeo.html.twig')]
+#[AsBlock(name: 'twitter_embed', template: 'blocks/embeds/twitter.html.twig')]
+#[AsBlock(name: 'linkedin_embed', template: 'blocks/embeds/linkedin.html.twig')]
+final readonly class EmbedBlock
+{
+    // ...
+}
+```
+
 ### Customizing the Default Template Path
 
 You can change the default template path structure by configuring it in `storyblok.yaml`:
