@@ -36,6 +36,10 @@ final readonly class ContentTypeValueResolver implements ValueResolverInterface
             return [];
         }
 
+        if (null === $argument->getType()) {
+            return [];
+        }
+
         $types = \array_filter(
             \explode('|', $argument->getType()),
             static fn (string $type) => $request->attributes->get('_storyblok_content_type') === $type,
