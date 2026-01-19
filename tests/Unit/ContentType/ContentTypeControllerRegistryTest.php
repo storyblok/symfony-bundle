@@ -20,7 +20,10 @@ use Storyblok\Bundle\ContentType\ContentTypeControllerDefinition;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\Exception\ContentTypeControllerNotFoundException;
 use Storyblok\Bundle\Tests\Double\Block\SampleBlock;
+use Storyblok\Bundle\Tests\Double\ContentType\AnotherContentType;
 use Storyblok\Bundle\Tests\Double\ContentType\SampleContentType;
+use Storyblok\Bundle\Tests\Double\Controller\MultipleContentTypesController;
+use Storyblok\Bundle\Tests\Double\Controller\MultipleContentTypesDefaultController;
 use Storyblok\Bundle\Tests\Double\Controller\SampleController;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 
@@ -149,5 +152,79 @@ final class ContentTypeControllerRegistryTest extends TestCase
         $collection->add(new ContentTypeControllerDefinition(SampleController::class, SampleContentType::class, $faker->word(), $slug = $faker->slug()));
 
         self::assertCount(1, $collection->all());
+    }
+
+    #[Test]
+    public function addMultipleSlugsWithSameControllerAndContentType(): void
+    {
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type'));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type', MultipleContentTypesController::IMPRINT_SLUG));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type', MultipleContentTypesController::PRIVACY_SLUG));
+
+        self::assertCount(3, $collection);
+    }
+
+    #[Test]
+    public function getReturnsFirstDefinitionForControllerWithMultipleSlugs(): void
+    {
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add($first = new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type'));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type', MultipleContentTypesController::IMPRINT_SLUG));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type', MultipleContentTypesController::PRIVACY_SLUG));
+
+        self::assertSame($first, $collection->get(MultipleContentTypesController::class));
+    }
+
+    #[Test]
+    public function bySlugReturnsCorrectDefinitionForControllerWithMultipleSlugs(): void
+    {
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type'));
+        $collection->add($imprint = new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type', MultipleContentTypesController::IMPRINT_SLUG));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type', MultipleContentTypesController::PRIVACY_SLUG));
+
+        self::assertSame($imprint, $collection->bySlug(MultipleContentTypesController::IMPRINT_SLUG));
+    }
+
+    #[Test]
+    public function byTypeReturnsCatchAllDefinitionForControllerWithMultipleSlugs(): void
+    {
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add($catchAll = new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type'));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type', MultipleContentTypesController::IMPRINT_SLUG));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesController::class, SampleContentType::class, 'sample_content_type', MultipleContentTypesController::PRIVACY_SLUG));
+
+        self::assertSame($catchAll, $collection->byType('sample_content_type'));
+    }
+
+    #[Test]
+    public function addMultipleContentTypesWithSameController(): void
+    {
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesDefaultController::class, SampleContentType::class, 'sample_content_type'));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesDefaultController::class, AnotherContentType::class, 'another_content_type'));
+
+        self::assertCount(2, $collection);
+    }
+
+    #[Test]
+    public function byTypeReturnsCorrectDefinitionForControllerWithMultipleContentTypes(): void
+    {
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesDefaultController::class, SampleContentType::class, 'sample_content_type'));
+        $collection->add($another = new ContentTypeControllerDefinition(MultipleContentTypesDefaultController::class, AnotherContentType::class, 'another_content_type'));
+
+        self::assertSame($another, $collection->byType('another_content_type'));
+    }
+
+    #[Test]
+    public function getReturnsFirstDefinitionForControllerWithMultipleContentTypes(): void
+    {
+        $collection = new ContentTypeControllerRegistry();
+        $collection->add($first = new ContentTypeControllerDefinition(MultipleContentTypesDefaultController::class, SampleContentType::class, 'sample_content_type'));
+        $collection->add(new ContentTypeControllerDefinition(MultipleContentTypesDefaultController::class, AnotherContentType::class, 'another_content_type'));
+
+        self::assertSame($first, $collection->get(MultipleContentTypesDefaultController::class));
     }
 }

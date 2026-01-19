@@ -307,7 +307,7 @@ use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-#[AsContentTypeController(contentType: Page::class, slug: 'legal/imprint')]
+#[AsContentTypeController(contentType: Page::class, slug: '/legal/imprint')]
 final readonly class ImprintController
 {
     public function __invoke(Request $request): Response
@@ -316,6 +316,69 @@ final readonly class ImprintController
     }
 }
 ```
+
+### Repeatable Attribute
+
+The `#[AsContentTypeController]` attribute is repeatable, enabling two powerful patterns:
+
+#### Multiple Slugs with the Same Content Type
+
+Handle specific slugs with dedicated logic while using the same controller:
+
+```php
+use App\ContentType\LegalPage\LegalPage;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AsContentTypeController(contentType: LegalPage::class, slug: '/legal/imprint')]
+#[AsContentTypeController(contentType: LegalPage::class, slug: '/legal/privacy-policy')]
+#[AsContentTypeController(contentType: LegalPage::class, slug: '/legal/terms')]
+final readonly class LegalController
+{
+    public function __invoke(Request $request, LegalPage $legalPage): Response
+    {
+        return $this->render(
+            sprintf('content_types/legal/%s.html.twig', str_replace('/', '_', $legalPage->getSlug())),
+            ['legal_page' => $legalPage]
+        );
+    }
+}
+```
+
+#### Multiple Content Types with a Single Controller
+
+Handle different content types that share similar rendering logic:
+
+```php
+use App\ContentType\BlogPost\BlogPost;
+use App\ContentType\Event\Event;
+use App\ContentType\Page\Page;
+use App\ContentType\SuccessStory\SuccessStory;
+use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+#[AsContentTypeController(contentType: Page::class)]
+#[AsContentTypeController(contentType: BlogPost::class)]
+#[AsContentTypeController(contentType: SuccessStory::class)]
+#[AsContentTypeController(contentType: Event::class)]
+final readonly class DefaultController
+{
+    public function __invoke(Request $request, Page|BlogPost|SuccessStory|Event $contentType): Response
+    {
+        return $this->render(
+            sprintf('content_types/%s/detail.html.twig', $contentType::type()),
+            ['content_type' => $contentType]
+        );
+    }
+}
+```
+
+This approach allows you to:
+- Keep your code DRY when logic is shared across multiple pages or content types
+- Handle specific slugs with dedicated templates
+- Use a single controller for multiple content types with similar rendering patterns
 
 Controllers marked with the `#[AsContentTypeController]` attribute will be tagged with
 `storyblok.content_type.controller` and `controller.service_arguments`.
@@ -485,6 +548,43 @@ final readonly class SampleBlock
 |------------|--------|-----------|-------------|
 | `name`     | `string` | No | The block name used in Storyblok. Defaults to the class name converted to snake_case. |
 | `template` | `string` | No | The Twig template for rendering the block. Defaults to `blocks/{name}.html.twig`. |
+
+### Multiple Block Names for a Single Class
+
+The `#[AsBlock]` attribute is repeatable, allowing you to register the same PHP class under multiple Storyblok block names. This is useful when you have several Storyblok components that share the same structure and can be handled by the same class:
+
+```php
+use Storyblok\Bundle\Block\Attribute\AsBlock;
+
+#[AsBlock(name: 'youtube_embed')]
+#[AsBlock(name: 'vimeo_embed')]
+#[AsBlock(name: 'twitter_embed')]
+#[AsBlock(name: 'linkedin_embed')]
+final readonly class EmbedBlock
+{
+    public string $url;
+    public ?string $caption;
+
+    public function __construct(array $values)
+    {
+        $this->url = $values['url'] ?? '';
+        $this->caption = $values['caption'] ?? null;
+    }
+}
+```
+
+Each `#[AsBlock]` attribute registers the class separately in the `BlockRegistry`, making it accessible by its respective name. You can also specify different templates for each block name if needed:
+
+```php
+#[AsBlock(name: 'youtube_embed', template: 'blocks/embeds/youtube.html.twig')]
+#[AsBlock(name: 'vimeo_embed', template: 'blocks/embeds/vimeo.html.twig')]
+#[AsBlock(name: 'twitter_embed', template: 'blocks/embeds/twitter.html.twig')]
+#[AsBlock(name: 'linkedin_embed', template: 'blocks/embeds/linkedin.html.twig')]
+final readonly class EmbedBlock
+{
+    // ...
+}
+```
 
 ### Customizing the Default Template Path
 
