@@ -17,6 +17,7 @@ namespace Storyblok\Bundle\Tests\Unit\ValueResolver;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\ContentType\ContentTypeStorage;
+use Storyblok\Bundle\Tests\Double\ContentType\AnotherContentType;
 use Storyblok\Bundle\Tests\Double\ContentType\SampleContentType;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Storyblok\Bundle\ValueResolver\ContentTypeValueResolver;
@@ -73,5 +74,22 @@ final class ContentTypeValueResolverTest extends TestCase
         $request->attributes->set('_storyblok_content_type', SampleContentType::class);
 
         self::assertEmpty($resolver->resolve($request, new ArgumentMetadata($faker->word(), SampleContentType::class, false, false, null)));
+    }
+
+    #[Test]
+    public function resolveWithUnionType(): void
+    {
+        $faker = self::faker();
+        $storage = new ContentTypeStorage();
+        $storage->setContentType($expected = new SampleContentType([]));
+
+        $resolver = new ContentTypeValueResolver($storage);
+
+        $request = new Request();
+        $request->attributes->set('_storyblok_content_type', $expected::class);
+
+        $unionType = SampleContentType::class.'|'.AnotherContentType::class;
+
+        self::assertSame([$expected], $resolver->resolve($request, new ArgumentMetadata($faker->word(), $unionType, false, false, null)));
     }
 }
