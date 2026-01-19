@@ -43,7 +43,13 @@ final class ContentTypeControllerRegistryTest extends TestCase
     #[Test]
     public function addWithArray(): void
     {
-        $values = ['className' => SampleController::class, 'contentType' => SampleBlock::class, 'type' => self::faker()->word()];
+        $values = [
+            'className' => SampleController::class,
+            'contentType' => SampleBlock::class,
+            'type' => self::faker()->word(),
+            'resolveRelations' => '',
+            'resolveLinks' => ['type' => null, 'level' => 1],
+        ];
 
         $collection = new ContentTypeControllerRegistry();
         $collection->add($values);

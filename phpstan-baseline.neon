@@ -57,7 +57,7 @@ parameters:
 		-
 			message: '#^Cannot access constant class on callable\.$#'
 			identifier: classConstant.nonObject
-			count: 6
+			count: 10
 			path: tests/Unit/ContentType/Listener/ResolveControllerListenerTest.php
 
 		-

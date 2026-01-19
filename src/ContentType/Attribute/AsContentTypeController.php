@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\ContentType\Attribute;
 
+use Storyblok\Api\Domain\Value\Resolver\RelationCollection;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
 use Storyblok\Bundle\ContentType\ContentTypeInterface;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
@@ -25,6 +27,8 @@ final readonly class AsContentTypeController
     public function __construct(
         public string $contentType,
         public ?string $slug = null,
+        public RelationCollection $resolveRelations = new RelationCollection(),
+        public ResolveLinks $resolveLinks = new ResolveLinks(),
     ) {
     }
 }
