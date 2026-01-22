@@ -21,6 +21,7 @@ use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
 use Storyblok\Bundle\Cdn\CdnUrlGenerator;
 use Storyblok\Bundle\Cdn\CdnUrlGeneratorInterface;
+use Storyblok\Bundle\Command\CdnCleanupCommand;
 use Storyblok\Bundle\Cdn\Download\AssetDownloader;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnFileFilesystemStorage;
@@ -217,5 +218,11 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(CdnExtension::class)
             ->tag('twig.extension')
+
+        ->set(CdnCleanupCommand::class)
+            ->args([
+                '$storagePath' => env('resolve:CDN_FILE_STORAGE_PATH'),
+            ])
+            ->tag('console.command')
     ;
 };
