@@ -17,6 +17,10 @@ namespace Storyblok\Bundle\Cdn;
 use Storyblok\Api\Domain\Type\Asset;
 use Storyblok\ImageService\Image;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 interface CdnUrlGeneratorInterface
 {
     public function generate(Asset|Image $asset): string;

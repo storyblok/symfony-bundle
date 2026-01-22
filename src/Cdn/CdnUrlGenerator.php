@@ -22,6 +22,10 @@ use Storyblok\Bundle\Routing\Route;
 use Storyblok\ImageService\Image;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final readonly class CdnUrlGenerator implements CdnUrlGeneratorInterface
 {
     public function __construct(

@@ -18,6 +18,10 @@ use Storyblok\Bundle\Cdn\CdnUrlGeneratorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final class CdnExtension extends AbstractExtension
 {
     public function __construct(

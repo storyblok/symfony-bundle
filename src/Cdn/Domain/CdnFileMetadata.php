@@ -16,6 +16,10 @@ namespace Storyblok\Bundle\Cdn\Domain;
 
 use Safe\DateTimeImmutable;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final readonly class CdnFileMetadata implements \JsonSerializable
 {
     public function __construct(

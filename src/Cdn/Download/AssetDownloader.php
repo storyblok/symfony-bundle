@@ -20,6 +20,10 @@ use Storyblok\Bundle\Cdn\Domain\DownloadedFile;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function Symfony\Component\String\u;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final readonly class AssetDownloader implements FileDownloaderInterface
 {
     private const int DEFAULT_TTL = 86400;

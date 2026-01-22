@@ -14,6 +14,10 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Cdn\Domain;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final readonly class DownloadedFile
 {
     public function __construct(

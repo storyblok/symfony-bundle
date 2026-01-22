@@ -16,6 +16,10 @@ namespace Storyblok\Bundle\Cdn\Domain;
 
 use Symfony\Component\HttpFoundation\File\File;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final readonly class CdnFile
 {
     public function __construct(

@@ -19,6 +19,9 @@ use Storyblok\ImageService\Image;
 
 /**
  * @internal
+ *
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
  */
 final readonly class AssetInfo
 {

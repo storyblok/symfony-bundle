@@ -14,6 +14,10 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Cdn\Storage;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final class CdnFileNotFoundException extends \RuntimeException
 {
 }

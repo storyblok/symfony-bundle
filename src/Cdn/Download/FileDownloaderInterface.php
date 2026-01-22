@@ -16,6 +16,10 @@ namespace Storyblok\Bundle\Cdn\Download;
 
 use Storyblok\Bundle\Cdn\Domain\DownloadedFile;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 interface FileDownloaderInterface
 {
     public function download(string $url): DownloadedFile;

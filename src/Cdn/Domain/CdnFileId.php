@@ -16,6 +16,10 @@ namespace Storyblok\Bundle\Cdn\Domain;
 
 use Webmozart\Assert\Assert;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final readonly class CdnFileId
 {
     public function __construct(

@@ -23,6 +23,10 @@ use function Safe\json_decode;
 use function Safe\json_encode;
 use function Symfony\Component\String\u;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final readonly class CdnFileFilesystemStorage implements CdnFileStorageInterface
 {
     public function __construct(

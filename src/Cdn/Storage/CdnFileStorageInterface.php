@@ -20,6 +20,9 @@ use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
 
 /**
  * @experimental
+ *
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
  */
 interface CdnFileStorageInterface
 {

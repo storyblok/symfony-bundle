@@ -23,6 +23,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
 final readonly class CdnController
 {
     public function __construct(
@@ -47,6 +51,11 @@ final readonly class CdnController
 
         if (null === $cdnFile->file) {
             $downloaded = $this->downloader->download($cdnFile->metadata->originalUrl);
+
+            if (null === $downloaded->metadata->contentType || null === $downloaded->metadata->expiresAt) {
+                throw new \RuntimeException('Downloaded file metadata is incomplete');
+            }
+
             $enrichedMetadata = $cdnFile->metadata->withDownloadInfo(
                 $downloaded->metadata->contentType,
                 $downloaded->metadata->etag,
@@ -55,6 +64,10 @@ final readonly class CdnController
             $this->storage->set($fileId, $fullFilename, $enrichedMetadata, $downloaded->content);
 
             $cdnFile = $this->storage->get($fileId, $fullFilename);
+        }
+
+        if (null === $cdnFile->file) {
+            throw new NotFoundHttpException('Asset not found');
         }
 
         $response = new BinaryFileResponse($cdnFile->file, contentDisposition: ResponseHeaderBag::DISPOSITION_INLINE);
