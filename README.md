@@ -626,6 +626,154 @@ It works out of the box with:
 - A default TipTap editor configuration
 - Automatic rendering of registered Storyblok blocks using the `Storyblok\Bundle\Block\BlockRegistry`
 
+## CDN Asset Handling
+
+The bundle provides a CDN feature that allows you to serve Storyblok assets through your own domain. This is useful for:
+- Serving assets from your own CDN
+- Applying custom caching strategies
+- Avoiding mixed content issues
+- Better control over asset delivery
+
+### Configuration
+
+First, enable the CDN route in your application:
+
+```yaml
+# config/routes/storyblok.yaml
+storyblok_cdn:
+    resource: '@StoryblokBundle/config/routes/cdn.php'
+```
+
+The CDN feature is **enabled by default** with filesystem storage at `%kernel.project_dir%/var/cdn`. It only supports public Storyblok assets.
+
+```yaml
+# config/packages/storyblok.yaml
+storyblok:
+    # ...
+
+    # CDN is enabled by default with these settings:
+    # cdn:
+    #     enabled: true
+    #     storage:
+    #         type: filesystem
+    #         path: '%kernel.project_dir%/var/cdn'
+
+    # Custom configuration example:
+    cdn:
+        storage:
+            type: filesystem
+            path: '%kernel.project_dir%/var/cdn'
+        cache:
+            public: true
+            max_age: 31536000   # 1 year
+            smax_age: 31536000
+```
+
+#### Disabling CDN
+
+To disable the CDN feature and remove all related services:
+
+```yaml
+storyblok:
+    cdn: false
+```
+
+### Usage in Twig
+
+#### Generating CDN URLs
+
+Use the `cdn_url` function to generate a URL that serves the asset through your CDN:
+
+```twig
+{# From an Asset #}
+<img src="{{ cdn_url(asset) }}" alt="My image">
+
+{# From an Image (with transformations) #}
+{% set image = asset|storyblok_image(800, 600) %}
+<img src="{{ cdn_url(image) }}" alt="Resized image">
+
+{# Combine filter and function #}
+<img src="{{ cdn_url(asset|storyblok_image(400, 300)) }}" alt="Thumbnail">
+```
+
+The `cdn_url` function accepts an optional second argument to specify the URL reference type. See Symfony's [UrlGeneratorInterface](https://symfony.com/doc/current/routing.html#generating-urls) for available options (`ABSOLUTE_URL`, `ABSOLUTE_PATH`, `RELATIVE_PATH`, `NETWORK_PATH`).
+
+#### Supported Formats
+
+The CDN supports all file formats served by Storyblok, including images (JPG, PNG, WebP, GIF, SVG, AVIF), documents (PDF), and other assets.
+
+**Example URLs:**
+
+| Asset Type | Storyblok URL | CDN URL |
+|------------|---------------|---------|
+| Original image | `https://a.storyblok.com/f/12345/1920x1080/abc123/photo.jpg` | `https://example.com/f/a1b2c3d4e5f6g7h8/1920x1080-photo.jpg` |
+| Resized image | `https://a.storyblok.com/f/12345/1920x1080/abc123/photo.jpg/m/800x600` | `https://example.com/f/b2c3d4e5f6g7h8i9/800x600-photo.jpg` |
+| PDF document | `https://a.storyblok.com/f/12345/document.pdf` | `https://example.com/f/c3d4e5f6g7h8i9j0/document.pdf` |
+
+> [!WARNING]
+> Private assets are not supported yet. Only public Storyblok assets can be served through the CDN.
+
+### Cleanup Command
+
+The bundle provides a console command to clean up cached CDN files:
+
+```bash
+# Delete all cached files
+php bin/console storyblok:cdn:cleanup
+
+# Preview what would be deleted (dry-run)
+php bin/console storyblok:cdn:cleanup --dry-run
+
+# Delete only expired files
+php bin/console storyblok:cdn:cleanup --expired
+```
+
+> [!TIP]
+> Configure this command as a cronjob to automatically clean up expired files. For example, to run daily at midnight:
+> ```bash
+> 0 0 * * * php bin/console storyblok:cdn:cleanup --expired
+> ```
+
+### How It Works
+
+The CDN feature uses a lazy-loading approach for optimal performance:
+
+1. **During Twig rendering**: When `cdn_url()` is called, only metadata (the original Storyblok URL) is stored locally. No download occurs at this point, keeping page rendering fast.
+
+2. **On first browser request**: When a browser requests the CDN URL, the controller downloads the file from Storyblok, stores it locally with enriched metadata (content type, etag, expiration), and serves it.
+
+3. **On subsequent requests**: The file is served directly from local storage with appropriate caching headers.
+
+This approach ensures that page rendering is not blocked by asset downloads, even when dealing with many images.
+
+### Custom Storage Implementation
+
+By default, assets are stored on the filesystem. You can implement your own storage by creating a class that implements `CdnStorageInterface`:
+
+```php
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
+use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+
+#[AsAlias(CdnStorageInterface::class)]
+final class RedisCdnStorage implements CdnStorageInterface
+{
+    // Implement the interface methods
+}
+```
+
+Then configure the bundle to use custom storage:
+
+```yaml
+# config/packages/storyblok.yaml
+storyblok:
+    cdn:
+        storage:
+            type: custom  # This removes the built-in filesystem storage
+```
+
+> [!NOTE]
+> When using `type: custom`, the `path` option should not be set. The built-in cleanup command is also removed since it's specific to filesystem storage.
+
 ### Image Transformation
 
 The bundle provides a `storyblok_image` Twig filter to convert Storyblok Assets to Image objects with optional resizing. This filter integrates with the [storyblok/php-image-service](https://github.com/storyblok/php-image-service) library and returns an immutable `Image` instance that you can further transform using the fluent API.
