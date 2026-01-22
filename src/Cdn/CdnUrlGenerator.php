@@ -34,7 +34,7 @@ final readonly class CdnUrlGenerator implements CdnUrlGeneratorInterface
     ) {
     }
 
-    public function generate(Asset|Image $asset): string
+    public function generate(Asset|Image $asset, int $referenceType = UrlGeneratorInterface::ABSOLUTE_URL): string
     {
         $assetInfo = new AssetInfo($asset);
 
@@ -46,6 +46,6 @@ final readonly class CdnUrlGenerator implements CdnUrlGeneratorInterface
             'id' => $assetInfo->id->value,
             'filename' => $assetInfo->filename,
             'extension' => $assetInfo->extension,
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
+        ], $referenceType);
     }
 }

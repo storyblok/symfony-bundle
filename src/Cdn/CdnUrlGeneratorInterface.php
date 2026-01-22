@@ -16,6 +16,7 @@ namespace Storyblok\Bundle\Cdn;
 
 use Storyblok\Api\Domain\Type\Asset;
 use Storyblok\ImageService\Image;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @author Silas Joisten <silasjoisten@proton.me>
@@ -23,5 +24,8 @@ use Storyblok\ImageService\Image;
  */
 interface CdnUrlGeneratorInterface
 {
-    public function generate(Asset|Image $asset): string;
+    /**
+     * @param UrlGeneratorInterface::* $referenceType
+     */
+    public function generate(Asset|Image $asset, int $referenceType = UrlGeneratorInterface::ABSOLUTE_URL): string;
 }
