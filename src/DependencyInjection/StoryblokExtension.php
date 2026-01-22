@@ -29,6 +29,7 @@ use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
+use Storyblok\Bundle\Controller\CdnController;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
@@ -113,6 +114,15 @@ final class StoryblokExtension extends Extension
         ]);
 
         $container->setDefinition(GlobalCachingListener::class, $storage);
+
+        $storage = $container->getDefinition(CdnController::class);
+        $storage->setArguments([
+            '$public' => $config['cdn']['cache']['public'],
+            '$maxAge' => $config['cdn']['cache']['max_age'],
+            '$smaxAge' => $config['cdn']['cache']['smax_age'],
+        ]);
+
+        $container->setDefinition(CdnController::class, $storage);
 
         $this->registerAttributes($container, $config);
     }

@@ -19,6 +19,12 @@ use Storyblok\Api\TagsApiInterface;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
+use Storyblok\Bundle\Cdn\CdnUrlGenerator;
+use Storyblok\Bundle\Cdn\CdnUrlGeneratorInterface;
+use Storyblok\Bundle\Cdn\Download\AssetDownloader;
+use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnFileFilesystemStorage;
+use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeRegistryInterface;
@@ -27,12 +33,14 @@ use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
 use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
 use Storyblok\Bundle\ContentType\Listener\ResolveControllerListener;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
+use Storyblok\Bundle\Controller\CdnController;
 use Storyblok\Bundle\Controller\WebhookController;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Tiptap\DefaultEditorBuilder;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Storyblok\Bundle\Twig\BlockExtension;
+use Storyblok\Bundle\Twig\CdnExtension;
 use Storyblok\Bundle\Twig\ImageExtension;
 use Storyblok\Bundle\Twig\LiveEditorExtension;
 use Storyblok\Bundle\Twig\RichTextExtension;
@@ -180,6 +188,33 @@ return static function (ContainerConfigurator $container): void {
             ->alias(ContentTypeRegistryInterface::class, ContentTypeRegistry::class)
 
         ->set(ImageExtension::class)
+            ->tag('twig.extension')
+
+        ->set(CdnController::class)
+            ->args([
+                '$storage' => service(CdnFileStorageInterface::class),
+                '$public' => abstract_arg('public cache directive'),
+                '$maxAge' => abstract_arg('max-age cache directive'),
+                '$smaxAge' => abstract_arg('smaxage cache directive'),
+            ])
+            ->tag('controller.service_arguments')
+
+        ->set(AssetDownloader::class)
+            ->alias(FileDownloaderInterface::class, AssetDownloader::class)
+
+        ->set(CdnFileFilesystemStorage::class)
+            ->args([
+                '$storagePath' => env('resolve:CDN_FILE_STORAGE_PATH'),
+            ])
+            ->alias(CdnFileStorageInterface::class, CdnFileFilesystemStorage::class)
+
+        ->set(CdnUrlGenerator::class)
+            ->alias(CdnUrlGeneratorInterface::class, CdnUrlGenerator::class)
+
+        ->set(ImageExtension::class)
+            ->tag('twig.extension')
+
+        ->set(CdnExtension::class)
             ->tag('twig.extension')
     ;
 };
