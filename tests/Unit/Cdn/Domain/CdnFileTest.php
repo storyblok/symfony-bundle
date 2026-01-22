@@ -19,7 +19,6 @@ use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Cdn\Domain\CdnFile;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
 use Symfony\Component\HttpFoundation\File\File;
-
 use function Safe\file_put_contents;
 use function Safe\tempnam;
 use function Safe\unlink;
