@@ -193,6 +193,7 @@ return static function (ContainerConfigurator $container): void {
         ->set(CdnController::class)
             ->args([
                 '$storage' => service(CdnFileStorageInterface::class),
+                '$downloader' => service(FileDownloaderInterface::class),
                 '$public' => abstract_arg('public cache directive'),
                 '$maxAge' => abstract_arg('max-age cache directive'),
                 '$smaxAge' => abstract_arg('smaxage cache directive'),

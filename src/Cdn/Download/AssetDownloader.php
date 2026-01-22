@@ -27,6 +27,7 @@ final readonly class AssetDownloader implements FileDownloaderInterface
         return new DownloadedFile(
             content: $response->getContent(),
             metadata: new CdnFileMetadata(
+                originalUrl: $url,
                 contentType: $headers['content-type'][0] ?? 'application/octet-stream',
                 etag: $headers['etag'][0] ?? null,
                 expiresAt: (new DateTimeImmutable())->modify(\sprintf('+%d seconds', self::parseTtl($headers))),

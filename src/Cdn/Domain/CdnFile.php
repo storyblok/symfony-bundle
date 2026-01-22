@@ -9,8 +9,8 @@ use Symfony\Component\HttpFoundation\File\File;
 final readonly class CdnFile
 {
     public function __construct(
-        public File $file,
         public CdnFileMetadata $metadata,
+        public ?File $file = null,
     ) {
     }
 }

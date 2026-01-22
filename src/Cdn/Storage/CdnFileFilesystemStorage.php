@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Cdn\Storage;
 
-use Safe\DateTimeImmutable;
 use Storyblok\Bundle\Cdn\Domain\CdnFile;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
@@ -16,8 +15,6 @@ use function Symfony\Component\String\u;
 
 final readonly class CdnFileFilesystemStorage implements CdnFileStorageInterface
 {
-    private const string METADATA_FILENAME = 'metadata.json';
-
     public function __construct(
         private Filesystem $filesystem,
         private string $storagePath,
@@ -26,44 +23,39 @@ final readonly class CdnFileFilesystemStorage implements CdnFileStorageInterface
 
     public function has(CdnFileId $id, string $filename): bool
     {
-        return $this->filesystem->exists($this->filePath($id, $filename))
-            && $this->filesystem->exists($this->metadataPath($id));
+        return $this->filesystem->exists($this->metadataPath($id, $filename))
+            && $this->filesystem->exists($this->filePath($id, $filename));
     }
 
     public function get(CdnFileId $id, string $filename): CdnFile
     {
-        $filePath = $this->filePath($id, $filename);
-        $metadataPath = $this->metadataPath($id);
+        $metadataPath = $this->metadataPath($id, $filename);
 
-        if (!$this->filesystem->exists($filePath) || !$this->filesystem->exists($metadataPath)) {
-            throw new CdnFileNotFoundException(\sprintf('File not found: %s/%s', $id->value, $filename));
+        if (!$this->filesystem->exists($metadataPath)) {
+            throw new CdnFileNotFoundException(\sprintf('Metadata not found: %s/%s', $id->value, $filename));
         }
 
-        $data = json_decode($this->filesystem->readFile($metadataPath), true, 512, \JSON_THROW_ON_ERROR);
+        $metadata = CdnFileMetadata::fromArray(json_decode($this->filesystem->readFile($metadataPath), true, 512, \JSON_THROW_ON_ERROR));
+        $filePath = $this->filePath($id, $filename);
 
         return new CdnFile(
-            file: new File($filePath),
-            metadata: new CdnFileMetadata(
-                contentType: $data['contentType'],
-                etag: $data['etag'],
-                expiresAt: new DateTimeImmutable($data['expiresAt']),
-            ),
+            metadata: $metadata,
+            file: $this->filesystem->exists($filePath) ? new File($filePath) : null,
         );
     }
 
-    public function set(CdnFileId $id, string $filename, string $content, CdnFileMetadata $metadata): void
+    public function set(CdnFileId $id, string $filename, CdnFileMetadata $metadata, ?string $content = null): void
     {
-        $this->filesystem->dumpFile($this->filePath($id, $filename), $content);
-        $this->filesystem->dumpFile($this->metadataPath($id), json_encode($metadata, \JSON_THROW_ON_ERROR | \JSON_PRETTY_PRINT));
+        $this->filesystem->dumpFile($this->metadataPath($id, $filename), json_encode($metadata, \JSON_THROW_ON_ERROR | \JSON_PRETTY_PRINT));
+
+        if (null !== $content) {
+            $this->filesystem->dumpFile($this->filePath($id, $filename), $content);
+        }
     }
 
     public function remove(CdnFileId $id, string $filename): void
     {
-        $directoryPath = $this->directoryPath($id);
-
-        if ($this->filesystem->exists($directoryPath)) {
-            $this->filesystem->remove($directoryPath);
-        }
+        $this->filesystem->remove($this->directoryPath($id));
     }
 
     private function directoryPath(CdnFileId $id): string
@@ -82,8 +74,8 @@ final readonly class CdnFileFilesystemStorage implements CdnFileStorageInterface
             ->toString();
     }
 
-    private function metadataPath(CdnFileId $id): string
+    private function metadataPath(CdnFileId $id, string $filename): string
     {
-        return $this->filePath($id, self::METADATA_FILENAME);
+        return $this->filePath($id, \sprintf('%s.json', $filename));
     }
 }
