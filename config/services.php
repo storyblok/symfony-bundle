@@ -33,6 +33,7 @@ use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Tiptap\DefaultEditorBuilder;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Storyblok\Bundle\Twig\BlockExtension;
+use Storyblok\Bundle\Twig\ImageExtension;
 use Storyblok\Bundle\Twig\LiveEditorExtension;
 use Storyblok\Bundle\Twig\RichTextExtension;
 use Storyblok\Bundle\ValueResolver\ContentTypeValueResolver;
@@ -177,5 +178,8 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(ContentTypeRegistry::class)
             ->alias(ContentTypeRegistryInterface::class, ContentTypeRegistry::class)
+
+        ->set(ImageExtension::class)
+            ->tag('twig.extension')
     ;
 };
