@@ -228,9 +228,6 @@ return static function (ContainerConfigurator $container): void {
         ->set(CdnUrlGenerator::class)
             ->alias(CdnUrlGeneratorInterface::class, CdnUrlGenerator::class)
 
-        ->set(ImageExtension::class)
-            ->tag('twig.extension')
-
         ->set(CdnExtension::class)
             ->tag('twig.extension')
 

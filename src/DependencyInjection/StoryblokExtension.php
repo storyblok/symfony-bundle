@@ -152,7 +152,6 @@ final class StoryblokExtension extends Extension
             $container->removeDefinition(CdnFilesystemStorage::class);
             $container->removeDefinition(AssetDownloader::class);
             $container->removeDefinition(CdnExtension::class);
-            $container->removeDefinition(ImageExtension::class);
             $container->removeDefinition(CdnCleanupCommand::class);
             $container->removeDefinition(CdnCollector::class);
             $container->removeDefinition(TraceableCdnStorage::class);
