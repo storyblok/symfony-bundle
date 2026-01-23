@@ -626,7 +626,35 @@ It works out of the box with:
 - A default TipTap editor configuration
 - Automatic rendering of registered Storyblok blocks using the `Storyblok\Bundle\Block\BlockRegistry`
 
-## Enabling Storyblok’s Live Editor
+### Image Transformation
+
+The bundle provides a `storyblok_image` Twig filter to convert Storyblok Assets to Image objects with optional resizing. This filter integrates with the [storyblok/php-image-service](https://github.com/storyblok/php-image-service) library and returns an immutable `Image` instance that you can further transform using the fluent API.
+
+```twig
+{# Basic usage - returns Image instance #}
+{% set image = asset|storyblok_image %}
+<img src="{{ image }}" alt="My image">
+
+{# With resize (width, height) #}
+{% set image = asset|storyblok_image(640, 480) %}
+
+{# Width only (maintains aspect ratio) #}
+{% set image = asset|storyblok_image(800, 0) %}
+
+{# Height only (maintains aspect ratio) #}
+{% set image = asset|storyblok_image(0, 600) %}
+
+{# Chain additional transformations #}
+{% set image = asset|storyblok_image(800, 600).format('webp') %}
+{% set image = asset|storyblok_image.blur(5) %}
+{% set image = asset|storyblok_image(400, 300).grayscale() %}
+```
+
+The filter automatically applies the asset's focal point if defined in Storyblok, ensuring images are cropped around the point of interest.
+
+See the [storyblok/php-image-service documentation](https://github.com/storyblok/php-image-service) for all available image transformations including blur, brightness, crop, flip, rotate, and format conversion.
+
+## Enabling Storyblok's Live Editor
 
 This integration lets the Storyblok Visual Editor highlight components directly on your frontend and open the corresponding editing form automatically. Here’s how to set it up:
 
