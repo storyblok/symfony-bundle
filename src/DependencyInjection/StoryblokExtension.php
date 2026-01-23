@@ -42,7 +42,6 @@ use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Twig\CdnExtension;
-use Storyblok\Bundle\Twig\ImageExtension;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;

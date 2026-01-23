@@ -390,7 +390,6 @@ final class StoryblokExtensionTest extends TestCase
         self::assertFalse($builder->hasDefinition(CdnFilesystemStorage::class));
         self::assertFalse($builder->hasDefinition(AssetDownloader::class));
         self::assertFalse($builder->hasDefinition(CdnExtension::class));
-        self::assertFalse($builder->hasDefinition(ImageExtension::class));
         self::assertFalse($builder->hasDefinition(CdnCleanupCommand::class));
         self::assertFalse($builder->hasDefinition(CdnCollector::class));
         self::assertFalse($builder->hasDefinition(TraceableCdnStorage::class));
