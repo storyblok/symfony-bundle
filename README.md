@@ -626,6 +626,7 @@ It works out of the box with:
 - A default TipTap editor configuration
 - Automatic rendering of registered Storyblok blocks using the `Storyblok\Bundle\Block\BlockRegistry`
 
+
 ## CDN Asset Handling
 
 The bundle provides a CDN feature that allows you to serve Storyblok assets through your own domain. This is useful for:

@@ -27,12 +27,17 @@ use Storyblok\Bundle\Cdn\Download\AssetDownloader;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnFileFilesystemStorage;
 use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
+use Storyblok\Bundle\Command\CdnCleanupCommand;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\Controller\CdnController;
+use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\DependencyInjection\StoryblokExtension;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
+use Storyblok\Bundle\Twig\CdnExtension;
+use Storyblok\Bundle\Twig\ImageExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpClient\TraceableHttpClient;
 
@@ -265,7 +270,7 @@ final class StoryblokExtensionTest extends TestCase
     }
 
     #[Test]
-    public function loadWillRegisterCdnServices(): void
+    public function loadWillRegisterCdnServicesByDefault(): void
     {
         $faker = self::faker();
 
@@ -283,6 +288,7 @@ final class StoryblokExtensionTest extends TestCase
             $builder,
         );
 
+        // CDN is enabled by default
         self::assertTrue($builder->hasDefinition(CdnController::class));
         self::assertTrue($builder->hasDefinition(CdnUrlGenerator::class));
         self::assertTrue($builder->hasDefinition(CdnFileFilesystemStorage::class));
@@ -357,5 +363,184 @@ final class StoryblokExtensionTest extends TestCase
         self::assertNull($arguments['$public']);
         self::assertNull($arguments['$maxAge']);
         self::assertNull($arguments['$smaxAge']);
+    }
+
+    #[Test]
+    public function loadWithCdnDisabledWillRemoveAllCdnServices(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['cdn' => ['enabled' => false]],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        self::assertFalse($builder->hasDefinition(CdnController::class));
+        self::assertFalse($builder->hasDefinition(CdnUrlGenerator::class));
+        self::assertFalse($builder->hasDefinition(CdnFileFilesystemStorage::class));
+        self::assertFalse($builder->hasDefinition(AssetDownloader::class));
+        self::assertFalse($builder->hasDefinition(CdnExtension::class));
+        self::assertFalse($builder->hasDefinition(ImageExtension::class));
+        self::assertFalse($builder->hasDefinition(CdnCleanupCommand::class));
+        self::assertFalse($builder->hasDefinition(CdnCollector::class));
+        self::assertFalse($builder->hasDefinition(TraceableCdnFileStorage::class));
+        self::assertFalse($builder->hasAlias(CdnUrlGeneratorInterface::class));
+        self::assertFalse($builder->hasAlias(CdnFileStorageInterface::class));
+        self::assertFalse($builder->hasAlias(FileDownloaderInterface::class));
+    }
+
+    #[Test]
+    public function loadWithCdnStorageTypeCustomWillRemoveFilesystemServices(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['cdn' => ['storage' => ['type' => 'custom']]],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        // Core CDN services should still exist
+        self::assertTrue($builder->hasDefinition(CdnController::class));
+        self::assertTrue($builder->hasDefinition(CdnUrlGenerator::class));
+        self::assertTrue($builder->hasDefinition(AssetDownloader::class));
+        self::assertTrue($builder->hasDefinition(CdnExtension::class));
+        self::assertTrue($builder->hasDefinition(ImageExtension::class));
+
+        // Filesystem-specific services should be removed
+        self::assertFalse($builder->hasDefinition(CdnFileFilesystemStorage::class));
+        self::assertFalse($builder->hasDefinition(TraceableCdnFileStorage::class));
+        self::assertFalse($builder->hasDefinition(CdnCleanupCommand::class));
+        self::assertFalse($builder->hasDefinition(CdnCollector::class));
+        self::assertFalse($builder->hasAlias(CdnFileStorageInterface::class));
+    }
+
+    #[Test]
+    public function loadWithCdnStorageTypeFilesystemWillSetStoragePath(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $storagePath = '/custom/cdn/path';
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['cdn' => ['storage' => ['type' => 'filesystem', 'path' => $storagePath]]],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        self::assertTrue($builder->hasDefinition(CdnFileFilesystemStorage::class));
+
+        $storageDefinition = $builder->getDefinition(CdnFileFilesystemStorage::class);
+        self::assertSame($storagePath, $storageDefinition->getArgument('$storagePath'));
+
+        $cleanupDefinition = $builder->getDefinition(CdnCleanupCommand::class);
+        self::assertSame($storagePath, $cleanupDefinition->getArgument('$storagePath'));
+    }
+
+    #[Test]
+    public function loadWithCdnStorageDefaultPathWillUseProjectDir(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        $storageDefinition = $builder->getDefinition(CdnFileFilesystemStorage::class);
+        self::assertSame('%kernel.project_dir%/var/cdn', $storageDefinition->getArgument('$storagePath'));
+    }
+
+    #[Test]
+    public function loadWithCdnEnabledAndDebugModeWillUseTraceableStorage(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        self::assertTrue($builder->hasDefinition(TraceableCdnFileStorage::class));
+        self::assertTrue($builder->hasDefinition(CdnCollector::class));
+        self::assertTrue($builder->hasAlias(CdnFileStorageInterface::class));
+
+        // In debug mode, the alias should point to TraceableCdnFileStorage
+        $alias = $builder->getAlias(CdnFileStorageInterface::class);
+        self::assertSame(TraceableCdnFileStorage::class, (string) $alias);
+    }
+
+    #[Test]
+    public function loadWithCdnEnabledAndNoDebugModeWillRemoveProfilerServices(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', false);
+
+        $config = [
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+        ];
+
+        $extension->load(
+            $config,
+            $builder,
+        );
+
+        // CDN services should still exist
+        self::assertTrue($builder->hasDefinition(CdnController::class));
+        self::assertTrue($builder->hasDefinition(CdnFileFilesystemStorage::class));
+
+        // Profiler-specific services should be removed
+        self::assertFalse($builder->hasDefinition(CdnCollector::class));
+        self::assertFalse($builder->hasDefinition(TraceableCdnFileStorage::class));
     }
 }

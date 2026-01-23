@@ -25,8 +25,14 @@ use Storyblok\Api\StoryblokClient;
 use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Block\BlockRegistry;
+use Storyblok\Bundle\Cdn\CdnUrlGenerator;
+use Storyblok\Bundle\Cdn\CdnUrlGeneratorInterface;
+use Storyblok\Bundle\Cdn\Download\AssetDownloader;
+use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnFileFilesystemStorage;
 use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
+use Storyblok\Bundle\Command\CdnCleanupCommand;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
@@ -35,6 +41,8 @@ use Storyblok\Bundle\Controller\CdnController;
 use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
+use Storyblok\Bundle\Twig\CdnExtension;
+use Storyblok\Bundle\Twig\ImageExtension;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -70,11 +78,16 @@ final class StoryblokExtension extends Extension
             $container->setAlias(StoryblokClientInterface::class, StoryblokClient::class);
         }
 
+        self::configureCdn($container, $config);
+
         if (false === $container->getParameter('kernel.debug')) {
             $container->removeDefinition(StoryblokCollector::class);
-            $container->removeDefinition(CdnCollector::class);
-            $container->removeDefinition(TraceableCdnFileStorage::class);
             $container->removeDefinition(UpdateProfilerListener::class);
+
+            if ($config['cdn']['enabled']) {
+                $container->removeDefinition(CdnCollector::class);
+                $container->removeDefinition(TraceableCdnFileStorage::class);
+            }
         } else {
             $httpClient = $container->getDefinition('storyblok.http_client');
 
@@ -85,7 +98,9 @@ final class StoryblokExtension extends Extension
                 ],
             ));
 
-            $container->setAlias(CdnFileStorageInterface::class, TraceableCdnFileStorage::class);
+            if ($config['cdn']['enabled'] && 'filesystem' === $config['cdn']['storage']['type']) {
+                $container->setAlias(CdnFileStorageInterface::class, TraceableCdnFileStorage::class);
+            }
         }
 
         if (true === $config['auto_resolve_relations'] || true === $config['auto_resolve_links']) {
@@ -122,16 +137,67 @@ final class StoryblokExtension extends Extension
 
         $container->setDefinition(GlobalCachingListener::class, $storage);
 
-        $storage = $container->getDefinition(CdnController::class);
-        $storage->setArguments([
-            '$public' => $config['cdn']['cache']['public'],
-            '$maxAge' => $config['cdn']['cache']['max_age'],
-            '$smaxAge' => $config['cdn']['cache']['smax_age'],
-        ]);
-
-        $container->setDefinition(CdnController::class, $storage);
-
         $this->registerAttributes($container, $config);
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    private static function configureCdn(ContainerBuilder $container, array $config): void
+    {
+        if (false === $config['cdn']['enabled']) {
+            // Remove all CDN-related services
+            $container->removeDefinition(CdnController::class);
+            $container->removeDefinition(CdnUrlGenerator::class);
+            $container->removeDefinition(CdnFileFilesystemStorage::class);
+            $container->removeDefinition(AssetDownloader::class);
+            $container->removeDefinition(CdnExtension::class);
+            $container->removeDefinition(ImageExtension::class);
+            $container->removeDefinition(CdnCleanupCommand::class);
+            $container->removeDefinition(CdnCollector::class);
+            $container->removeDefinition(TraceableCdnFileStorage::class);
+
+            if ($container->hasAlias(CdnFileStorageInterface::class)) {
+                $container->removeAlias(CdnFileStorageInterface::class);
+            }
+
+            if ($container->hasAlias(CdnUrlGeneratorInterface::class)) {
+                $container->removeAlias(CdnUrlGeneratorInterface::class);
+            }
+
+            if ($container->hasAlias(FileDownloaderInterface::class)) {
+                $container->removeAlias(FileDownloaderInterface::class);
+            }
+
+            return;
+        }
+
+        // Configure CDN controller cache settings
+        $cdnController = $container->getDefinition(CdnController::class);
+        $cdnController->setArgument('$public', $config['cdn']['cache']['public']);
+        $cdnController->setArgument('$maxAge', $config['cdn']['cache']['max_age']);
+        $cdnController->setArgument('$smaxAge', $config['cdn']['cache']['smax_age']);
+
+        if ('filesystem' === $config['cdn']['storage']['type']) {
+            // Configure filesystem storage with the provided path
+            $filesystemStorage = $container->getDefinition(CdnFileFilesystemStorage::class);
+            $filesystemStorage->setArgument('$storagePath', $config['cdn']['storage']['path']);
+
+            // Configure cleanup command with the same path
+            $cleanupCommand = $container->getDefinition(CdnCleanupCommand::class);
+            $cleanupCommand->setArgument('$storagePath', $config['cdn']['storage']['path']);
+        } else {
+            // Custom storage: remove filesystem-specific services
+            // User must provide their own CdnFileStorageInterface implementation
+            $container->removeDefinition(CdnFileFilesystemStorage::class);
+            $container->removeDefinition(TraceableCdnFileStorage::class);
+            $container->removeDefinition(CdnCleanupCommand::class);
+            $container->removeDefinition(CdnCollector::class);
+
+            if ($container->hasAlias(CdnFileStorageInterface::class)) {
+                $container->removeAlias(CdnFileStorageInterface::class);
+            }
+        }
     }
 
     private static function configureAssetsApi(ContainerBuilder $container): void

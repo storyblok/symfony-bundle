@@ -221,7 +221,7 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(CdnFileFilesystemStorage::class)
             ->args([
-                '$storagePath' => env('resolve:CDN_FILE_STORAGE_PATH'),
+                '$storagePath' => abstract_arg('CDN storage path'),
             ])
             ->alias(CdnFileStorageInterface::class, CdnFileFilesystemStorage::class)
 
@@ -236,7 +236,7 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(CdnCleanupCommand::class)
             ->args([
-                '$storagePath' => env('resolve:CDN_FILE_STORAGE_PATH'),
+                '$storagePath' => abstract_arg('CDN storage path'),
             ])
             ->tag('console.command')
     ;

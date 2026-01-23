@@ -61,6 +61,11 @@ final class ConfigurationTest extends TestCase
             ],
             [
                 'cdn' => [
+                    'enabled' => true,
+                    'storage' => [
+                        'type' => 'filesystem',
+                        'path' => '/custom/cdn/path',
+                    ],
                     'cache' => [
                         'public' => $cdnPublic,
                         'max_age' => $cdnMaxAge,
@@ -86,6 +91,11 @@ final class ConfigurationTest extends TestCase
                 ],
             ],
             'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '/custom/cdn/path',
+                ],
                 'cache' => [
                     'public' => $cdnPublic,
                     'max_age' => $cdnMaxAge,
@@ -123,6 +133,286 @@ final class ConfigurationTest extends TestCase
                 ],
             ],
             'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function cdnCanBeExplicitlyDisabled(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['cdn' => ['enabled' => false]],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => false,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function cdnCacheCanBeCustomized(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['cdn' => ['cache' => ['max_age' => 3600]]],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => null,
+                    'max_age' => 3600,
+                    'smax_age' => null,
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function cdnStorageTypeCanBeCustom(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['cdn' => ['storage' => ['type' => 'custom']]],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'custom',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function cdnStoragePathCannotBeSetWithCustomType(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        self::assertConfigurationIsInvalid(
+            [
+                ['base_uri' => $url],
+                ['token' => $token],
+                ['cdn' => ['storage' => ['type' => 'custom', 'path' => '/custom/path']]],
+            ],
+            'The "path" option should not be set when using "custom" storage type.',
+        );
+    }
+
+    #[Test]
+    public function cdnNullMeansEnabledWithDefaults(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['cdn' => null],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function cdnTrueMeansEnabledWithDefaults(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['cdn' => true],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function cdnFalseMeansDisabled(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['cdn' => false],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => false,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
                 'cache' => [
                     'public' => null,
                     'max_age' => null,
