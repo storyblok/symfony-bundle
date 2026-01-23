@@ -14,46 +14,46 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Cdn\Storage;
 
-use Storyblok\Bundle\Cdn\Domain\CdnFile;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
- * A decorator for CdnFileStorageInterface that traces storage operations
+ * A decorator for CdnStorageInterface that traces storage operations
  * for debugging and profiling purposes.
  *
  * @author Silas Joisten <silasjoisten@proton.me>
  */
-final class TraceableCdnFileStorage implements CdnFileStorageInterface, ResetInterface
+final class TraceableCdnFileStorage implements CdnStorageInterface, ResetInterface
 {
     /**
      * @var list<array{
      *     id: string,
      *     filename: string,
      *     operation: string,
-     *     hit: bool,
+     *     cached: bool,
      *     originalUrl: null|string,
      * }>
      */
     private array $traces = [];
 
     public function __construct(
-        private readonly CdnFileStorageInterface $decorated,
+        private readonly CdnStorageInterface $decorated,
     ) {
     }
 
-    public function has(CdnFileId $id, string $filename): bool
+    public function hasMetadata(CdnFileId $id, string $filename): bool
     {
-        $result = $this->decorated->has($id, $filename);
+        $result = $this->decorated->hasMetadata($id, $filename);
 
-        // Only track hits here - misses will be tracked via set()
+        // Track cache hits (metadata exists = asset was previously processed)
         if ($result) {
             $this->traces[] = [
                 'id' => $id->value,
                 'filename' => $filename,
-                'operation' => 'has',
-                'hit' => true,
+                'operation' => 'hasMetadata',
+                'cached' => true,
                 'originalUrl' => null,
             ];
         }
@@ -61,39 +61,41 @@ final class TraceableCdnFileStorage implements CdnFileStorageInterface, ResetInt
         return $result;
     }
 
-    public function get(CdnFileId $id, string $filename): CdnFile
+    public function hasFile(CdnFileId $id, string $filename): bool
     {
-        $cdnFile = $this->decorated->get($id, $filename);
-
-        // A "hit" means the file content was already cached (not just metadata)
-        $hit = null !== $cdnFile->file;
-
-        $this->traces[] = [
-            'id' => $id->value,
-            'filename' => $filename,
-            'operation' => 'get',
-            'hit' => $hit,
-            'originalUrl' => $cdnFile->metadata->originalUrl,
-        ];
-
-        return $cdnFile;
+        return $this->decorated->hasFile($id, $filename);
     }
 
-    public function set(CdnFileId $id, string $filename, CdnFileMetadata $metadata, ?string $content = null): void
+    public function getMetadata(CdnFileId $id, string $filename): CdnFileMetadata
     {
-        $this->decorated->set($id, $filename, $metadata, $content);
+        return $this->decorated->getMetadata($id, $filename);
+    }
 
-        // Track set() with null content as a "miss" - this is a new CDN URL being prepared
-        // The actual file will be downloaded lazily when the browser requests it
-        if (null === $content) {
+    public function getFile(CdnFileId $id, string $filename): File
+    {
+        return $this->decorated->getFile($id, $filename);
+    }
+
+    public function setMetadata(CdnFileId $id, string $filename, CdnFileMetadata $metadata): void
+    {
+        $this->decorated->setMetadata($id, $filename, $metadata);
+
+        // Track pending assets (new metadata = new asset being prepared for lazy download)
+        // Only track when contentType is null (initial creation, not enrichment after download)
+        if (null === $metadata->contentType) {
             $this->traces[] = [
                 'id' => $id->value,
                 'filename' => $filename,
-                'operation' => 'set',
-                'hit' => false,
+                'operation' => 'setMetadata',
+                'cached' => false,
                 'originalUrl' => $metadata->originalUrl,
             ];
         }
+    }
+
+    public function setFile(CdnFileId $id, string $filename, string $content): void
+    {
+        $this->decorated->setFile($id, $filename, $content);
     }
 
     public function remove(CdnFileId $id, string $filename): void
@@ -106,7 +108,7 @@ final class TraceableCdnFileStorage implements CdnFileStorageInterface, ResetInt
      *     id: string,
      *     filename: string,
      *     operation: string,
-     *     hit: bool,
+     *     cached: bool,
      *     originalUrl: null|string,
      * }>
      */

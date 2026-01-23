@@ -17,7 +17,7 @@ namespace Storyblok\Bundle\Cdn;
 use Storyblok\Api\Domain\Type\Asset;
 use Storyblok\Bundle\Cdn\Domain\AssetInfo;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Routing\Route;
 use Storyblok\ImageService\Image;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -29,7 +29,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final readonly class CdnUrlGenerator implements CdnUrlGeneratorInterface
 {
     public function __construct(
-        private CdnFileStorageInterface $storage,
+        private CdnStorageInterface $storage,
         private UrlGeneratorInterface $urlGenerator,
     ) {
     }
@@ -38,8 +38,8 @@ final readonly class CdnUrlGenerator implements CdnUrlGeneratorInterface
     {
         $assetInfo = new AssetInfo($asset);
 
-        if (!$this->storage->has($assetInfo->id, $assetInfo->fullFilename)) {
-            $this->storage->set($assetInfo->id, $assetInfo->fullFilename, new CdnFileMetadata(originalUrl: $assetInfo->url));
+        if (!$this->storage->hasMetadata($assetInfo->id, $assetInfo->fullFilename)) {
+            $this->storage->setMetadata($assetInfo->id, $assetInfo->fullFilename, new CdnFileMetadata(originalUrl: $assetInfo->url));
         }
 
         return $this->urlGenerator->generate(Route::CDN, [

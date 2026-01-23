@@ -29,8 +29,8 @@ use Storyblok\Bundle\Cdn\CdnUrlGenerator;
 use Storyblok\Bundle\Cdn\CdnUrlGeneratorInterface;
 use Storyblok\Bundle\Cdn\Download\AssetDownloader;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
-use Storyblok\Bundle\Cdn\Storage\CdnFileFilesystemStorage;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnFilesystemStorage;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
 use Storyblok\Bundle\Command\CdnCleanupCommand;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
@@ -99,7 +99,7 @@ final class StoryblokExtension extends Extension
             ));
 
             if ($config['cdn']['enabled'] && 'filesystem' === $config['cdn']['storage']['type']) {
-                $container->setAlias(CdnFileStorageInterface::class, TraceableCdnFileStorage::class);
+                $container->setAlias(CdnStorageInterface::class, TraceableCdnFileStorage::class);
             }
         }
 
@@ -149,7 +149,7 @@ final class StoryblokExtension extends Extension
             // Remove all CDN-related services
             $container->removeDefinition(CdnController::class);
             $container->removeDefinition(CdnUrlGenerator::class);
-            $container->removeDefinition(CdnFileFilesystemStorage::class);
+            $container->removeDefinition(CdnFilesystemStorage::class);
             $container->removeDefinition(AssetDownloader::class);
             $container->removeDefinition(CdnExtension::class);
             $container->removeDefinition(ImageExtension::class);
@@ -157,8 +157,8 @@ final class StoryblokExtension extends Extension
             $container->removeDefinition(CdnCollector::class);
             $container->removeDefinition(TraceableCdnFileStorage::class);
 
-            if ($container->hasAlias(CdnFileStorageInterface::class)) {
-                $container->removeAlias(CdnFileStorageInterface::class);
+            if ($container->hasAlias(CdnStorageInterface::class)) {
+                $container->removeAlias(CdnStorageInterface::class);
             }
 
             if ($container->hasAlias(CdnUrlGeneratorInterface::class)) {
@@ -180,7 +180,7 @@ final class StoryblokExtension extends Extension
 
         if ('filesystem' === $config['cdn']['storage']['type']) {
             // Configure filesystem storage with the provided path
-            $filesystemStorage = $container->getDefinition(CdnFileFilesystemStorage::class);
+            $filesystemStorage = $container->getDefinition(CdnFilesystemStorage::class);
             $filesystemStorage->setArgument('$storagePath', $config['cdn']['storage']['path']);
 
             // Configure cleanup command with the same path
@@ -189,13 +189,13 @@ final class StoryblokExtension extends Extension
         } else {
             // Custom storage: remove filesystem-specific services
             // User must provide their own CdnFileStorageInterface implementation
-            $container->removeDefinition(CdnFileFilesystemStorage::class);
+            $container->removeDefinition(CdnFilesystemStorage::class);
             $container->removeDefinition(TraceableCdnFileStorage::class);
             $container->removeDefinition(CdnCleanupCommand::class);
             $container->removeDefinition(CdnCollector::class);
 
-            if ($container->hasAlias(CdnFileStorageInterface::class)) {
-                $container->removeAlias(CdnFileStorageInterface::class);
+            if ($container->hasAlias(CdnStorageInterface::class)) {
+                $container->removeAlias(CdnStorageInterface::class);
             }
         }
     }

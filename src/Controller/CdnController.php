@@ -17,7 +17,8 @@ namespace Storyblok\Bundle\Controller;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnFileNotFoundException;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\MetadataNotFoundException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -30,7 +31,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final readonly class CdnController
 {
     public function __construct(
-        private CdnFileStorageInterface $storage,
+        private CdnStorageInterface $storage,
         private FileDownloaderInterface $downloader,
         private ?int $maxAge,
         private ?int $smaxAge,
@@ -44,40 +45,41 @@ final readonly class CdnController
         $fullFilename = \sprintf('%s.%s', $filename, $extension);
 
         try {
-            $cdnFile = $this->storage->get($fileId, $fullFilename);
-        } catch (CdnFileNotFoundException) {
+            $metadata = $this->storage->getMetadata($fileId, $fullFilename);
+        } catch (MetadataNotFoundException) {
             throw new NotFoundHttpException('Asset not found');
         }
 
-        if (null === $cdnFile->file) {
-            $downloaded = $this->downloader->download($cdnFile->metadata->originalUrl);
+        if (!$this->storage->hasFile($fileId, $fullFilename)) {
+            $downloaded = $this->downloader->download($metadata->originalUrl);
 
             if (null === $downloaded->metadata->contentType || null === $downloaded->metadata->expiresAt) {
                 throw new \RuntimeException('Downloaded file metadata is incomplete');
             }
 
-            $enrichedMetadata = $cdnFile->metadata->withDownloadInfo(
+            $metadata = $metadata->withDownloadInfo(
                 $downloaded->metadata->contentType,
                 $downloaded->metadata->etag,
                 $downloaded->metadata->expiresAt,
             );
-            $this->storage->set($fileId, $fullFilename, $enrichedMetadata, $downloaded->content);
-
-            $cdnFile = $this->storage->get($fileId, $fullFilename);
+            $this->storage->setMetadata($fileId, $fullFilename, $metadata);
+            $this->storage->setFile($fileId, $fullFilename, $downloaded->content);
         }
 
-        if (null === $cdnFile->file) {
+        try {
+            $file = $this->storage->getFile($fileId, $fullFilename);
+        } catch (CdnFileNotFoundException) {
             throw new NotFoundHttpException('Asset not found');
         }
 
-        $response = new BinaryFileResponse($cdnFile->file, contentDisposition: ResponseHeaderBag::DISPOSITION_INLINE);
+        $response = new BinaryFileResponse($file, contentDisposition: ResponseHeaderBag::DISPOSITION_INLINE);
 
-        if (null !== $cdnFile->metadata->contentType) {
-            $response->headers->set('Content-Type', $cdnFile->metadata->contentType);
+        if (null !== $metadata->contentType) {
+            $response->headers->set('Content-Type', $metadata->contentType);
         }
 
-        if (null !== $cdnFile->metadata->etag) {
-            $response->setEtag($cdnFile->metadata->etag);
+        if (null !== $metadata->etag) {
+            $response->setEtag($metadata->etag);
         }
 
         if (null !== $this->maxAge) {

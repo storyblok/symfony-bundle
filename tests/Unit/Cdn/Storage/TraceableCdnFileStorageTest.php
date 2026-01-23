@@ -16,10 +16,9 @@ namespace Storyblok\Bundle\Tests\Unit\Cdn\Storage;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Storyblok\Bundle\Cdn\Domain\CdnFile;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Symfony\Component\HttpFoundation\File\File;
@@ -37,166 +36,187 @@ final class TraceableCdnFileStorageTest extends TestCase
     #[Test]
     public function defaults(): void
     {
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
         $storage = new TraceableCdnFileStorage($decorated);
 
         self::assertEmpty($storage->getTraces());
     }
 
     #[Test]
-    public function hasTracksHitWhenTrue(): void
+    public function hasMetadataTracksCachedWhenTrue(): void
     {
         $id = self::generateFileId();
         $filename = 'image.jpg';
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->expects(self::once())
-            ->method('has')
+            ->method('hasMetadata')
             ->with($id, $filename)
             ->willReturn(true);
 
         $storage = new TraceableCdnFileStorage($decorated);
 
-        self::assertTrue($storage->has($id, $filename));
+        self::assertTrue($storage->hasMetadata($id, $filename));
         self::assertCount(1, $storage->getTraces());
 
         $trace = $storage->getTraces()[0];
-        self::assertTrue($trace['hit']);
-        self::assertSame('has', $trace['operation']);
+        self::assertTrue($trace['cached']);
+        self::assertSame('hasMetadata', $trace['operation']);
     }
 
     #[Test]
-    public function hasDoesNotTrackWhenFalse(): void
+    public function hasMetadataDoesNotTrackWhenFalse(): void
     {
         $id = self::generateFileId();
         $filename = 'image.jpg';
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->expects(self::once())
-            ->method('has')
+            ->method('hasMetadata')
             ->with($id, $filename)
             ->willReturn(false);
 
         $storage = new TraceableCdnFileStorage($decorated);
 
-        self::assertFalse($storage->has($id, $filename));
+        self::assertFalse($storage->hasMetadata($id, $filename));
         self::assertEmpty($storage->getTraces());
     }
 
     #[Test]
-    public function getTracksHitWhenFileExists(): void
+    public function hasFileIsDelegatedToDecorated(): void
+    {
+        $id = self::generateFileId();
+        $filename = 'image.jpg';
+
+        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated->expects(self::once())
+            ->method('hasFile')
+            ->with($id, $filename)
+            ->willReturn(true);
+
+        $storage = new TraceableCdnFileStorage($decorated);
+
+        self::assertTrue($storage->hasFile($id, $filename));
+        self::assertEmpty($storage->getTraces());
+    }
+
+    #[Test]
+    public function getMetadataIsDelegatedToDecorated(): void
     {
         $id = self::generateFileId();
         $filename = 'image.jpg';
         $originalUrl = 'https://a.storyblok.com/f/12345/image.jpg';
+        $metadata = new CdnFileMetadata($originalUrl);
+
+        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated->expects(self::once())
+            ->method('getMetadata')
+            ->with($id, $filename)
+            ->willReturn($metadata);
+
+        $storage = new TraceableCdnFileStorage($decorated);
+
+        $result = $storage->getMetadata($id, $filename);
+
+        self::assertSame($metadata, $result);
+        self::assertEmpty($storage->getTraces());
+    }
+
+    #[Test]
+    public function getFileIsDelegatedToDecorated(): void
+    {
+        $id = self::generateFileId();
+        $filename = 'image.jpg';
 
         $tempFile = tempnam(sys_get_temp_dir(), 'cdn_test_');
         file_put_contents($tempFile, 'content');
 
         try {
-            $metadata = new CdnFileMetadata($originalUrl);
-            $cdnFile = new CdnFile($metadata, new File($tempFile));
+            $file = new File($tempFile);
 
-            $decorated = $this->createMock(CdnFileStorageInterface::class);
+            $decorated = $this->createMock(CdnStorageInterface::class);
             $decorated->expects(self::once())
-                ->method('get')
+                ->method('getFile')
                 ->with($id, $filename)
-                ->willReturn($cdnFile);
+                ->willReturn($file);
 
             $storage = new TraceableCdnFileStorage($decorated);
 
-            $result = $storage->get($id, $filename);
+            $result = $storage->getFile($id, $filename);
 
-            self::assertSame($cdnFile, $result);
-            self::assertCount(1, $storage->getTraces());
-
-            $trace = $storage->getTraces()[0];
-            self::assertSame($id->value, $trace['id']);
-            self::assertSame($filename, $trace['filename']);
-            self::assertSame('get', $trace['operation']);
-            self::assertTrue($trace['hit']);
-            self::assertSame($originalUrl, $trace['originalUrl']);
+            self::assertSame($file, $result);
+            self::assertEmpty($storage->getTraces());
         } finally {
             unlink($tempFile);
         }
     }
 
     #[Test]
-    public function getTracksMissWhenFileDoesNotExist(): void
+    public function setMetadataWithContentTypeDoesNotTrack(): void
     {
         $id = self::generateFileId();
         $filename = 'image.jpg';
-        $originalUrl = 'https://a.storyblok.com/f/12345/image.jpg';
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+            contentType: 'image/jpeg',
+        );
 
-        $metadata = new CdnFileMetadata($originalUrl);
-        $cdnFile = new CdnFile($metadata, null);
-
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->expects(self::once())
-            ->method('get')
-            ->with($id, $filename)
-            ->willReturn($cdnFile);
+            ->method('setMetadata')
+            ->with($id, $filename, $metadata);
 
         $storage = new TraceableCdnFileStorage($decorated);
 
-        $result = $storage->get($id, $filename);
-
-        self::assertSame($cdnFile, $result);
-        self::assertCount(1, $storage->getTraces());
-
-        $trace = $storage->getTraces()[0];
-        self::assertSame($id->value, $trace['id']);
-        self::assertSame($filename, $trace['filename']);
-        self::assertSame('get', $trace['operation']);
-        self::assertFalse($trace['hit']);
-        self::assertSame($originalUrl, $trace['originalUrl']);
-    }
-
-    #[Test]
-    public function setWithContentDoesNotTrack(): void
-    {
-        $id = self::generateFileId();
-        $filename = 'image.jpg';
-        $metadata = new CdnFileMetadata('https://a.storyblok.com/f/12345/image.jpg');
-        $content = 'file content';
-
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
-        $decorated->expects(self::once())
-            ->method('set')
-            ->with($id, $filename, $metadata, $content);
-
-        $storage = new TraceableCdnFileStorage($decorated);
-
-        $storage->set($id, $filename, $metadata, $content);
+        $storage->setMetadata($id, $filename, $metadata);
 
         self::assertEmpty($storage->getTraces());
     }
 
     #[Test]
-    public function setWithoutContentTracksMiss(): void
+    public function setMetadataWithoutContentTypeTracksPending(): void
     {
         $id = self::generateFileId();
         $filename = 'image.jpg';
         $originalUrl = 'https://a.storyblok.com/f/12345/image.jpg';
         $metadata = new CdnFileMetadata($originalUrl);
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->expects(self::once())
-            ->method('set')
-            ->with($id, $filename, $metadata, null);
+            ->method('setMetadata')
+            ->with($id, $filename, $metadata);
 
         $storage = new TraceableCdnFileStorage($decorated);
 
-        $storage->set($id, $filename, $metadata, null);
+        $storage->setMetadata($id, $filename, $metadata);
 
         self::assertCount(1, $storage->getTraces());
 
         $trace = $storage->getTraces()[0];
         self::assertSame($id->value, $trace['id']);
         self::assertSame($filename, $trace['filename']);
-        self::assertSame('set', $trace['operation']);
-        self::assertFalse($trace['hit']);
+        self::assertSame('setMetadata', $trace['operation']);
+        self::assertFalse($trace['cached']);
         self::assertSame($originalUrl, $trace['originalUrl']);
+    }
+
+    #[Test]
+    public function setFileIsDelegatedToDecorated(): void
+    {
+        $id = self::generateFileId();
+        $filename = 'image.jpg';
+        $content = 'file content';
+
+        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated->expects(self::once())
+            ->method('setFile')
+            ->with($id, $filename, $content);
+
+        $storage = new TraceableCdnFileStorage($decorated);
+
+        $storage->setFile($id, $filename, $content);
+
+        self::assertEmpty($storage->getTraces());
     }
 
     #[Test]
@@ -205,7 +225,7 @@ final class TraceableCdnFileStorageTest extends TestCase
         $id = self::generateFileId();
         $filename = 'image.jpg';
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->expects(self::once())
             ->method('remove')
             ->with($id, $filename);
@@ -224,11 +244,11 @@ final class TraceableCdnFileStorageTest extends TestCase
         $filename = 'image.jpg';
         $metadata = new CdnFileMetadata('https://a.storyblok.com/f/12345/image.jpg');
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
 
         $storage = new TraceableCdnFileStorage($decorated);
 
-        $storage->set($id, $filename, $metadata, null);
+        $storage->setMetadata($id, $filename, $metadata);
 
         self::assertCount(1, $storage->getTraces());
 
@@ -245,17 +265,17 @@ final class TraceableCdnFileStorageTest extends TestCase
         $filename = 'image.jpg';
         $metadata = new CdnFileMetadata('https://a.storyblok.com/f/12345/image.jpg');
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
-        $decorated->method('has')->willReturn(true);
+        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated->method('hasMetadata')->willReturn(true);
 
         $storage = new TraceableCdnFileStorage($decorated);
 
-        // Two hits via has()
-        $storage->has($id1, $filename);
-        $storage->has($id2, $filename);
+        // Two cache hits via hasMetadata()
+        $storage->hasMetadata($id1, $filename);
+        $storage->hasMetadata($id2, $filename);
 
-        // One miss via set()
-        $storage->set(self::generateFileId(), $filename, $metadata, null);
+        // One pending via setMetadata()
+        $storage->setMetadata(self::generateFileId(), $filename, $metadata);
 
         self::assertCount(3, $storage->getTraces());
     }

@@ -18,7 +18,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
 use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
@@ -33,7 +33,7 @@ final class CdnCollectorTest extends TestCase
     #[Test]
     public function defaults(): void
     {
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
         $storage = new TraceableCdnFileStorage($decorated);
         $collector = new CdnCollector($storage);
 
@@ -55,14 +55,14 @@ final class CdnCollectorTest extends TestCase
         $id = self::generateFileId();
         $filename = 'image.jpg';
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
-        $decorated->method('has')->willReturn(true);
+        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated->method('hasMetadata')->willReturn(true);
 
         $storage = new TraceableCdnFileStorage($decorated);
         $collector = new CdnCollector($storage);
 
         // Simulate cdn_url() call where file is already cached
-        $storage->has($id, $filename);
+        $storage->hasMetadata($id, $filename);
 
         $collector->lateCollect();
 
@@ -79,15 +79,15 @@ final class CdnCollectorTest extends TestCase
         $filename = 'image.jpg';
         $metadata = new CdnFileMetadata('https://a.storyblok.com/f/12345/image.jpg');
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
-        $decorated->method('has')->willReturn(false);
+        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated->method('hasMetadata')->willReturn(false);
 
         $storage = new TraceableCdnFileStorage($decorated);
         $collector = new CdnCollector($storage);
 
         // Simulate cdn_url() call where file doesn't exist yet
-        $storage->has($id, $filename);
-        $storage->set($id, $filename, $metadata, null);
+        $storage->hasMetadata($id, $filename);
+        $storage->setMetadata($id, $filename, $metadata);
 
         $collector->lateCollect();
 
@@ -102,20 +102,20 @@ final class CdnCollectorTest extends TestCase
     {
         $metadata = new CdnFileMetadata('https://a.storyblok.com/f/12345/image.jpg');
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
-        $decorated->method('has')
+        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated->method('hasMetadata')
             ->willReturnOnConsecutiveCalls(true, false, true, false);
 
         $storage = new TraceableCdnFileStorage($decorated);
         $collector = new CdnCollector($storage);
 
         // 2 cached (has returns true), 2 pending (set with null content)
-        $storage->has(self::generateFileId(), 'image1.jpg');
-        $storage->has(self::generateFileId(), 'image2.jpg');
-        $storage->set(self::generateFileId(), 'image2.jpg', $metadata, null);
-        $storage->has(self::generateFileId(), 'image3.jpg');
-        $storage->has(self::generateFileId(), 'image4.jpg');
-        $storage->set(self::generateFileId(), 'image4.jpg', $metadata, null);
+        $storage->hasMetadata(self::generateFileId(), 'image1.jpg');
+        $storage->hasMetadata(self::generateFileId(), 'image2.jpg');
+        $storage->setMetadata(self::generateFileId(), 'image2.jpg', $metadata);
+        $storage->hasMetadata(self::generateFileId(), 'image3.jpg');
+        $storage->hasMetadata(self::generateFileId(), 'image4.jpg');
+        $storage->setMetadata(self::generateFileId(), 'image4.jpg', $metadata);
 
         $collector->lateCollect();
 
@@ -132,12 +132,12 @@ final class CdnCollectorTest extends TestCase
         $filename = 'image.jpg';
         $metadata = new CdnFileMetadata('https://a.storyblok.com/f/12345/image.jpg');
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
 
         $storage = new TraceableCdnFileStorage($decorated);
         $collector = new CdnCollector($storage);
 
-        $storage->set($id, $filename, $metadata, null);
+        $storage->setMetadata($id, $filename, $metadata);
 
         $collector->lateCollect();
 
@@ -159,12 +159,12 @@ final class CdnCollectorTest extends TestCase
         $filename = 'image.jpg';
         $metadata = new CdnFileMetadata('https://a.storyblok.com/f/12345/image.jpg');
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
+        $decorated = $this->createMock(CdnStorageInterface::class);
 
         $storage = new TraceableCdnFileStorage($decorated);
         $collector = new CdnCollector($storage);
 
-        $storage->set($id, $filename, $metadata, null);
+        $storage->setMetadata($id, $filename, $metadata);
 
         self::assertCount(1, $storage->getTraces());
 
@@ -179,13 +179,13 @@ final class CdnCollectorTest extends TestCase
         $id = self::generateFileId();
         $filename = 'image.jpg';
 
-        $decorated = $this->createMock(CdnFileStorageInterface::class);
-        $decorated->method('has')->willReturn(true);
+        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated->method('hasMetadata')->willReturn(true);
 
         $storage = new TraceableCdnFileStorage($decorated);
         $collector = new CdnCollector($storage);
 
-        $storage->has($id, $filename);
+        $storage->hasMetadata($id, $filename);
 
         $collector->lateCollect();
 

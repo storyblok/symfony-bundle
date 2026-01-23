@@ -25,8 +25,8 @@ use Storyblok\Bundle\Cdn\CdnUrlGenerator;
 use Storyblok\Bundle\Cdn\CdnUrlGeneratorInterface;
 use Storyblok\Bundle\Cdn\Download\AssetDownloader;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
-use Storyblok\Bundle\Cdn\Storage\CdnFileFilesystemStorage;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnFilesystemStorage;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
 use Storyblok\Bundle\Command\CdnCleanupCommand;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
@@ -291,10 +291,10 @@ final class StoryblokExtensionTest extends TestCase
         // CDN is enabled by default
         self::assertTrue($builder->hasDefinition(CdnController::class));
         self::assertTrue($builder->hasDefinition(CdnUrlGenerator::class));
-        self::assertTrue($builder->hasDefinition(CdnFileFilesystemStorage::class));
+        self::assertTrue($builder->hasDefinition(CdnFilesystemStorage::class));
         self::assertTrue($builder->hasDefinition(AssetDownloader::class));
         self::assertTrue($builder->hasAlias(CdnUrlGeneratorInterface::class));
-        self::assertTrue($builder->hasAlias(CdnFileStorageInterface::class));
+        self::assertTrue($builder->hasAlias(CdnStorageInterface::class));
         self::assertTrue($builder->hasAlias(FileDownloaderInterface::class));
     }
 
@@ -387,7 +387,7 @@ final class StoryblokExtensionTest extends TestCase
 
         self::assertFalse($builder->hasDefinition(CdnController::class));
         self::assertFalse($builder->hasDefinition(CdnUrlGenerator::class));
-        self::assertFalse($builder->hasDefinition(CdnFileFilesystemStorage::class));
+        self::assertFalse($builder->hasDefinition(CdnFilesystemStorage::class));
         self::assertFalse($builder->hasDefinition(AssetDownloader::class));
         self::assertFalse($builder->hasDefinition(CdnExtension::class));
         self::assertFalse($builder->hasDefinition(ImageExtension::class));
@@ -395,7 +395,7 @@ final class StoryblokExtensionTest extends TestCase
         self::assertFalse($builder->hasDefinition(CdnCollector::class));
         self::assertFalse($builder->hasDefinition(TraceableCdnFileStorage::class));
         self::assertFalse($builder->hasAlias(CdnUrlGeneratorInterface::class));
-        self::assertFalse($builder->hasAlias(CdnFileStorageInterface::class));
+        self::assertFalse($builder->hasAlias(CdnStorageInterface::class));
         self::assertFalse($builder->hasAlias(FileDownloaderInterface::class));
     }
 
@@ -427,11 +427,11 @@ final class StoryblokExtensionTest extends TestCase
         self::assertTrue($builder->hasDefinition(ImageExtension::class));
 
         // Filesystem-specific services should be removed
-        self::assertFalse($builder->hasDefinition(CdnFileFilesystemStorage::class));
+        self::assertFalse($builder->hasDefinition(CdnFilesystemStorage::class));
         self::assertFalse($builder->hasDefinition(TraceableCdnFileStorage::class));
         self::assertFalse($builder->hasDefinition(CdnCleanupCommand::class));
         self::assertFalse($builder->hasDefinition(CdnCollector::class));
-        self::assertFalse($builder->hasAlias(CdnFileStorageInterface::class));
+        self::assertFalse($builder->hasAlias(CdnStorageInterface::class));
     }
 
     #[Test]
@@ -456,9 +456,9 @@ final class StoryblokExtensionTest extends TestCase
             $builder,
         );
 
-        self::assertTrue($builder->hasDefinition(CdnFileFilesystemStorage::class));
+        self::assertTrue($builder->hasDefinition(CdnFilesystemStorage::class));
 
-        $storageDefinition = $builder->getDefinition(CdnFileFilesystemStorage::class);
+        $storageDefinition = $builder->getDefinition(CdnFilesystemStorage::class);
         self::assertSame($storagePath, $storageDefinition->getArgument('$storagePath'));
 
         $cleanupDefinition = $builder->getDefinition(CdnCleanupCommand::class);
@@ -484,7 +484,7 @@ final class StoryblokExtensionTest extends TestCase
             $builder,
         );
 
-        $storageDefinition = $builder->getDefinition(CdnFileFilesystemStorage::class);
+        $storageDefinition = $builder->getDefinition(CdnFilesystemStorage::class);
         self::assertSame('%kernel.project_dir%/var/cdn', $storageDefinition->getArgument('$storagePath'));
     }
 
@@ -509,10 +509,10 @@ final class StoryblokExtensionTest extends TestCase
 
         self::assertTrue($builder->hasDefinition(TraceableCdnFileStorage::class));
         self::assertTrue($builder->hasDefinition(CdnCollector::class));
-        self::assertTrue($builder->hasAlias(CdnFileStorageInterface::class));
+        self::assertTrue($builder->hasAlias(CdnStorageInterface::class));
 
         // In debug mode, the alias should point to TraceableCdnFileStorage
-        $alias = $builder->getAlias(CdnFileStorageInterface::class);
+        $alias = $builder->getAlias(CdnStorageInterface::class);
         self::assertSame(TraceableCdnFileStorage::class, (string) $alias);
     }
 
@@ -537,7 +537,7 @@ final class StoryblokExtensionTest extends TestCase
 
         // CDN services should still exist
         self::assertTrue($builder->hasDefinition(CdnController::class));
-        self::assertTrue($builder->hasDefinition(CdnFileFilesystemStorage::class));
+        self::assertTrue($builder->hasDefinition(CdnFilesystemStorage::class));
 
         // Profiler-specific services should be removed
         self::assertFalse($builder->hasDefinition(CdnCollector::class));

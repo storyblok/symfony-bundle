@@ -44,10 +44,6 @@ final class CdnCollector extends AbstractDataCollector implements LateDataCollec
         $this->data['pending_count'] ??= 0;
 
         foreach ($traces as $trace) {
-            // Rename 'hit' to 'cached' for the template
-            $trace['cached'] = $trace['hit'];
-            unset($trace['hit']);
-
             if ($trace['cached']) {
                 ++$this->data['cached_count'];
             } else {

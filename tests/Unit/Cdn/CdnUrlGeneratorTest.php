@@ -20,7 +20,7 @@ use Storyblok\Api\Domain\Type\Asset;
 use Storyblok\Bundle\Cdn\CdnUrlGenerator;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Routing\Route;
 use Storyblok\ImageService\Image;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -39,12 +39,12 @@ final class CdnUrlGeneratorTest extends TestCase
             'filename' => 'https://a.storyblok.com/f/12345/1920x1080/abc123/image.jpg',
         ]);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::once())
-            ->method('has')
+            ->method('hasMetadata')
             ->willReturn(false);
         $storage->expects(self::once())
-            ->method('set')
+            ->method('setMetadata')
             ->with(
                 self::isInstanceOf(CdnFileId::class),
                 '1920x1080-image.jpg',
@@ -75,12 +75,12 @@ final class CdnUrlGeneratorTest extends TestCase
     {
         $image = new Image('https://a.storyblok.com/f/12345/1920x1080/abc123/photo.webp');
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::once())
-            ->method('has')
+            ->method('hasMetadata')
             ->willReturn(false);
         $storage->expects(self::once())
-            ->method('set')
+            ->method('setMetadata')
             ->with(
                 self::isInstanceOf(CdnFileId::class),
                 '1920x1080-photo.webp',
@@ -105,12 +105,12 @@ final class CdnUrlGeneratorTest extends TestCase
         $image = (new Image('https://a.storyblok.com/f/12345/1920x1080/abc123/photo.jpg'))
             ->resize(640, 480);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::once())
-            ->method('has')
+            ->method('hasMetadata')
             ->willReturn(false);
         $storage->expects(self::once())
-            ->method('set')
+            ->method('setMetadata')
             ->with(
                 self::isInstanceOf(CdnFileId::class),
                 '640x480-photo.jpg',
@@ -143,12 +143,12 @@ final class CdnUrlGeneratorTest extends TestCase
             'filename' => 'https://a.storyblok.com/f/12345/1920x1080/abc123/image.jpg',
         ]);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::once())
-            ->method('has')
+            ->method('hasMetadata')
             ->willReturn(true);
         $storage->expects(self::never())
-            ->method('set');
+            ->method('setMetadata');
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator->expects(self::once())
@@ -170,8 +170,8 @@ final class CdnUrlGeneratorTest extends TestCase
             'filename' => 'https://a.storyblok.com/f/12345/1920x1080/abc123/image.jpg',
         ]);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('has')->willReturn(true);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('hasMetadata')->willReturn(true);
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator->expects(self::once())
@@ -198,8 +198,8 @@ final class CdnUrlGeneratorTest extends TestCase
             'filename' => 'https://a.storyblok.com/f/12345/1920x1080/abc123/image.jpg',
         ]);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('has')->willReturn(true);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('hasMetadata')->willReturn(true);
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator->expects(self::once())
@@ -226,9 +226,9 @@ final class CdnUrlGeneratorTest extends TestCase
             'filename' => 'https://a.storyblok.com/f/12345/document.pdf',
         ]);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('has')->willReturn(false);
-        $storage->method('set');
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('hasMetadata')->willReturn(false);
+        $storage->method('setMetadata');
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator->expects(self::once())
@@ -258,12 +258,12 @@ final class CdnUrlGeneratorTest extends TestCase
             'filename' => 'https://a.storyblok.com/f/12345/1920x1080/abc123/image.jpg',
         ]);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::exactly(2))
-            ->method('has')
+            ->method('hasMetadata')
             ->willReturnOnConsecutiveCalls(false, true);
         $storage->expects(self::once())
-            ->method('set');
+            ->method('setMetadata');
 
         $urlGenerator = self::createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')

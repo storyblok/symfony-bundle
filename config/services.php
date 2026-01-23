@@ -24,8 +24,8 @@ use Storyblok\Bundle\Cdn\CdnUrlGeneratorInterface;
 use Storyblok\Bundle\Command\CdnCleanupCommand;
 use Storyblok\Bundle\Cdn\Download\AssetDownloader;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
-use Storyblok\Bundle\Cdn\Storage\CdnFileFilesystemStorage;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnFilesystemStorage;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
 use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
@@ -123,7 +123,7 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(TraceableCdnFileStorage::class)
             ->args([
-                '$decorated' => service(CdnFileFilesystemStorage::class),
+                '$decorated' => service(CdnFilesystemStorage::class),
             ])
 
         ->set(CdnCollector::class)
@@ -208,7 +208,7 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(CdnController::class)
             ->args([
-                '$storage' => service(CdnFileStorageInterface::class),
+                '$storage' => service(CdnStorageInterface::class),
                 '$downloader' => service(FileDownloaderInterface::class),
                 '$public' => abstract_arg('public cache directive'),
                 '$maxAge' => abstract_arg('max-age cache directive'),
@@ -219,11 +219,11 @@ return static function (ContainerConfigurator $container): void {
         ->set(AssetDownloader::class)
             ->alias(FileDownloaderInterface::class, AssetDownloader::class)
 
-        ->set(CdnFileFilesystemStorage::class)
+        ->set(CdnFilesystemStorage::class)
             ->args([
                 '$storagePath' => abstract_arg('CDN storage path'),
             ])
-            ->alias(CdnFileStorageInterface::class, CdnFileFilesystemStorage::class)
+            ->alias(CdnStorageInterface::class, CdnFilesystemStorage::class)
 
         ->set(CdnUrlGenerator::class)
             ->alias(CdnUrlGeneratorInterface::class, CdnUrlGenerator::class)

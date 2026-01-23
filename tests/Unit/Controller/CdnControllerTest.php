@@ -17,13 +17,12 @@ namespace Storyblok\Bundle\Tests\Unit\Controller;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Safe\DateTimeImmutable;
-use Storyblok\Bundle\Cdn\Domain\CdnFile;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
 use Storyblok\Bundle\Cdn\Domain\DownloadedFile;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
-use Storyblok\Bundle\Cdn\Storage\CdnFileNotFoundException;
-use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\MetadataNotFoundException;
 use Storyblok\Bundle\Controller\CdnController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -58,10 +57,10 @@ final class CdnControllerTest extends TestCase
     #[Test]
     public function throwsNotFoundWhenMetadataNotFound(): void
     {
-        $storage = self::createMock(CdnFileStorageInterface::class);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::once())
-            ->method('get')
-            ->willThrowException(new CdnFileNotFoundException('Not found'));
+            ->method('getMetadata')
+            ->willThrowException(new MetadataNotFoundException('Not found'));
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
@@ -86,12 +85,16 @@ final class CdnControllerTest extends TestCase
             expiresAt: new DateTimeImmutable('+1 day'),
         );
 
-        $cdnFile = new CdnFile($metadata, $file);
-
-        $storage = self::createMock(CdnFileStorageInterface::class);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::once())
-            ->method('get')
-            ->willReturn($cdnFile);
+            ->method('getMetadata')
+            ->willReturn($metadata);
+        $storage->expects(self::once())
+            ->method('hasFile')
+            ->willReturn(true);
+        $storage->expects(self::once())
+            ->method('getFile')
+            ->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
         $downloader->expects(self::never())->method('download');
@@ -113,15 +116,6 @@ final class CdnControllerTest extends TestCase
         $metadataWithoutFile = new CdnFileMetadata(
             originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
         );
-        $cdnFileWithoutFile = new CdnFile($metadataWithoutFile, null);
-
-        $metadataWithFile = new CdnFileMetadata(
-            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
-            contentType: 'image/jpeg',
-            etag: '"downloaded"',
-            expiresAt: new DateTimeImmutable('+1 day'),
-        );
-        $cdnFileWithFile = new CdnFile($metadataWithFile, $file);
 
         $downloadedMetadata = new CdnFileMetadata(
             originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
@@ -131,18 +125,30 @@ final class CdnControllerTest extends TestCase
         );
         $downloadedFile = new DownloadedFile('downloaded content', $downloadedMetadata);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->expects(self::exactly(2))
-            ->method('get')
-            ->willReturnOnConsecutiveCalls($cdnFileWithoutFile, $cdnFileWithFile);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::once())
-            ->method('set')
+            ->method('getMetadata')
+            ->willReturn($metadataWithoutFile);
+        $storage->expects(self::once())
+            ->method('hasFile')
+            ->willReturn(false);
+        $storage->expects(self::once())
+            ->method('setMetadata')
             ->with(
                 self::isInstanceOf(CdnFileId::class),
                 'image.jpg',
                 self::isInstanceOf(CdnFileMetadata::class),
+            );
+        $storage->expects(self::once())
+            ->method('setFile')
+            ->with(
+                self::isInstanceOf(CdnFileId::class),
+                'image.jpg',
                 'downloaded content',
             );
+        $storage->expects(self::once())
+            ->method('getFile')
+            ->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
         $downloader->expects(self::once())
@@ -164,7 +170,6 @@ final class CdnControllerTest extends TestCase
         $metadataWithoutFile = new CdnFileMetadata(
             originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
         );
-        $cdnFileWithoutFile = new CdnFile($metadataWithoutFile, null);
 
         $incompleteMetadata = new CdnFileMetadata(
             originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
@@ -173,8 +178,9 @@ final class CdnControllerTest extends TestCase
         );
         $downloadedFile = new DownloadedFile('content', $incompleteMetadata);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('get')->willReturn($cdnFileWithoutFile);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadataWithoutFile);
+        $storage->method('hasFile')->willReturn(false);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
         $downloader->method('download')->willReturn($downloadedFile);
@@ -198,10 +204,11 @@ final class CdnControllerTest extends TestCase
             contentType: 'image/webp',
             expiresAt: new DateTimeImmutable('+1 day'),
         );
-        $cdnFile = new CdnFile($metadata, $file);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('get')->willReturn($cdnFile);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
@@ -224,10 +231,11 @@ final class CdnControllerTest extends TestCase
             etag: '"etag-value-123"',
             expiresAt: new DateTimeImmutable('+1 day'),
         );
-        $cdnFile = new CdnFile($metadata, $file);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('get')->willReturn($cdnFile);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
@@ -249,10 +257,11 @@ final class CdnControllerTest extends TestCase
             contentType: 'image/jpeg',
             expiresAt: new DateTimeImmutable('+1 day'),
         );
-        $cdnFile = new CdnFile($metadata, $file);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('get')->willReturn($cdnFile);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
@@ -274,10 +283,11 @@ final class CdnControllerTest extends TestCase
             contentType: 'image/jpeg',
             expiresAt: new DateTimeImmutable('+1 day'),
         );
-        $cdnFile = new CdnFile($metadata, $file);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('get')->willReturn($cdnFile);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
@@ -299,10 +309,11 @@ final class CdnControllerTest extends TestCase
             contentType: 'image/jpeg',
             expiresAt: new DateTimeImmutable('+1 day'),
         );
-        $cdnFile = new CdnFile($metadata, $file);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('get')->willReturn($cdnFile);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
@@ -324,10 +335,11 @@ final class CdnControllerTest extends TestCase
             contentType: 'image/jpeg',
             expiresAt: new DateTimeImmutable('+1 day'),
         );
-        $cdnFile = new CdnFile($metadata, $file);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('get')->willReturn($cdnFile);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
@@ -349,10 +361,11 @@ final class CdnControllerTest extends TestCase
             contentType: 'image/jpeg',
             expiresAt: new DateTimeImmutable('+1 day'),
         );
-        $cdnFile = new CdnFile($metadata, $file);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
-        $storage->method('get')->willReturn($cdnFile);
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
@@ -377,16 +390,17 @@ final class CdnControllerTest extends TestCase
             contentType: 'application/pdf',
             expiresAt: new DateTimeImmutable('+1 day'),
         );
-        $cdnFile = new CdnFile($metadata, $file);
 
-        $storage = self::createMock(CdnFileStorageInterface::class);
+        $storage = self::createMock(CdnStorageInterface::class);
         $storage->expects(self::once())
-            ->method('get')
+            ->method('getMetadata')
             ->with(
                 self::isInstanceOf(CdnFileId::class),
                 'my-document.pdf',
             )
-            ->willReturn($cdnFile);
+            ->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
