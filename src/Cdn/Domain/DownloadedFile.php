@@ -12,11 +12,17 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Storyblok\Bundle\Routing;
+namespace Storyblok\Bundle\Cdn\Domain;
 
-enum Route
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
+final readonly class DownloadedFile
 {
-    public const string WEBHOOK = 'storyblok_webhook';
-    public const string CONTENT_TYPE = 'storyblok_content_type';
-    public const string CDN = 'storyblok_cdn';
+    public function __construct(
+        public string $content,
+        public CdnFileMetadata $metadata,
+    ) {
+    }
 }

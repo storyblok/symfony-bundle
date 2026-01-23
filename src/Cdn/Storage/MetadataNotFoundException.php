@@ -12,11 +12,13 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Storyblok\Bundle\Routing;
+namespace Storyblok\Bundle\Cdn\Storage;
 
-enum Route
+/**
+ * Exception thrown when CDN metadata cannot be found.
+ *
+ * @author Silas Joisten <silasjoisten@proton.me>
+ */
+final class MetadataNotFoundException extends \RuntimeException
 {
-    public const string WEBHOOK = 'storyblok_webhook';
-    public const string CONTENT_TYPE = 'storyblok_content_type';
-    public const string CDN = 'storyblok_cdn';
 }

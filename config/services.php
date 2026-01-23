@@ -19,6 +19,15 @@ use Storyblok\Api\TagsApiInterface;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Renderer\BlockRenderer;
 use Storyblok\Bundle\Block\Renderer\RendererInterface;
+use Storyblok\Bundle\Cdn\CdnUrlGenerator;
+use Storyblok\Bundle\Cdn\CdnUrlGeneratorInterface;
+use Storyblok\Bundle\Command\CdnCleanupCommand;
+use Storyblok\Bundle\Cdn\Download\AssetDownloader;
+use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
+use Storyblok\Bundle\Cdn\Storage\CdnFilesystemStorage;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\TraceableCdnStorage;
+use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeRegistryInterface;
@@ -27,12 +36,14 @@ use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
 use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
 use Storyblok\Bundle\ContentType\Listener\ResolveControllerListener;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
+use Storyblok\Bundle\Controller\CdnController;
 use Storyblok\Bundle\Controller\WebhookController;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Tiptap\DefaultEditorBuilder;
 use Storyblok\Bundle\Tiptap\EditorBuilderInterface;
 use Storyblok\Bundle\Twig\BlockExtension;
+use Storyblok\Bundle\Twig\CdnExtension;
 use Storyblok\Bundle\Twig\ImageExtension;
 use Storyblok\Bundle\Twig\LiveEditorExtension;
 use Storyblok\Bundle\Twig\RichTextExtension;
@@ -110,6 +121,19 @@ return static function (ContainerConfigurator $container): void {
                 'priority' => 255,
             ])
 
+        ->set(TraceableCdnStorage::class)
+            ->args([
+                '$decorated' => service(CdnFilesystemStorage::class),
+            ])
+
+        ->set(CdnCollector::class)
+            ->args([
+                '$storage' => service(TraceableCdnStorage::class),
+            ])
+            ->tag('data_collector', [
+                'priority' => 254,
+            ])
+
         ->set(UpdateProfilerListener::class)
             ->tag('kernel.event_listener', [
                 'event' => KernelEvents::RESPONSE,
@@ -181,5 +205,36 @@ return static function (ContainerConfigurator $container): void {
 
         ->set(ImageExtension::class)
             ->tag('twig.extension')
+
+        ->set(CdnController::class)
+            ->args([
+                '$storage' => service(CdnStorageInterface::class),
+                '$downloader' => service(FileDownloaderInterface::class),
+                '$public' => abstract_arg('public cache directive'),
+                '$maxAge' => abstract_arg('max-age cache directive'),
+                '$smaxAge' => abstract_arg('smaxage cache directive'),
+            ])
+            ->tag('controller.service_arguments')
+
+        ->set(AssetDownloader::class)
+            ->alias(FileDownloaderInterface::class, AssetDownloader::class)
+
+        ->set(CdnFilesystemStorage::class)
+            ->args([
+                '$storagePath' => abstract_arg('CDN storage path'),
+            ])
+            ->alias(CdnStorageInterface::class, CdnFilesystemStorage::class)
+
+        ->set(CdnUrlGenerator::class)
+            ->alias(CdnUrlGeneratorInterface::class, CdnUrlGenerator::class)
+
+        ->set(CdnExtension::class)
+            ->tag('twig.extension')
+
+        ->set(CdnCleanupCommand::class)
+            ->args([
+                '$storagePath' => abstract_arg('CDN storage path'),
+            ])
+            ->tag('console.command')
     ;
 };

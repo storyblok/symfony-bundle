@@ -1,0 +1,51 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * This file is part of storyblok/symfony-bundle.
+ *
+ * (c) Storyblok GmbH <info@storyblok.com>
+ * in cooperation with SensioLabs Deutschland <info@sensiolabs.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Storyblok\Bundle\Cdn;
+
+use Storyblok\Api\Domain\Type\Asset;
+use Storyblok\Bundle\Cdn\Domain\AssetInfo;
+use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
+use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
+use Storyblok\Bundle\Routing\Route;
+use Storyblok\ImageService\Image;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+/**
+ * @author Silas Joisten <silasjoisten@proton.me>
+ * @author Stiven Llupa <stiven.llupa@gmail.com>
+ */
+final readonly class CdnUrlGenerator implements CdnUrlGeneratorInterface
+{
+    public function __construct(
+        private CdnStorageInterface $storage,
+        private UrlGeneratorInterface $urlGenerator,
+    ) {
+    }
+
+    public function generate(Asset|Image $asset, int $referenceType = UrlGeneratorInterface::ABSOLUTE_URL): string
+    {
+        $assetInfo = new AssetInfo($asset);
+
+        if (!$this->storage->hasMetadata($assetInfo->id, $assetInfo->fullFilename)) {
+            $this->storage->setMetadata($assetInfo->id, $assetInfo->fullFilename, new CdnFileMetadata(originalUrl: $assetInfo->url));
+        }
+
+        return $this->urlGenerator->generate(Route::CDN, [
+            'id' => $assetInfo->id->value,
+            'filename' => $assetInfo->filename,
+            'extension' => $assetInfo->extension,
+        ], $referenceType);
+    }
+}
