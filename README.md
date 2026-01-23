@@ -629,6 +629,9 @@ It works out of the box with:
 
 ## CDN Asset Handling
 
+> [!WARNING]
+> This feature only supports **public Storyblok assets**. Private assets are not supported.
+
 The bundle provides a CDN feature that allows you to serve Storyblok assets through your own domain. This is useful for:
 - Serving assets from your own CDN
 - Applying custom caching strategies
