@@ -25,7 +25,7 @@ use Symfony\Contracts\Service\ResetInterface;
  *
  * @author Silas Joisten <silasjoisten@proton.me>
  */
-final class TraceableCdnFileStorage implements CdnStorageInterface, ResetInterface
+final class TraceableCdnStorage implements CdnStorageInterface, ResetInterface
 {
     /**
      * @var list<array{

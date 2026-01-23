@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
 use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
-use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
+use Storyblok\Bundle\Cdn\Storage\TraceableCdnStorage;
 use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 
@@ -34,7 +34,7 @@ final class CdnCollectorTest extends TestCase
     public function defaults(): void
     {
         $decorated = $this->createMock(CdnStorageInterface::class);
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
         $collector = new CdnCollector($storage);
 
         self::assertEmpty($collector->getTraces());
@@ -58,7 +58,7 @@ final class CdnCollectorTest extends TestCase
         $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->method('hasMetadata')->willReturn(true);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
         $collector = new CdnCollector($storage);
 
         // Simulate cdn_url() call where file is already cached
@@ -82,7 +82,7 @@ final class CdnCollectorTest extends TestCase
         $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->method('hasMetadata')->willReturn(false);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
         $collector = new CdnCollector($storage);
 
         // Simulate cdn_url() call where file doesn't exist yet
@@ -106,7 +106,7 @@ final class CdnCollectorTest extends TestCase
         $decorated->method('hasMetadata')
             ->willReturnOnConsecutiveCalls(true, false, true, false);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
         $collector = new CdnCollector($storage);
 
         // 2 cached (has returns true), 2 pending (set with null content)
@@ -134,7 +134,7 @@ final class CdnCollectorTest extends TestCase
 
         $decorated = $this->createMock(CdnStorageInterface::class);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
         $collector = new CdnCollector($storage);
 
         $storage->setMetadata($id, $filename, $metadata);
@@ -161,7 +161,7 @@ final class CdnCollectorTest extends TestCase
 
         $decorated = $this->createMock(CdnStorageInterface::class);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
         $collector = new CdnCollector($storage);
 
         $storage->setMetadata($id, $filename, $metadata);
@@ -182,7 +182,7 @@ final class CdnCollectorTest extends TestCase
         $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->method('hasMetadata')->willReturn(true);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
         $collector = new CdnCollector($storage);
 
         $storage->hasMetadata($id, $filename);

@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
 use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
-use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
+use Storyblok\Bundle\Cdn\Storage\TraceableCdnStorage;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Symfony\Component\HttpFoundation\File\File;
 use function Safe\file_put_contents;
@@ -29,7 +29,7 @@ use function Safe\unlink;
 /**
  * @author Silas Joisten <silasjoisten@proton.me>
  */
-final class TraceableCdnFileStorageTest extends TestCase
+final class TraceableCdnStorageTest extends TestCase
 {
     use FakerTrait;
 
@@ -37,7 +37,7 @@ final class TraceableCdnFileStorageTest extends TestCase
     public function defaults(): void
     {
         $decorated = $this->createMock(CdnStorageInterface::class);
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         self::assertEmpty($storage->getTraces());
     }
@@ -54,7 +54,7 @@ final class TraceableCdnFileStorageTest extends TestCase
             ->with($id, $filename)
             ->willReturn(true);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         self::assertTrue($storage->hasMetadata($id, $filename));
         self::assertCount(1, $storage->getTraces());
@@ -76,7 +76,7 @@ final class TraceableCdnFileStorageTest extends TestCase
             ->with($id, $filename)
             ->willReturn(false);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         self::assertFalse($storage->hasMetadata($id, $filename));
         self::assertEmpty($storage->getTraces());
@@ -94,7 +94,7 @@ final class TraceableCdnFileStorageTest extends TestCase
             ->with($id, $filename)
             ->willReturn(true);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         self::assertTrue($storage->hasFile($id, $filename));
         self::assertEmpty($storage->getTraces());
@@ -114,7 +114,7 @@ final class TraceableCdnFileStorageTest extends TestCase
             ->with($id, $filename)
             ->willReturn($metadata);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         $result = $storage->getMetadata($id, $filename);
 
@@ -140,7 +140,7 @@ final class TraceableCdnFileStorageTest extends TestCase
                 ->with($id, $filename)
                 ->willReturn($file);
 
-            $storage = new TraceableCdnFileStorage($decorated);
+            $storage = new TraceableCdnStorage($decorated);
 
             $result = $storage->getFile($id, $filename);
 
@@ -166,7 +166,7 @@ final class TraceableCdnFileStorageTest extends TestCase
             ->method('setMetadata')
             ->with($id, $filename, $metadata);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         $storage->setMetadata($id, $filename, $metadata);
 
@@ -186,7 +186,7 @@ final class TraceableCdnFileStorageTest extends TestCase
             ->method('setMetadata')
             ->with($id, $filename, $metadata);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         $storage->setMetadata($id, $filename, $metadata);
 
@@ -212,7 +212,7 @@ final class TraceableCdnFileStorageTest extends TestCase
             ->method('setFile')
             ->with($id, $filename, $content);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         $storage->setFile($id, $filename, $content);
 
@@ -230,7 +230,7 @@ final class TraceableCdnFileStorageTest extends TestCase
             ->method('remove')
             ->with($id, $filename);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         $storage->remove($id, $filename);
 
@@ -246,7 +246,7 @@ final class TraceableCdnFileStorageTest extends TestCase
 
         $decorated = $this->createMock(CdnStorageInterface::class);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         $storage->setMetadata($id, $filename, $metadata);
 
@@ -268,7 +268,7 @@ final class TraceableCdnFileStorageTest extends TestCase
         $decorated = $this->createMock(CdnStorageInterface::class);
         $decorated->method('hasMetadata')->willReturn(true);
 
-        $storage = new TraceableCdnFileStorage($decorated);
+        $storage = new TraceableCdnStorage($decorated);
 
         // Two cache hits via hasMetadata()
         $storage->hasMetadata($id1, $filename);

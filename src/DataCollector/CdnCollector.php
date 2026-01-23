@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\DataCollector;
 
-use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
+use Storyblok\Bundle\Cdn\Storage\TraceableCdnStorage;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 final class CdnCollector extends AbstractDataCollector implements LateDataCollectorInterface
 {
     public function __construct(
-        private readonly TraceableCdnFileStorage $storage,
+        private readonly TraceableCdnStorage $storage,
     ) {
     }
 

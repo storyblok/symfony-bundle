@@ -31,7 +31,7 @@ use Storyblok\Bundle\Cdn\Download\AssetDownloader;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnFilesystemStorage;
 use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
-use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
+use Storyblok\Bundle\Cdn\Storage\TraceableCdnStorage;
 use Storyblok\Bundle\Command\CdnCleanupCommand;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
@@ -86,7 +86,7 @@ final class StoryblokExtension extends Extension
 
             if ($config['cdn']['enabled']) {
                 $container->removeDefinition(CdnCollector::class);
-                $container->removeDefinition(TraceableCdnFileStorage::class);
+                $container->removeDefinition(TraceableCdnStorage::class);
             }
         } else {
             $httpClient = $container->getDefinition('storyblok.http_client');
@@ -99,7 +99,7 @@ final class StoryblokExtension extends Extension
             ));
 
             if ($config['cdn']['enabled'] && 'filesystem' === $config['cdn']['storage']['type']) {
-                $container->setAlias(CdnStorageInterface::class, TraceableCdnFileStorage::class);
+                $container->setAlias(CdnStorageInterface::class, TraceableCdnStorage::class);
             }
         }
 
@@ -155,7 +155,7 @@ final class StoryblokExtension extends Extension
             $container->removeDefinition(ImageExtension::class);
             $container->removeDefinition(CdnCleanupCommand::class);
             $container->removeDefinition(CdnCollector::class);
-            $container->removeDefinition(TraceableCdnFileStorage::class);
+            $container->removeDefinition(TraceableCdnStorage::class);
 
             if ($container->hasAlias(CdnStorageInterface::class)) {
                 $container->removeAlias(CdnStorageInterface::class);
@@ -190,7 +190,7 @@ final class StoryblokExtension extends Extension
             // Custom storage: remove filesystem-specific services
             // User must provide their own CdnFileStorageInterface implementation
             $container->removeDefinition(CdnFilesystemStorage::class);
-            $container->removeDefinition(TraceableCdnFileStorage::class);
+            $container->removeDefinition(TraceableCdnStorage::class);
             $container->removeDefinition(CdnCleanupCommand::class);
             $container->removeDefinition(CdnCollector::class);
 
