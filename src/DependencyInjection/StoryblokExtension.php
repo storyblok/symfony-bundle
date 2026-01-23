@@ -25,11 +25,14 @@ use Storyblok\Api\StoryblokClient;
 use Storyblok\Api\StoryblokClientInterface;
 use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Block\BlockRegistry;
+use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
 use Storyblok\Bundle\ContentType\Attribute\AsContentTypeController;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\Listener\GlobalCachingListener;
 use Storyblok\Bundle\ContentType\Listener\StoryNotFoundExceptionListener;
 use Storyblok\Bundle\Controller\CdnController;
+use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
@@ -69,6 +72,8 @@ final class StoryblokExtension extends Extension
 
         if (false === $container->getParameter('kernel.debug')) {
             $container->removeDefinition(StoryblokCollector::class);
+            $container->removeDefinition(CdnCollector::class);
+            $container->removeDefinition(TraceableCdnFileStorage::class);
             $container->removeDefinition(UpdateProfilerListener::class);
         } else {
             $httpClient = $container->getDefinition('storyblok.http_client');
@@ -79,6 +84,8 @@ final class StoryblokExtension extends Extension
                     '$client' => $httpClient,
                 ],
             ));
+
+            $container->setAlias(CdnFileStorageInterface::class, TraceableCdnFileStorage::class);
         }
 
         if (true === $config['auto_resolve_relations'] || true === $config['auto_resolve_links']) {

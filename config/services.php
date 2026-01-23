@@ -26,6 +26,8 @@ use Storyblok\Bundle\Cdn\Download\AssetDownloader;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnFileFilesystemStorage;
 use Storyblok\Bundle\Cdn\Storage\CdnFileStorageInterface;
+use Storyblok\Bundle\Cdn\Storage\TraceableCdnFileStorage;
+use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\ContentType\ContentTypeControllerRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeRegistry;
 use Storyblok\Bundle\ContentType\ContentTypeRegistryInterface;
@@ -117,6 +119,19 @@ return static function (ContainerConfigurator $container): void {
             ])
             ->tag('data_collector', [
                 'priority' => 255,
+            ])
+
+        ->set(TraceableCdnFileStorage::class)
+            ->args([
+                '$decorated' => service(CdnFileFilesystemStorage::class),
+            ])
+
+        ->set(CdnCollector::class)
+            ->args([
+                '$storage' => service(TraceableCdnFileStorage::class),
+            ])
+            ->tag('data_collector', [
+                'priority' => 254,
             ])
 
         ->set(UpdateProfilerListener::class)
