@@ -37,7 +37,6 @@ use Storyblok\Bundle\DependencyInjection\StoryblokExtension;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 use Storyblok\Bundle\Twig\CdnExtension;
-use Storyblok\Bundle\Twig\ImageExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpClient\TraceableHttpClient;
 
@@ -423,7 +422,6 @@ final class StoryblokExtensionTest extends TestCase
         self::assertTrue($builder->hasDefinition(CdnUrlGenerator::class));
         self::assertTrue($builder->hasDefinition(AssetDownloader::class));
         self::assertTrue($builder->hasDefinition(CdnExtension::class));
-        self::assertTrue($builder->hasDefinition(ImageExtension::class));
 
         // Filesystem-specific services should be removed
         self::assertFalse($builder->hasDefinition(CdnFilesystemStorage::class));
