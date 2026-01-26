@@ -149,4 +149,17 @@ final class AssetInfoTest extends TestCase
         self::assertNotSame($assetInfo1->id->value, $assetInfo2->id->value);
         self::assertNotSame($assetInfo1->url, $assetInfo2->url);
     }
+
+    #[Test]
+    public function extensionIsAlwaysLowercase(): void
+    {
+        $asset = new Asset([
+            'id' => 12345,
+            'filename' => 'https://a.storyblok.com/f/12345/1920x1080/abc123/image.JPG',
+        ]);
+
+        $assetInfo = new AssetInfo($asset);
+
+        self::assertSame('jpg', $assetInfo->extension);
+    }
 }
