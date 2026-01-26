@@ -161,5 +161,6 @@ final class AssetInfoTest extends TestCase
         $assetInfo = new AssetInfo($asset);
 
         self::assertSame('jpg', $assetInfo->extension);
+        self::assertSame('1920x1080-image.jpg', $assetInfo->fullFilename);
     }
 }
