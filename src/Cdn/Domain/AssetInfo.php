@@ -56,7 +56,7 @@ final readonly class AssetInfo
         }
 
         $this->url = $url;
-        $this->extension = $extension;
+        $this->extension = \strtolower($extension);
         $this->filename = null !== $dimensions ? \sprintf('%s-%s', $dimensions, $name) : $name;
         $this->fullFilename = \sprintf('%s.%s', $this->filename, $extension);
     }
