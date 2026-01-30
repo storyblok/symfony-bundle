@@ -36,14 +36,6 @@ final readonly class GlobalCachingListener
 
         $response = $event->getResponse();
 
-        if (null !== $this->public && !$response->headers->hasCacheControlDirective('public')) {
-            if ($this->public) {
-                $response->setPublic();
-            } else {
-                $response->setPrivate();
-            }
-        }
-
         if (true === $this->mustRevalidate && !$response->headers->hasCacheControlDirective('must-revalidate')) {
             $response->headers->addCacheControlDirective('must-revalidate');
 
@@ -60,6 +52,14 @@ final readonly class GlobalCachingListener
 
         if (null !== $this->smaxAge && !$response->headers->hasCacheControlDirective('s-maxage')) {
             $response->setSharedMaxAge($this->smaxAge);
+        }
+
+        if (null !== $this->public && !$response->headers->hasCacheControlDirective('public')) {
+            if ($this->public) {
+                $response->setPublic();
+            } else {
+                $response->setPrivate();
+            }
         }
 
         $event->setResponse($response);
