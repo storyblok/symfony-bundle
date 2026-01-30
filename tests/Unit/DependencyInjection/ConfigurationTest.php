@@ -40,7 +40,6 @@ final class ConfigurationTest extends TestCase
         $public = $faker->boolean();
         $cdnMaxAge = $faker->numberBetween(3600);
         $cdnSmaxAge = $faker->numberBetween(3600);
-        $cdnPublic = $faker->boolean();
 
         self::assertProcessedConfigurationEquals([
             ['base_uri' => $url],
@@ -67,7 +66,7 @@ final class ConfigurationTest extends TestCase
                         'path' => '/custom/cdn/path',
                     ],
                     'cache' => [
-                        'public' => $cdnPublic,
+                        'public' => true,
                         'max_age' => $cdnMaxAge,
                         'smax_age' => $cdnSmaxAge,
                     ],
@@ -98,7 +97,7 @@ final class ConfigurationTest extends TestCase
                     'path' => '/custom/cdn/path',
                 ],
                 'cache' => [
-                    'public' => $cdnPublic,
+                    'public' => true,
                     'max_age' => $cdnMaxAge,
                     'smax_age' => $cdnSmaxAge,
                 ],
