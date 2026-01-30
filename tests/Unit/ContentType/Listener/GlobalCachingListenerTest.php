@@ -180,7 +180,7 @@ final class GlobalCachingListenerTest extends TestCase
         $listener($event);
 
         self::assertTrue($event->getResponse()->headers->has('ETag'));
-        self::assertSame('"'.md5('Hello World').'"', $event->getResponse()->headers->get('ETag'));
+        self::assertSame('"'.hash('xxh3', 'Hello World').'"', $event->getResponse()->headers->get('ETag'));
     }
 
     #[Test]
@@ -189,7 +189,7 @@ final class GlobalCachingListenerTest extends TestCase
         $listener = new GlobalCachingListener(new ContentTypeStorage(), etag: true);
 
         $request = new Request();
-        $request->headers->set('If-None-Match', '"'.md5('Hello World').'"');
+        $request->headers->set('If-None-Match', '"'.hash('xxh3', 'Hello World').'"');
 
         $event = new ResponseEvent(
             TestKernel::create([], self::class, static fn () => ''),

@@ -51,7 +51,7 @@ final readonly class GlobalCachingListener
             $content = $response->getContent();
 
             if (false !== $content) {
-                $response->setEtag(md5($content));
+                $response->setEtag(hash('xxh3', $content));
             }
         }
 
