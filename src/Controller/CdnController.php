@@ -37,6 +37,7 @@ final readonly class CdnController
         private ?int $maxAge,
         private ?int $smaxAge,
         private ?bool $public,
+        private ?bool $etag = null,
     ) {
     }
 
@@ -79,7 +80,7 @@ final readonly class CdnController
             $response->headers->set('Content-Type', $metadata->contentType);
         }
 
-        if (null !== $metadata->etag) {
+        if (true === $this->etag && null !== $metadata->etag) {
             $response->setEtag($metadata->etag);
         }
 

@@ -221,7 +221,7 @@ final class CdnControllerTest extends TestCase
     }
 
     #[Test]
-    public function setsEtagHeader(): void
+    public function setsEtagHeaderWhenConfigured(): void
     {
         $tempFile = $this->createTempFile('content');
         $file = new File($tempFile);
@@ -240,11 +240,38 @@ final class CdnControllerTest extends TestCase
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
-        $controller = new CdnController($storage, $downloader, null, null, null);
+        $controller = new CdnController($storage, $downloader, null, null, null, true);
 
         $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         self::assertSame('"etag-value-123"', $response->getEtag());
+    }
+
+    #[Test]
+    public function doesNotSetEtagHeaderWhenNotConfigured(): void
+    {
+        $tempFile = $this->createTempFile('content');
+        $file = new File($tempFile);
+
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+            contentType: 'image/jpeg',
+            etag: '"etag-value-123"',
+            expiresAt: new DateTimeImmutable('+1 day'),
+        );
+
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
+
+        $downloader = self::createMock(FileDownloaderInterface::class);
+
+        $controller = new CdnController($storage, $downloader, null, null, null, null);
+
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
+
+        self::assertNull($response->getEtag());
     }
 
     #[Test]
@@ -400,7 +427,7 @@ final class CdnControllerTest extends TestCase
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
-        $controller = new CdnController($storage, $downloader, null, null, null);
+        $controller = new CdnController($storage, $downloader, null, null, null, true);
 
         $request = new Request();
         $request->headers->set('If-None-Match', '"etag-value-123"');
