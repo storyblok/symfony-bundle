@@ -25,6 +25,7 @@ final readonly class GlobalCachingListener
         private ?bool $mustRevalidate = null,
         private ?int $maxAge = null,
         private ?int $smaxAge = null,
+        private ?bool $etag = null,
     ) {
     }
 
@@ -36,14 +37,6 @@ final readonly class GlobalCachingListener
 
         $response = $event->getResponse();
 
-        if (null !== $this->public && !$response->headers->hasCacheControlDirective('public')) {
-            if ($this->public) {
-                $response->setPublic();
-            } else {
-                $response->setPrivate();
-            }
-        }
-
         if (true === $this->mustRevalidate && !$response->headers->hasCacheControlDirective('must-revalidate')) {
             $response->headers->addCacheControlDirective('must-revalidate');
 
@@ -54,6 +47,14 @@ final readonly class GlobalCachingListener
             }
         }
 
+        if (true === $this->etag && !$response->headers->has('ETag')) {
+            $content = $response->getContent();
+
+            if (false !== $content) {
+                $response->setEtag(hash('xxh3', $content));
+            }
+        }
+
         if (null !== $this->maxAge && !$response->headers->hasCacheControlDirective('max-age')) {
             $response->setMaxAge($this->maxAge);
         }
@@ -61,6 +62,16 @@ final readonly class GlobalCachingListener
         if (null !== $this->smaxAge && !$response->headers->hasCacheControlDirective('s-maxage')) {
             $response->setSharedMaxAge($this->smaxAge);
         }
+
+        if (null !== $this->public && !$response->headers->hasCacheControlDirective('public')) {
+            if ($this->public) {
+                $response->setPublic();
+            } else {
+                $response->setPrivate();
+            }
+        }
+
+        $response->isNotModified($event->getRequest());
 
         $event->setResponse($response);
     }

@@ -25,6 +25,7 @@ final class RouteTest extends TestCase
     {
         self::assertSame('storyblok_webhook', Route::WEBHOOK);
         self::assertSame('storyblok_content_type', Route::CONTENT_TYPE);
+        self::assertSame('storyblok_cdn', Route::CDN);
     }
 
     #[Test]
@@ -32,6 +33,6 @@ final class RouteTest extends TestCase
     {
         $reflection = new \ReflectionClass(Route::class);
 
-        self::assertCount(2, $reflection->getConstants());
+        self::assertCount(3, $reflection->getConstants());
     }
 }

@@ -76,12 +76,88 @@ final class Configuration implements ConfigurationInterface
                                 ->booleanNode('must_revalidate')
                                     ->defaultNull()
                                 ->end()
+                                ->booleanNode('etag')
+                                    ->defaultNull()
+                                ->end()
                                 ->integerNode('max_age')
                                     ->defaultNull()
                                 ->end()
                                 ->integerNode('smax_age')
                                     ->defaultNull()
                                 ->end()
+                            ->end()
+                            ->validate()
+                                ->ifTrue(static fn (array $v): bool => false === $v['public'] && null !== $v['smax_age'])
+                                ->then(static function (array $v): array {
+                                    trigger_deprecation(
+                                        'storyblok/symfony-bundle',
+                                        '1.16.0',
+                                        'Setting "smax_age" with "public: false" in "storyblok.controller.cache" is deprecated. The s-maxage directive is only applicable to shared caches (CDN/proxy), which require public caching. This configuration will throw an exception in 2.0.',
+                                    );
+
+                                    return $v;
+                                })
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('cdn')
+                    ->addDefaultsIfNotSet()
+                    ->beforeNormalization()
+                        ->ifTrue()
+                        ->then(static fn (): array => ['enabled' => true])
+                    ->end()
+                    ->beforeNormalization()
+                        ->ifFalse()
+                        ->then(static fn (): array => ['enabled' => false])
+                    ->end()
+                    ->children()
+                        ->booleanNode('enabled')
+                            ->defaultTrue()
+                            ->info('CDN is enabled by default. Set to false to disable.')
+                        ->end()
+                        ->arrayNode('storage')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->enumNode('type')
+                                    ->values(['filesystem', 'custom'])
+                                    ->defaultValue('filesystem')
+                                    ->info('Use "filesystem" for built-in storage or "custom" when providing your own CdnFileStorageInterface implementation.')
+                                ->end()
+                                ->scalarNode('path')
+                                    ->defaultValue('%kernel.project_dir%/var/cdn')
+                                    ->info('Storage path for the filesystem storage. Only used when type is "filesystem".')
+                                ->end()
+                            ->end()
+                            ->validate()
+                                ->ifTrue(static fn (array $v): bool => 'custom' === $v['type'] && '%kernel.project_dir%/var/cdn' !== $v['path'])
+                                ->thenInvalid('The "path" option should not be set when using "custom" storage type. Configure your own CdnFileStorageInterface implementation instead.')
+                            ->end()
+                        ->end()
+                        ->arrayNode('cache')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->booleanNode('public')
+                                    ->defaultNull()
+                                ->end()
+                                ->integerNode('max_age')
+                                    ->defaultNull()
+                                ->end()
+                                ->integerNode('smax_age')
+                                    ->defaultNull()
+                                ->end()
+                            ->end()
+                            ->validate()
+                                ->ifTrue(static fn (array $v): bool => false === $v['public'] && null !== $v['smax_age'])
+                                ->then(static function (array $v): array {
+                                    trigger_deprecation(
+                                        'storyblok/symfony-bundle',
+                                        '1.16.0',
+                                        'Setting "smax_age" with "public: false" in "storyblok.cdn.cache" is deprecated. The s-maxage directive is only applicable to shared caches (CDN/proxy), which require public caching. This configuration will throw an exception in 2.0.',
+                                    );
+
+                                    return $v;
+                                })
                             ->end()
                         ->end()
                     ->end()

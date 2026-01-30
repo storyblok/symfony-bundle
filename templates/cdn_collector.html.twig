@@ -1,0 +1,116 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% macro svg_icon() %}
+    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+    </svg>
+{% endmacro %}
+
+{% block toolbar %}
+    {% set icon %}
+        {{ _self.svg_icon() }}
+        <span class="sf-toolbar-value">{{ collector.totalCount }}</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>CDN Assets</b>
+            <span>{{ collector.totalCount }}</span>
+        </div>
+
+        <div class="sf-toolbar-info-piece">
+            <b>Cached</b>
+            <span class="sf-toolbar-status {{ collector.cachedCount > 0 ? 'sf-toolbar-status-green' }}">{{ collector.cachedCount }}</span>
+        </div>
+
+        <div class="sf-toolbar-info-piece">
+            <b>Pending</b>
+            <span class="sf-toolbar-status {{ collector.pendingCount > 0 ? 'sf-toolbar-status-yellow' }}">{{ collector.pendingCount }}</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig') }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label {{ collector.totalCount == 0 ? 'disabled' }}">
+        <span class="icon">
+            {{ _self.svg_icon() }}
+        </span>
+        <strong>CDN Cache</strong>
+        {% if collector.totalCount > 0 %}
+            <span class="count">
+                <span>{{ collector.totalCount }}</span>
+            </span>
+        {% endif %}
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>CDN Cache</h2>
+    {% if collector.totalCount == 0 %}
+        <div class="empty empty-panel">
+            <p>No CDN assets were requested.</p>
+        </div>
+    {% else %}
+        <div class="metrics">
+            <div class="metric">
+                <span class="value">{{ collector.totalCount }}</span>
+                <span class="label">Total assets</span>
+            </div>
+            <div class="metric">
+                <span class="value">{{ collector.cachedCount }}</span>
+                <span class="label">Cached</span>
+            </div>
+            <div class="metric">
+                <span class="value">{{ collector.pendingCount }}</span>
+                <span class="label">Pending</span>
+            </div>
+        </div>
+
+        <div class="sf-tabs">
+            <div class="tab">
+                <h3 class="tab-title">Assets <span class="badge">{{ collector.totalCount }}</span></h3>
+                <div class="tab-content">
+                    <p class="help">
+                        <strong>CACHED</strong> = Asset is fully cached locally and will be served immediately when requested by the browser.<br>
+                        <strong>PENDING</strong> = Asset metadata was created during this request. The file will be downloaded from Storyblok on the first browser request.
+                    </p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>File ID</th>
+                                <th>Filename</th>
+                                <th class="full-width">Storyblok URL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for trace in collector.traces %}
+                                <tr>
+                                    <td>
+                                        {% if trace.cached %}
+                                            <span class="status-success">CACHED</span>
+                                        {% else %}
+                                            <span class="status-warning">PENDING</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><code>{{ trace.id|slice(0, 8) }}...</code></td>
+                                    <td><code>{{ trace.filename }}</code></td>
+                                    <td>
+                                        {% if trace.originalUrl %}
+                                            <a href="{{ trace.originalUrl }}" target="_blank" rel="noopener">{{ trace.originalUrl }}</a>
+                                        {% else %}
+                                            <em>Cached (URL in metadata)</em>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

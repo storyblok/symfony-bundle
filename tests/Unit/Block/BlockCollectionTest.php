@@ -20,11 +20,17 @@ use Storyblok\Bundle\Block\BlockDefinition;
 use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Block\Exception\BlockNotFoundException;
 use Storyblok\Bundle\Tests\Double\Block\SampleBlock;
+use Storyblok\Bundle\Tests\Fixtures\MultipleAttributesBlock;
 use Storyblok\Bundle\Tests\Util\FakerTrait;
 
 final class BlockCollectionTest extends TestCase
 {
     use FakerTrait;
+
+    protected function setUp(): void
+    {
+        BlockRegistry::$blocks = [];
+    }
 
     #[Test]
     public function add(): void
@@ -97,5 +103,41 @@ final class BlockCollectionTest extends TestCase
         self::expectException(BlockNotFoundException::class);
 
         $collection::byName($faker->domainName());
+    }
+
+    #[Test]
+    public function addMultipleBlocksWithSameClassButDifferentNames(): void
+    {
+        $faker = self::faker();
+
+        $collection = new BlockRegistry();
+        $collection::add(new BlockDefinition('youtube_embed', MultipleAttributesBlock::class, $faker->word()));
+        $collection::add(new BlockDefinition('vimeo_embed', MultipleAttributesBlock::class, $faker->word()));
+
+        self::assertCount(2, $collection);
+    }
+
+    #[Test]
+    public function getReturnsFirstBlockForClassWithMultipleDefinitions(): void
+    {
+        $faker = self::faker();
+
+        $collection = new BlockRegistry();
+        $collection::add($first = new BlockDefinition('youtube_embed', MultipleAttributesBlock::class, $faker->word()));
+        $collection::add(new BlockDefinition('vimeo_embed', MultipleAttributesBlock::class, $faker->word()));
+
+        self::assertSame($first, $collection::get(MultipleAttributesBlock::class));
+    }
+
+    #[Test]
+    public function byNameReturnsCorrectBlockForClassWithMultipleDefinitions(): void
+    {
+        $faker = self::faker();
+
+        $collection = new BlockRegistry();
+        $collection::add(new BlockDefinition('youtube_embed', MultipleAttributesBlock::class, $faker->word()));
+        $collection::add($vimeoEmbed = new BlockDefinition('vimeo_embed', MultipleAttributesBlock::class, $faker->word()));
+
+        self::assertSame($vimeoEmbed, $collection::byName('vimeo_embed'));
     }
 }
