@@ -64,6 +64,45 @@ Ensure that the value passed to `rich_text` is a **Rich Text object**, not an ar
 
 ---
 
+### 3. `smax_age` with `public: false` Now Throws an Exception
+
+Setting `smax_age` with `public: false` in `storyblok.controller.cache` or `storyblok.cdn.cache` now throws an `InvalidConfigurationException` instead of triggering a deprecation warning.
+
+```yaml
+# ❌ This configuration is no longer allowed
+storyblok:
+    controller:
+        cache:
+            public: false
+            smax_age: 3600
+```
+
+#### 🔧 How to upgrade:
+
+The `s-maxage` directive is only applicable to shared caches (CDN/proxy), which require public caching. Either:
+
+1. **Remove `smax_age`** if you want private caching:
+   ```yaml
+   storyblok:
+       controller:
+           cache:
+               public: false
+               max_age: 3600
+   ```
+
+2. **Use `public: true`** (or remove it) if you want shared cache caching:
+   ```yaml
+   storyblok:
+       controller:
+           cache:
+               public: true
+               smax_age: 3600
+   ```
+
+> 📝 This was deprecated in version `1.16.0`.
+
+---
+
 ## 🧪 Run the Symfony Deprecation Detector
 
 Run this command to see what needs to be updated before upgrading:
@@ -72,13 +111,13 @@ Run this command to see what needs to be updated before upgrading:
 bin/console debug:container --deprecations
 ```
 
-Make sure to address any deprecation notices introduced in `1.10.0`.
+Make sure to address any deprecation notices introduced in `1.10.0` and `1.16.0`.
 
 ---
 
 ## ✅ Recommended Steps
 
-1. Upgrade to the latest `1.10.x` version.
+1. Upgrade to the latest `1.x` version.
 2. Fix all deprecation warnings.
 3. Update your code to follow the new interface and filter requirements.
 4. Require `storyblok/symfony-bundle:^2.0` in your `composer.json`.
