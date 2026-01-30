@@ -132,7 +132,8 @@ final class CdnFilesystemStorageTest extends TestCase
 
         self::assertSame('https://a.storyblok.com/f/12345/image.jpg', $result->originalUrl);
         self::assertSame('image/jpeg', $result->contentType);
-        self::assertSame('"abc123"', $result->etag);
+        // ETag is normalized when loading from storage (quotes stripped)
+        self::assertSame('abc123', $result->etag);
     }
 
     #[Test]
@@ -207,7 +208,8 @@ final class CdnFilesystemStorageTest extends TestCase
         $result = $this->storage->getMetadata($id, 'image.jpg');
 
         self::assertSame('image/jpeg', $result->contentType);
-        self::assertSame('"updated"', $result->etag);
+        // ETag is normalized when loading from storage (quotes stripped)
+        self::assertSame('updated', $result->etag);
     }
 
     #[Test]

@@ -81,7 +81,10 @@ final readonly class CdnController
         }
 
         if (true === $this->etag && null !== $metadata->etag) {
-            $response->setEtag($metadata->etag);
+            $etag = $metadata->etag;
+            $weak = str_starts_with($etag, 'W/');
+
+            $response->setEtag($weak ? substr($etag, 2) : $etag, $weak);
         }
 
         if (null !== $this->maxAge) {
