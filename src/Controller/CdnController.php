@@ -20,6 +20,7 @@ use Storyblok\Bundle\Cdn\Storage\CdnFileNotFoundException;
 use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\MetadataNotFoundException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -39,7 +40,7 @@ final readonly class CdnController
     ) {
     }
 
-    public function __invoke(string $id, string $filename, string $extension): Response
+    public function __invoke(Request $request, string $id, string $filename, string $extension): Response
     {
         $fileId = new CdnFileId($id);
         $fullFilename = \sprintf('%s.%s', $filename, $extension);
@@ -97,6 +98,8 @@ final readonly class CdnController
                 $response->setPrivate();
             }
         }
+
+        $response->isNotModified($request);
 
         return $response;
     }
