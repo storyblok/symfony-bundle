@@ -86,6 +86,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => $public,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => $maxAge,
                     'smax_age' => null,
                 ],
@@ -128,6 +129,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -171,6 +173,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -214,6 +217,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -257,6 +261,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -317,6 +322,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -360,6 +366,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -403,6 +410,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -472,6 +480,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => false,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => 3600,
                 ],
@@ -517,6 +526,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
