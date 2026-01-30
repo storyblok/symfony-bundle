@@ -176,6 +176,7 @@ final class StoryblokExtension extends Extension
         $cdnController->setArgument('$public', $config['cdn']['cache']['public']);
         $cdnController->setArgument('$maxAge', $config['cdn']['cache']['max_age']);
         $cdnController->setArgument('$smaxAge', $config['cdn']['cache']['smax_age']);
+        $cdnController->setArgument('$etag', $config['cdn']['cache']['etag']);
 
         if ('filesystem' === $config['cdn']['storage']['type']) {
             // Configure filesystem storage with the provided path
