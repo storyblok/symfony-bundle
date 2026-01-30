@@ -446,7 +446,7 @@ when@prod:
 
 #### Cache Validation (304 Not Modified)
 
-When `etag: true` is enabled, the bundle automatically generates an ETag header based on the response content (using MD5 hash). Combined with `must_revalidate: true`, which sets the `Last-Modified` header based on the content type's `publishedAt` date, this enables proper HTTP cache validation.
+When `etag: true` is enabled, the bundle automatically generates an ETag header based on the response content (using the fast xxh3 hash algorithm). Combined with `must_revalidate: true`, which sets the `Last-Modified` header based on the content type's `publishedAt` date, this enables proper HTTP cache validation.
 
 When a client sends an `If-None-Match` (for ETag) or `If-Modified-Since` (for Last-Modified) header, the server can respond with a `304 Not Modified` status if the content hasn't changed, saving bandwidth and improving performance.
 
