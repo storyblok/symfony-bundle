@@ -86,6 +86,18 @@ final class Configuration implements ConfigurationInterface
                                     ->defaultNull()
                                 ->end()
                             ->end()
+                            ->validate()
+                                ->ifTrue(static fn (array $v): bool => false === $v['public'] && null !== $v['smax_age'])
+                                ->then(static function (array $v): array {
+                                    trigger_deprecation(
+                                        'storyblok/symfony-bundle',
+                                        '1.16.0',
+                                        'Setting "smax_age" with "public: false" in "storyblok.controller.cache" is deprecated. The s-maxage directive is only applicable to shared caches (CDN/proxy), which require public caching. This configuration will throw an exception in 2.0.',
+                                    );
+
+                                    return $v;
+                                })
+                            ->end()
                         ->end()
                     ->end()
                 ->end()
@@ -134,6 +146,18 @@ final class Configuration implements ConfigurationInterface
                                 ->integerNode('smax_age')
                                     ->defaultNull()
                                 ->end()
+                            ->end()
+                            ->validate()
+                                ->ifTrue(static fn (array $v): bool => false === $v['public'] && null !== $v['smax_age'])
+                                ->then(static function (array $v): array {
+                                    trigger_deprecation(
+                                        'storyblok/symfony-bundle',
+                                        '1.16.0',
+                                        'Setting "smax_age" with "public: false" in "storyblok.cdn.cache" is deprecated. The s-maxage directive is only applicable to shared caches (CDN/proxy), which require public caching. This configuration will throw an exception in 2.0.',
+                                    );
+
+                                    return $v;
+                                })
                             ->end()
                         ->end()
                     ->end()
