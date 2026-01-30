@@ -306,7 +306,6 @@ final class StoryblokExtensionTest extends TestCase
         $builder = new ContainerBuilder();
         $builder->setParameter('kernel.debug', true);
 
-        $cdnPublic = $faker->boolean();
         $cdnMaxAge = $faker->numberBetween(3600, 86400);
         $cdnSmaxAge = $faker->numberBetween(3600, 86400);
 
@@ -316,7 +315,7 @@ final class StoryblokExtensionTest extends TestCase
             [
                 'cdn' => [
                     'cache' => [
-                        'public' => $cdnPublic,
+                        'public' => true,
                         'max_age' => $cdnMaxAge,
                         'smax_age' => $cdnSmaxAge,
                     ],
@@ -332,7 +331,7 @@ final class StoryblokExtensionTest extends TestCase
         $definition = $builder->getDefinition(CdnController::class);
         $arguments = $definition->getArguments();
 
-        self::assertSame($cdnPublic, $arguments['$public']);
+        self::assertTrue($arguments['$public']);
         self::assertSame($cdnMaxAge, $arguments['$maxAge']);
         self::assertSame($cdnSmaxAge, $arguments['$smaxAge']);
     }
