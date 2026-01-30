@@ -275,6 +275,33 @@ final class CdnControllerTest extends TestCase
     }
 
     #[Test]
+    public function setsWeakEtagHeaderWhenConfigured(): void
+    {
+        $tempFile = $this->createTempFile('content');
+        $file = new File($tempFile);
+
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+            contentType: 'image/jpeg',
+            etag: 'W/"f062382e65b34974ba85009cf8625737"',
+            expiresAt: new DateTimeImmutable('+1 day'),
+        );
+
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
+
+        $downloader = self::createMock(FileDownloaderInterface::class);
+
+        $controller = new CdnController($storage, $downloader, null, null, null, true);
+
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
+
+        self::assertSame('W/"f062382e65b34974ba85009cf8625737"', $response->getEtag());
+    }
+
+    #[Test]
     public function setsMaxAgeWhenConfigured(): void
     {
         $tempFile = $this->createTempFile('content');
