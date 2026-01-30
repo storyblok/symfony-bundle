@@ -306,7 +306,7 @@ final class StoryblokExtensionTest extends TestCase
         $builder = new ContainerBuilder();
         $builder->setParameter('kernel.debug', true);
 
-        $cdnPublic = $faker->boolean();
+        $cdnPublic = true; // Must be true when smax_age is set
         $cdnMaxAge = $faker->numberBetween(3600, 86400);
         $cdnSmaxAge = $faker->numberBetween(3600, 86400);
 

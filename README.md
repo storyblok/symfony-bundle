@@ -441,7 +441,22 @@ when@prod:
                 max_age: 3600
                 smax_age: 3600
                 must_revalidate: true
+                etag: true
 ```
+
+#### Cache Validation (304 Not Modified)
+
+When `must_revalidate` or `etag` is enabled, the bundle supports HTTP cache validation, allowing browsers and proxies to revalidate cached content efficiently:
+
+- **`must_revalidate: true`**: Sets the `Last-Modified` header based on the content's `publishedAt()` date. Clients can send `If-Modified-Since` headers to check if content has changed.
+- **`etag: true`**: Generates an `ETag` header from the response content hash (MD5). Clients can send `If-None-Match` headers to validate their cached version.
+
+When a client's cached content is still valid, the server responds with `304 Not Modified` instead of the full response body, significantly reducing bandwidth and improving performance.
+
+> [!TIP]
+> For best results, enable both `must_revalidate` and `etag` together. This provides two validation mechanisms:
+> - `ETag` for strong validation (byte-for-byte comparison)
+> - `Last-Modified` for weak validation (time-based comparison)
 
 In case you need a specific caching configuration for a specific controller you can use Symfony's `#[Cache]` attribute
 or modifying the `Response` object directly. This will cause that the global configuration is being ignored.

@@ -132,6 +132,7 @@ final class StoryblokExtension extends Extension
             '$mustRevalidate' => $config['controller']['cache']['must_revalidate'],
             '$maxAge' => $config['controller']['cache']['max_age'],
             '$smaxAge' => $config['controller']['cache']['smax_age'],
+            '$etag' => $config['controller']['cache']['etag'],
         ]);
 
         $container->setDefinition(GlobalCachingListener::class, $storage);

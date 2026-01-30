@@ -164,4 +164,119 @@ final class GlobalCachingListenerTest extends TestCase
         self::assertTrue($event->getResponse()->headers->has('Cache-Control'));
         self::assertSame('public, s-maxage=3600', $event->getResponse()->headers->get('Cache-Control'));
     }
+
+    #[Test]
+    public function etagCacheDirective(): void
+    {
+        $listener = new GlobalCachingListener(new ContentTypeStorage(), etag: true);
+
+        $event = new ResponseEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            new Request(),
+            KernelInterface::MAIN_REQUEST,
+            new Response('test content'),
+        );
+
+        $listener($event);
+
+        self::assertTrue($event->getResponse()->headers->has('ETag'));
+        self::assertSame('"'.md5('test content').'"', $event->getResponse()->getEtag());
+    }
+
+    #[Test]
+    public function returns304WhenEtagMatches(): void
+    {
+        $content = 'test content';
+        $etag = md5($content);
+
+        $listener = new GlobalCachingListener(new ContentTypeStorage(), public: true, etag: true);
+
+        $request = new Request();
+        $request->headers->set('If-None-Match', '"'.$etag.'"');
+
+        $event = new ResponseEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            $request,
+            KernelInterface::MAIN_REQUEST,
+            new Response($content),
+        );
+
+        $listener($event);
+
+        self::assertSame(304, $event->getResponse()->getStatusCode());
+    }
+
+    #[Test]
+    public function returns200WhenEtagDoesNotMatch(): void
+    {
+        $listener = new GlobalCachingListener(new ContentTypeStorage(), public: true, etag: true);
+
+        $request = new Request();
+        $request->headers->set('If-None-Match', '"different-etag"');
+
+        $event = new ResponseEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            $request,
+            KernelInterface::MAIN_REQUEST,
+            new Response('test content'),
+        );
+
+        $listener($event);
+
+        self::assertSame(200, $event->getResponse()->getStatusCode());
+    }
+
+    #[Test]
+    public function returns304WhenLastModifiedMatches(): void
+    {
+        $publishedAt = new DateTimeImmutable('2024-01-15 10:00:00', new \DateTimeZone('UTC'));
+        $clientCachedAt = new DateTimeImmutable('2024-01-15 12:00:00', new \DateTimeZone('UTC'));
+
+        $storage = new ContentTypeStorage();
+        $storage->setContentType(new SampleContentType(['published_at' => $publishedAt->format(\DATE_ATOM)]));
+
+        $listener = new GlobalCachingListener($storage, public: true, mustRevalidate: true);
+
+        $request = new Request();
+        $request->headers->set('If-Modified-Since', $clientCachedAt->format(\DateTimeInterface::RFC7231));
+
+        $event = new ResponseEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            $request,
+            KernelInterface::MAIN_REQUEST,
+            new Response(),
+        );
+
+        $listener($event);
+
+        self::assertSame(304, $event->getResponse()->getStatusCode());
+    }
+
+    #[Test]
+    public function returns200WhenLastModifiedIsNewer(): void
+    {
+        $publishedAt = new DateTimeImmutable('2024-01-15 10:00:00', new \DateTimeZone('UTC'));
+        $clientCachedAt = new DateTimeImmutable('2024-01-10 10:00:00', new \DateTimeZone('UTC'));
+
+        $storage = new ContentTypeStorage();
+        $storage->setContentType(new SampleContentType(['published_at' => $publishedAt->format(\DATE_ATOM)]));
+
+        $listener = new GlobalCachingListener($storage, public: true, mustRevalidate: true);
+
+        $request = new Request();
+        $request->headers->set('If-Modified-Since', $clientCachedAt->format(\DateTimeInterface::RFC7231));
+
+        $response = new Response('content');
+
+        $event = new ResponseEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            $request,
+            KernelInterface::MAIN_REQUEST,
+            $response,
+        );
+
+        $listener($event);
+
+        self::assertSame(200, $event->getResponse()->getStatusCode());
+    }
 }

@@ -40,7 +40,7 @@ final class ConfigurationTest extends TestCase
         $public = $faker->boolean();
         $cdnMaxAge = $faker->numberBetween(3600);
         $cdnSmaxAge = $faker->numberBetween(3600);
-        $cdnPublic = $faker->boolean();
+        $cdnPublic = true; // Must be true when smax_age is set
 
         self::assertProcessedConfigurationEquals([
             ['base_uri' => $url],
@@ -86,6 +86,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => $public,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => $maxAge,
                     'smax_age' => null,
                 ],
@@ -128,6 +129,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -171,6 +173,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -214,6 +217,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -257,6 +261,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -317,6 +322,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -360,6 +366,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -403,6 +410,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -444,6 +452,98 @@ final class ConfigurationTest extends TestCase
             [['base_uri' => $url]],
             'The child config "token" under "storyblok" must be configured.',
         );
+    }
+
+    #[Test]
+    public function controllerCacheSmaxAgeWithPrivateTriggersDeprecation(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        $this->expectUserDeprecationMessage('Since storyblok/symfony-bundle 1.16.0: Setting "smax_age" with "public: false" in "storyblok.controller.cache" is deprecated. The s-maxage directive is only applicable to shared caches (CDN/proxy), which require public caching. This configuration will throw an exception in 2.0.');
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['controller' => ['cache' => ['public' => false, 'smax_age' => 3600]]],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => false,
+                    'must_revalidate' => null,
+                    'etag' => null,
+                    'max_age' => null,
+                    'smax_age' => 3600,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function cdnCacheSmaxAgeWithPrivateTriggersDeprecation(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+
+        $this->expectUserDeprecationMessage('Since storyblok/symfony-bundle 1.16.0: Setting "smax_age" with "public: false" in "storyblok.cdn.cache" is deprecated. The s-maxage directive is only applicable to shared caches (CDN/proxy), which require public caching. This configuration will throw an exception in 2.0.');
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['cdn' => ['cache' => ['public' => false, 'smax_age' => 3600]]],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'etag' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => false,
+                    'max_age' => null,
+                    'smax_age' => 3600,
+                ],
+            ],
+        ]);
     }
 
     protected function getConfiguration(): Configuration
