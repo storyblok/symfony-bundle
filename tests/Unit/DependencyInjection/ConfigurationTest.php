@@ -480,6 +480,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => false,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => 3600,
                 ],
@@ -525,6 +526,7 @@ final class ConfigurationTest extends TestCase
                 'cache' => [
                     'public' => null,
                     'must_revalidate' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
