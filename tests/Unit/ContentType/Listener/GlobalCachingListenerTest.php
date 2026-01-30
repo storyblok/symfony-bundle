@@ -164,4 +164,67 @@ final class GlobalCachingListenerTest extends TestCase
         self::assertTrue($event->getResponse()->headers->has('Cache-Control'));
         self::assertSame('public, s-maxage=3600', $event->getResponse()->headers->get('Cache-Control'));
     }
+
+    #[Test]
+    public function etagCacheDirective(): void
+    {
+        $listener = new GlobalCachingListener(new ContentTypeStorage(), etag: true);
+
+        $event = new ResponseEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            new Request(),
+            KernelInterface::MAIN_REQUEST,
+            new Response('Hello World'),
+        );
+
+        $listener($event);
+
+        self::assertTrue($event->getResponse()->headers->has('ETag'));
+        self::assertSame('"'.md5('Hello World').'"', $event->getResponse()->headers->get('ETag'));
+    }
+
+    #[Test]
+    public function etagReturns304WhenMatches(): void
+    {
+        $listener = new GlobalCachingListener(new ContentTypeStorage(), etag: true);
+
+        $request = new Request();
+        $request->headers->set('If-None-Match', '"'.md5('Hello World').'"');
+
+        $event = new ResponseEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            $request,
+            KernelInterface::MAIN_REQUEST,
+            new Response('Hello World'),
+        );
+
+        $listener($event);
+
+        self::assertSame(Response::HTTP_NOT_MODIFIED, $event->getResponse()->getStatusCode());
+    }
+
+    #[Test]
+    public function lastModifiedReturns304WhenNotModified(): void
+    {
+        $publishedAt = new DateTimeImmutable('2024-01-15 10:00:00');
+
+        $storage = new ContentTypeStorage();
+        $storage->setContentType(new SampleContentType(['published_at' => $publishedAt->format(\DATE_ATOM)]));
+
+        $listener = new GlobalCachingListener($storage, mustRevalidate: true);
+
+        $request = new Request();
+        $request->headers->set('If-Modified-Since', $publishedAt->format(\DATE_RFC7231));
+
+        $event = new ResponseEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            $request,
+            KernelInterface::MAIN_REQUEST,
+            new Response('Hello World'),
+        );
+
+        $listener($event);
+
+        self::assertSame(Response::HTTP_NOT_MODIFIED, $event->getResponse()->getStatusCode());
+    }
 }

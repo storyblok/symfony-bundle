@@ -441,7 +441,14 @@ when@prod:
                 max_age: 3600
                 smax_age: 3600
                 must_revalidate: true
+                etag: true
 ```
+
+#### Cache Validation (304 Not Modified)
+
+When `etag: true` is enabled, the bundle automatically generates an ETag header based on the response content (using MD5 hash). Combined with `must_revalidate: true`, which sets the `Last-Modified` header based on the content type's `publishedAt` date, this enables proper HTTP cache validation.
+
+When a client sends an `If-None-Match` (for ETag) or `If-Modified-Since` (for Last-Modified) header, the server can respond with a `304 Not Modified` status if the content hasn't changed, saving bandwidth and improving performance.
 
 In case you need a specific caching configuration for a specific controller you can use Symfony's `#[Cache]` attribute
 or modifying the `Response` object directly. This will cause that the global configuration is being ignored.

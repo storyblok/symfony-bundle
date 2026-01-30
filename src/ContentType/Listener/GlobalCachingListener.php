@@ -25,6 +25,7 @@ final readonly class GlobalCachingListener
         private ?bool $mustRevalidate = null,
         private ?int $maxAge = null,
         private ?int $smaxAge = null,
+        private ?bool $etag = null,
     ) {
     }
 
@@ -46,6 +47,14 @@ final readonly class GlobalCachingListener
             }
         }
 
+        if (true === $this->etag && !$response->headers->has('ETag')) {
+            $content = $response->getContent();
+
+            if (false !== $content) {
+                $response->setEtag(md5($content));
+            }
+        }
+
         if (null !== $this->maxAge && !$response->headers->hasCacheControlDirective('max-age')) {
             $response->setMaxAge($this->maxAge);
         }
@@ -61,6 +70,8 @@ final readonly class GlobalCachingListener
                 $response->setPrivate();
             }
         }
+
+        $response->isNotModified($event->getRequest());
 
         $event->setResponse($response);
     }
