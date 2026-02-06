@@ -423,6 +423,103 @@ final readonly class PageController
 > support ticket to add a response header with the necessary information that would allow changing the first request to
 > a HEAD request, which would significantly reduce the overhead.
 
+### Accessing the Current Content Type
+
+The bundle provides `ContentTypeStorageInterface` to access the current `ContentType` anywhere in your application. This is particularly useful when building reusable components like navigation menus, language switchers, breadcrumbs, or shared layouts that need context about the current page.
+
+#### Why is this useful?
+
+Without `ContentTypeStorageInterface`, you would need to pass the content type through every controller action and template, creating tight coupling and duplicating logic. With this interface, you can access the current content type in Twig extensions, event listeners, services, or any other part of your application - making your code cleaner and more maintainable.
+
+#### Example: Global Header with Content Type Context
+
+Here's a practical example of a Twig extension that renders a global header. It fetches header data from Storyblok and makes the current content type available to the template, enabling context-aware navigation, active menu highlighting, or language switching:
+
+```php
+use Storyblok\Api\ContentApi\StoriesApiInterface;
+use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
+use Storyblok\Api\Domain\Value\Resolver\LinkType;
+use Storyblok\Api\Request\StoryRequest;
+use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
+use Symfony\Component\DependencyInjection\Attribute\AsTwigFunction;
+use Twig\Environment;
+
+final class HeaderExtension
+{
+    public function __construct(
+        private readonly StoriesApiInterface $stories,
+        private readonly ContentTypeStorageInterface $contentTypeStorage,
+    ) {
+    }
+
+    /**
+     * @param array<string, mixed> $parameters
+     */
+    #[AsTwigFunction('render_header', needsEnvironment: true, isSafe: ['html'])]
+    public function renderHeader(Environment $twig, string $locale, array $parameters = []): string
+    {
+        $header = new Header($this->stories->bySlug('_global/header', new StoryRequest(
+            language: $locale,
+            resolveLinks: new ResolveLinks(LinkType::Link),
+        ))->story);
+
+        return $twig->render('layouts/_header.html.twig', [
+            ...$parameters,
+            'header' => $header,
+            'content_type' => $this->contentTypeStorage->getContentType(),
+        ]);
+    }
+}
+```
+
+In your base template, use the function to render the header:
+
+```twig
+{# templates/base.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Welcome!{% endblock %}</title>
+</head>
+<body>
+    {{ render_header(app.request.locale) }}
+
+    {% block body %}{% endblock %}
+</body>
+</html>
+```
+
+In your header template, you now have access to the current content type for context-aware rendering:
+
+```twig
+{# templates/layouts/_header.html.twig #}
+<header>
+    <nav>
+        {% for link in header.navigation %}
+            {# Highlight active menu item based on current content type #}
+            <a href="{{ link.url }}"
+               class="{{ content_type and content_type.fullSlug() starts with link.slug ? 'active' : '' }}">
+                {{ link.title }}
+            </a>
+        {% endfor %}
+    </nav>
+
+    {# Example: Language switcher using content type's full slug #}
+    {% if content_type %}
+        <div class="language-switcher">
+            {% for locale in ['en', 'de', 'fr'] %}
+                <a href="/{{ locale }}/{{ content_type.fullSlug() }}"
+                   class="{{ locale == app.request.locale ? 'active' : '' }}">
+                    {{ locale|upper }}
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+</header>
+```
+
+The `ContentTypeStorageInterface` provides seamless access to the current content type throughout your application without needing to pass it explicitly through every controller and template.
+
 ### Caching
 
 The bundle provides a global caching configuration to enable HTTP caching directives, which
