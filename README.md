@@ -423,6 +423,126 @@ final readonly class PageController
 > support ticket to add a response header with the necessary information that would allow changing the first request to
 > a HEAD request, which would significantly reduce the overhead.
 
+### Accessing the Current Content Type
+
+The bundle provides `ContentTypeStorageInterface` to access the current `ContentType` anywhere in your application. This is particularly useful when building reusable components like navigation menus, language switchers, breadcrumbs, or shared layouts that need context about the current page.
+
+> [!NOTE]
+> `ContentTypeStorageInterface` only works in HTTP request context (controllers, Twig extensions, event listeners during request handling). It is not available in CLI/command context where no content type is being rendered.
+
+#### Why is this useful?
+
+Without `ContentTypeStorageInterface`, you would need to pass the content type through every controller action and template, creating tight coupling and duplicating logic. With this interface, you can access the current content type in Twig extensions, event listeners, services, or any other part of your application - making your code cleaner and more maintainable.
+
+#### Example ContentType Implementation
+
+First, here's a typical `Page` content type with common Storyblok properties:
+
+```php
+namespace App\ContentType;
+
+use Storyblok\Bundle\ContentType\ContentType;
+use Storyblok\Bundle\Util\ValueObjectTrait;
+
+final readonly class Page extends ContentType
+{
+    use ValueObjectTrait;
+
+    public string $uuid;
+    public string $fullSlug;
+    public string $title;
+    private \DateTimeImmutable $publishedAt;
+
+    public function __construct(array $values)
+    {
+        // Extract Storyblok story properties
+        $this->uuid = self::string($values, 'uuid');
+        $this->fullSlug = self::string($values, 'full_slug');
+        $this->publishedAt = self::DateTimeImmutable($values, 'published_at');
+
+        // Extract content fields
+        $content = $values['content'];
+        $this->title = self::string($content, 'title');
+    }
+
+    public function publishedAt(): \DateTimeImmutable
+    {
+        return $this->publishedAt;
+    }
+}
+```
+
+#### Practical Example: Language Switcher
+
+Now you can access this content type anywhere in your application. Here's a language switcher that preserves the current page context across translations:
+
+```php
+namespace App\Twig;
+
+use App\ContentType\Page;
+use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
+use Symfony\Component\DependencyInjection\Attribute\AsTwigFunction;
+
+final readonly class LanguageSwitcherExtension
+{
+    public function __construct(
+        private ContentTypeStorageInterface $contentTypeStorage,
+    ) {
+    }
+
+    /**
+     * Returns language-specific URLs for the current page.
+     * @return array<string, string>
+     */
+    #[AsTwigFunction('language_urls')]
+    public function getLanguageUrls(): array
+    {
+        /** @var Page|null $page */
+        $page = $this->contentTypeStorage->getContentType();
+
+        if (null !== $page) {
+            return [];
+        }
+
+        $urls = [];
+        foreach (['en', 'de', 'fr'] as $locale) {
+            // Build localized URL using the page's full slug
+            $urls[$locale] = '/' . $locale . '/' . $page->fullSlug;
+        }
+
+        return $urls;
+    }
+}
+```
+
+Usage in Twig:
+
+```twig
+{# templates/components/language_switcher.html.twig #}
+<div class="language-switcher">
+    {% for locale, url in language_urls() %}
+        <a href="{{ url }}"
+           class="{{ locale == app.request.locale ? 'active' : '' }}"
+           hreflang="{{ locale }}">
+            {{ locale|upper }}
+        </a>
+    {% endfor %}
+</div>
+```
+
+#### Other Common Use Cases
+
+- **Breadcrumb Navigation**: Split `fullSlug` (e.g., `products/electronics/laptops`) to build hierarchical breadcrumbs
+- **Active Menu Highlighting**: Compare current page's `fullSlug` with menu item slugs to highlight active navigation
+- **Canonical URLs**: Use `uuid` and `fullSlug` to generate canonical URLs and alternate language links
+- **Page Metadata**: Access `title` and other properties for generating `<title>`, `<meta>` tags, and OpenGraph data
+
+#### Key Benefits
+
+- **No manual passing**: Access content type context anywhere without passing it through controller → template → component chains
+- **Type-safe**: Your concrete ContentType class (e.g., `Page`) provides typed properties and IDE autocomplete
+- **Flexible**: Works in Twig extensions, event listeners, services, and any part of your application during request handling
+
 ### Caching
 
 The bundle provides a global caching configuration to enable HTTP caching directives, which
