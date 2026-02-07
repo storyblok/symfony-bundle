@@ -427,98 +427,121 @@ final readonly class PageController
 
 The bundle provides `ContentTypeStorageInterface` to access the current `ContentType` anywhere in your application. This is particularly useful when building reusable components like navigation menus, language switchers, breadcrumbs, or shared layouts that need context about the current page.
 
+> [!NOTE]
+> `ContentTypeStorageInterface` only works in HTTP request context (controllers, Twig extensions, event listeners during request handling). It is not available in CLI/command context where no content type is being rendered.
+
 #### Why is this useful?
 
 Without `ContentTypeStorageInterface`, you would need to pass the content type through every controller action and template, creating tight coupling and duplicating logic. With this interface, you can access the current content type in Twig extensions, event listeners, services, or any other part of your application - making your code cleaner and more maintainable.
 
-#### Example: Global Header with Content Type Context
+#### Example ContentType Implementation
 
-Here's a practical example of a Twig extension that renders a global header. It fetches header data from Storyblok and makes the current content type available to the template, enabling context-aware navigation, active menu highlighting, or language switching:
+First, here's a typical `Page` content type with common Storyblok properties:
 
 ```php
-use Storyblok\Api\ContentApi\StoriesApiInterface;
-use Storyblok\Api\Domain\Value\Resolver\ResolveLinks;
-use Storyblok\Api\Domain\Value\Resolver\LinkType;
-use Storyblok\Api\Request\StoryRequest;
-use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
-use Symfony\Component\DependencyInjection\Attribute\AsTwigFunction;
-use Twig\Environment;
+namespace App\ContentType;
 
-final class HeaderExtension
+use Storyblok\Bundle\ContentType\ContentType;
+use Storyblok\Bundle\Util\ValueObjectTrait;
+
+final readonly class Page extends ContentType
 {
-    public function __construct(
-        private readonly StoriesApiInterface $stories,
-        private readonly ContentTypeStorageInterface $contentTypeStorage,
-    ) {
+    use ValueObjectTrait;
+
+    public string $uuid;
+    public string $fullSlug;
+    public string $title;
+    private \DateTimeImmutable $publishedAt;
+
+    public function __construct(array $values)
+    {
+        // Extract Storyblok story properties
+        $this->uuid = self::string($values, 'uuid');
+        $this->fullSlug = self::string($values, 'full_slug');
+        $this->publishedAt = self::DateTimeImmutable($values, 'published_at');
+
+        // Extract content fields
+        $content = $values['content'];
+        $this->title = self::string($content, 'title');
     }
 
-    /**
-     * @param array<string, mixed> $parameters
-     */
-    #[AsTwigFunction('render_header', needsEnvironment: true, isSafe: ['html'])]
-    public function renderHeader(Environment $twig, string $locale, array $parameters = []): string
+    public function publishedAt(): \DateTimeImmutable
     {
-        $header = new Header($this->stories->bySlug('_global/header', new StoryRequest(
-            language: $locale,
-            resolveLinks: new ResolveLinks(LinkType::Link),
-        ))->story);
-
-        return $twig->render('layouts/_header.html.twig', [
-            ...$parameters,
-            'header' => $header,
-            'content_type' => $this->contentTypeStorage->getContentType(),
-        ]);
+        return $this->publishedAt;
     }
 }
 ```
 
-In your base template, use the function to render the header:
+#### Practical Example: Language Switcher
 
-```twig
-{# templates/base.html.twig #}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{% block title %}Welcome!{% endblock %}</title>
-</head>
-<body>
-    {{ render_header(app.request.locale) }}
+Now you can access this content type anywhere in your application. Here's a language switcher that preserves the current page context across translations:
 
-    {% block body %}{% endblock %}
-</body>
-</html>
+```php
+namespace App\Twig;
+
+use App\ContentType\Page;
+use Storyblok\Bundle\ContentType\ContentTypeStorageInterface;
+use Symfony\Component\DependencyInjection\Attribute\AsTwigFunction;
+
+final readonly class LanguageSwitcherExtension
+{
+    public function __construct(
+        private ContentTypeStorageInterface $contentTypeStorage,
+    ) {
+    }
+
+    /**
+     * Returns language-specific URLs for the current page.
+     * @return array<string, string>
+     */
+    #[AsTwigFunction('language_urls')]
+    public function getLanguageUrls(): array
+    {
+        /** @var Page|null $page */
+        $page = $this->contentTypeStorage->getContentType();
+
+        if (null !== $page) {
+            return [];
+        }
+
+        $urls = [];
+        foreach (['en', 'de', 'fr'] as $locale) {
+            // Build localized URL using the page's full slug
+            $urls[$locale] = '/' . $locale . '/' . $page->fullSlug;
+        }
+
+        return $urls;
+    }
+}
 ```
 
-In your header template, you now have access to the current content type for context-aware rendering:
+Usage in Twig:
 
 ```twig
-{# templates/layouts/_header.html.twig #}
-<header>
-    <nav>
-        {% for link in header.navigation %}
-            {# Highlight active menu item based on current content type #}
-            <a href="{{ link.url }}"
-               class="{{ content_type and content_type.fullSlug() starts with link.slug ? 'active' : '' }}">
-                {{ link.title }}
-            </a>
-        {% endfor %}
-    </nav>
-
-    {# Example: Language switcher using content type's full slug #}
-    {% if content_type %}
-        <div class="language-switcher">
-            {% for locale in ['en', 'de', 'fr'] %}
-                <a href="/{{ locale }}/{{ content_type.fullSlug() }}"
-                   class="{{ locale == app.request.locale ? 'active' : '' }}">
-                    {{ locale|upper }}
-                </a>
-            {% endfor %}
-        </div>
-    {% endif %}
-</header>
+{# templates/components/language_switcher.html.twig #}
+<div class="language-switcher">
+    {% for locale, url in language_urls() %}
+        <a href="{{ url }}"
+           class="{{ locale == app.request.locale ? 'active' : '' }}"
+           hreflang="{{ locale }}">
+            {{ locale|upper }}
+        </a>
+    {% endfor %}
+</div>
 ```
 
-The `ContentTypeStorageInterface` provides seamless access to the current content type throughout your application without needing to pass it explicitly through every controller and template.
+#### Other Common Use Cases
+
+- **Breadcrumb Navigation**: Split `fullSlug` (e.g., `products/electronics/laptops`) to build hierarchical breadcrumbs
+- **Active Menu Highlighting**: Compare current page's `fullSlug` with menu item slugs to highlight active navigation
+- **Canonical URLs**: Use `uuid` and `fullSlug` to generate canonical URLs and alternate language links
+- **Page Metadata**: Access `title` and other properties for generating `<title>`, `<meta>` tags, and OpenGraph data
+
+#### Key Benefits
+
+- **No manual passing**: Access content type context anywhere without passing it through controller → template → component chains
+- **Type-safe**: Your concrete ContentType class (e.g., `Page`) provides typed properties and IDE autocomplete
+- **Flexible**: Works in Twig extensions, event listeners, services, and any part of your application during request handling
 
 ### Caching
 
