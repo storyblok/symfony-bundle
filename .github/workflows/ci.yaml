@@ -38,7 +38,7 @@ jobs:
               run: "composer validate"
 
             - name: "Install dependencies with composer"
-              uses: "ramsey/composer-install@v3"
+              uses: "ramsey/composer-install@v4"
               with:
                   composer-options: "--no-scripts"
 
@@ -70,7 +70,7 @@ jobs:
                   php-version: "${{ matrix.php-version }}"
 
             - name: "Install dependencies with composer"
-              uses: "ramsey/composer-install@v3"
+              uses: "ramsey/composer-install@v4"
 
             - name: "Static code analysis"
               run: "vendor/bin/phpstan analyse --configuration phpstan.neon.dist --no-progress"
@@ -97,7 +97,7 @@ jobs:
                 php-version: "${{ matrix.php-version }}"
 
             - name: "Install dependencies with composer"
-              uses: "ramsey/composer-install@v3"
+              uses: "ramsey/composer-install@v4"
 
             - name: "Run tests"
               run: "vendor/bin/phpunit --configuration=phpunit.xml.dist --coverage-clover=.build/logs/clover.xml"
@@ -133,7 +133,7 @@ jobs:
               run: "composer validate"
 
             - name: "Install dependencies with composer"
-              uses: "ramsey/composer-install@v3"
+              uses: "ramsey/composer-install@v4"
               with:
                   composer-options: "--no-scripts"
 
