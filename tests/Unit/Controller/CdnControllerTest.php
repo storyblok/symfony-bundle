@@ -20,6 +20,7 @@ use Safe\DateTimeImmutable;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
 use Storyblok\Bundle\Cdn\Domain\DownloadedFile;
+use Storyblok\Bundle\Cdn\Download\AssetDownloadFailedException;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\MetadataNotFoundException;
@@ -492,6 +493,29 @@ final class CdnControllerTest extends TestCase
         $controller = new CdnController($storage, $downloader, null, null, null);
 
         $controller->__invoke(new Request(), 'ef7436441c4defbf', 'my-document', 'pdf');
+    }
+
+    #[Test]
+    public function throwsNotFoundWhenDownloadFails(): void
+    {
+        $metadataWithoutFile = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+        );
+
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadataWithoutFile);
+        $storage->method('hasFile')->willReturn(false);
+
+        $downloader = self::createMock(FileDownloaderInterface::class);
+        $downloader->method('download')
+            ->willThrowException(new AssetDownloadFailedException('Failed to download asset from "https://a.storyblok.com/f/12345/image.jpg"', 404));
+
+        $controller = new CdnController($storage, $downloader, null, null, null);
+
+        $this->expectException(NotFoundHttpException::class);
+        $this->expectExceptionMessage('Asset "image.jpg" could not be downloaded.');
+
+        $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
     }
 
     private function createTempFile(string $content): string

@@ -17,6 +17,7 @@ namespace Storyblok\Bundle\Cdn\Download;
 use Safe\DateTimeImmutable;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
 use Storyblok\Bundle\Cdn\Domain\DownloadedFile;
+use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function Symfony\Component\String\u;
 
@@ -35,18 +36,22 @@ final readonly class AssetDownloader implements FileDownloaderInterface
 
     public function download(string $url): DownloadedFile
     {
-        $response = $this->client->request('GET', $url);
-        $headers = $response->getHeaders();
+        try {
+            $response = $this->client->request('GET', $url);
+            $headers = $response->getHeaders();
 
-        return new DownloadedFile(
-            content: $response->getContent(),
-            metadata: new CdnFileMetadata(
-                originalUrl: $url,
-                contentType: $headers['content-type'][0] ?? 'application/octet-stream',
-                etag: $headers['etag'][0] ?? null,
-                expiresAt: (new DateTimeImmutable())->modify(\sprintf('+%d seconds', self::parseTtl($headers))),
-            ),
-        );
+            return new DownloadedFile(
+                content: $response->getContent(),
+                metadata: new CdnFileMetadata(
+                    originalUrl: $url,
+                    contentType: $headers['content-type'][0] ?? 'application/octet-stream',
+                    etag: $headers['etag'][0] ?? null,
+                    expiresAt: (new DateTimeImmutable())->modify(\sprintf('+%d seconds', self::parseTtl($headers))),
+                ),
+            );
+        } catch (HttpExceptionInterface $e) {
+            throw new AssetDownloadFailedException(\sprintf('Failed to download asset from "%s": %s', $url, $e->getMessage()), $e->getResponse()->getStatusCode(), $e);
+        }
     }
 
     /**
