@@ -20,6 +20,7 @@ use Safe\DateTimeImmutable;
 use Storyblok\Bundle\Cdn\Domain\DownloadedFile;
 use Storyblok\Bundle\Cdn\Download\AssetDownloader;
 use Storyblok\Bundle\Cdn\Download\AssetDownloadFailedException;
+use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -234,6 +235,22 @@ final class AssetDownloaderTest extends TestCase
         $downloader = new AssetDownloader($client);
 
         self::expectException(AssetDownloadFailedException::class);
+
+        $downloader->download($url);
+    }
+
+    #[Test]
+    public function downloadThrowsExceptionOnTransportError(): void
+    {
+        $url = 'https://a.storyblok.com/f/12345/image.jpg';
+
+        $client = new MockHttpClient(static function (): MockResponse {
+            throw new TransportException('Network is unreachable');
+        });
+        $downloader = new AssetDownloader($client);
+
+        self::expectException(AssetDownloadFailedException::class);
+        self::expectExceptionMessageMatches('/Failed to download asset from/');
 
         $downloader->download($url);
     }
