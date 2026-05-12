@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Storyblok\Bundle\Controller;
 
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
+use Storyblok\Bundle\Cdn\Download\AssetDownloadFailedException;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnFileNotFoundException;
 use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
@@ -53,7 +54,11 @@ final readonly class CdnController
         }
 
         if (!$this->storage->hasFile($fileId, $fullFilename)) {
-            $downloaded = $this->downloader->download($metadata->originalUrl);
+            try {
+                $downloaded = $this->downloader->download($metadata->originalUrl);
+            } catch (AssetDownloadFailedException $e) {
+                throw new NotFoundHttpException(\sprintf('Asset "%s" could not be downloaded.', $fullFilename), $e);
+            }
 
             if (null === $downloaded->metadata->contentType || null === $downloaded->metadata->expiresAt) {
                 throw new \RuntimeException('Downloaded file metadata is incomplete');
