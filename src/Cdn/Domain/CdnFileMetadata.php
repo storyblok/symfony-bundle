@@ -38,7 +38,7 @@ final readonly class CdnFileMetadata implements \JsonSerializable
         return new self(
             originalUrl: $data['originalUrl'],
             contentType: $data['contentType'],
-            etag: $data['etag'],
+            etag: self::normalizeEtag($data['etag']),
             expiresAt: null !== $data['expiresAt'] ? new DateTimeImmutable($data['expiresAt']) : null,
         );
     }
@@ -48,7 +48,7 @@ final readonly class CdnFileMetadata implements \JsonSerializable
         return new self(
             originalUrl: $this->originalUrl,
             contentType: $contentType,
-            etag: $etag,
+            etag: self::normalizeEtag($etag),
             expiresAt: $expiresAt,
         );
     }
@@ -73,5 +73,25 @@ final readonly class CdnFileMetadata implements \JsonSerializable
             'etag' => $this->etag,
             'expiresAt' => $this->expiresAt?->format(\DateTimeInterface::ATOM),
         ];
+    }
+
+    /**
+     * Normalize ETag by stripping surrounding quotes while preserving weak indicator.
+     * Converts: "value" → value, W/"value" → W/value.
+     */
+    private static function normalizeEtag(?string $etag): ?string
+    {
+        if (null === $etag) {
+            return null;
+        }
+
+        $weak = '';
+
+        if (str_starts_with($etag, 'W/')) {
+            $weak = 'W/';
+            $etag = substr($etag, 2);
+        }
+
+        return $weak.trim($etag, '"');
     }
 }

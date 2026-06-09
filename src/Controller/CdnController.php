@@ -15,11 +15,13 @@ declare(strict_types=1);
 namespace Storyblok\Bundle\Controller;
 
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
+use Storyblok\Bundle\Cdn\Download\AssetDownloadFailedException;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnFileNotFoundException;
 use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\MetadataNotFoundException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -36,10 +38,11 @@ final readonly class CdnController
         private ?int $maxAge,
         private ?int $smaxAge,
         private ?bool $public,
+        private ?bool $etag = null,
     ) {
     }
 
-    public function __invoke(string $id, string $filename, string $extension): Response
+    public function __invoke(Request $request, string $id, string $filename, string $extension): Response
     {
         $fileId = new CdnFileId($id);
         $fullFilename = \sprintf('%s.%s', $filename, $extension);
@@ -51,7 +54,11 @@ final readonly class CdnController
         }
 
         if (!$this->storage->hasFile($fileId, $fullFilename)) {
-            $downloaded = $this->downloader->download($metadata->originalUrl);
+            try {
+                $downloaded = $this->downloader->download($metadata->originalUrl);
+            } catch (AssetDownloadFailedException $e) {
+                throw new NotFoundHttpException(\sprintf('Asset "%s" could not be downloaded.', $fullFilename), $e);
+            }
 
             if (null === $downloaded->metadata->contentType || null === $downloaded->metadata->expiresAt) {
                 throw new \RuntimeException('Downloaded file metadata is incomplete');
@@ -78,8 +85,11 @@ final readonly class CdnController
             $response->headers->set('Content-Type', $metadata->contentType);
         }
 
-        if (null !== $metadata->etag) {
-            $response->setEtag($metadata->etag);
+        if (true === $this->etag && null !== $metadata->etag) {
+            $etag = $metadata->etag;
+            $weak = str_starts_with($etag, 'W/');
+
+            $response->setEtag($weak ? substr($etag, 2) : $etag, $weak);
         }
 
         if (null !== $this->maxAge) {
@@ -97,6 +107,8 @@ final readonly class CdnController
                 $response->setPrivate();
             }
         }
+
+        $response->isNotModified($request);
 
         return $response;
     }

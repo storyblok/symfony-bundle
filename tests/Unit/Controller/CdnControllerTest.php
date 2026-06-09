@@ -20,6 +20,7 @@ use Safe\DateTimeImmutable;
 use Storyblok\Bundle\Cdn\Domain\CdnFileId;
 use Storyblok\Bundle\Cdn\Domain\CdnFileMetadata;
 use Storyblok\Bundle\Cdn\Domain\DownloadedFile;
+use Storyblok\Bundle\Cdn\Download\AssetDownloadFailedException;
 use Storyblok\Bundle\Cdn\Download\FileDownloaderInterface;
 use Storyblok\Bundle\Cdn\Storage\CdnStorageInterface;
 use Storyblok\Bundle\Cdn\Storage\MetadataNotFoundException;
@@ -27,6 +28,7 @@ use Storyblok\Bundle\Controller\CdnController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use function Safe\file_put_contents;
 use function Safe\tempnam;
@@ -69,7 +71,7 @@ final class CdnControllerTest extends TestCase
         $this->expectException(NotFoundHttpException::class);
         $this->expectExceptionMessage('Asset not found');
 
-        $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
     }
 
     #[Test]
@@ -101,7 +103,7 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, null, null, null);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         self::assertInstanceOf(BinaryFileResponse::class, $response);
         self::assertSame(200, $response->getStatusCode());
@@ -158,7 +160,7 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, null, null, null);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         self::assertInstanceOf(BinaryFileResponse::class, $response);
         self::assertSame(200, $response->getStatusCode());
@@ -190,7 +192,7 @@ final class CdnControllerTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Downloaded file metadata is incomplete');
 
-        $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
     }
 
     #[Test]
@@ -214,13 +216,13 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, null, null, null);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'webp');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'webp');
 
         self::assertSame('image/webp', $response->headers->get('Content-Type'));
     }
 
     #[Test]
-    public function setsEtagHeader(): void
+    public function setsEtagHeaderWhenConfigured(): void
     {
         $tempFile = $this->createTempFile('content');
         $file = new File($tempFile);
@@ -239,11 +241,65 @@ final class CdnControllerTest extends TestCase
 
         $downloader = self::createMock(FileDownloaderInterface::class);
 
-        $controller = new CdnController($storage, $downloader, null, null, null);
+        $controller = new CdnController($storage, $downloader, null, null, null, true);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         self::assertSame('"etag-value-123"', $response->getEtag());
+    }
+
+    #[Test]
+    public function doesNotSetEtagHeaderWhenNotConfigured(): void
+    {
+        $tempFile = $this->createTempFile('content');
+        $file = new File($tempFile);
+
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+            contentType: 'image/jpeg',
+            etag: '"etag-value-123"',
+            expiresAt: new DateTimeImmutable('+1 day'),
+        );
+
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
+
+        $downloader = self::createMock(FileDownloaderInterface::class);
+
+        $controller = new CdnController($storage, $downloader, null, null, null, null);
+
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
+
+        self::assertNull($response->getEtag());
+    }
+
+    #[Test]
+    public function setsWeakEtagHeaderWhenConfigured(): void
+    {
+        $tempFile = $this->createTempFile('content');
+        $file = new File($tempFile);
+
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+            contentType: 'image/jpeg',
+            etag: 'W/"f062382e65b34974ba85009cf8625737"',
+            expiresAt: new DateTimeImmutable('+1 day'),
+        );
+
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
+
+        $downloader = self::createMock(FileDownloaderInterface::class);
+
+        $controller = new CdnController($storage, $downloader, null, null, null, true);
+
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
+
+        self::assertSame('W/"f062382e65b34974ba85009cf8625737"', $response->getEtag());
     }
 
     #[Test]
@@ -267,7 +323,7 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, 3600, null, null);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         self::assertSame(3600, $response->getMaxAge());
     }
@@ -293,7 +349,7 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, null, 7200, null);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         self::assertStringContainsString('s-maxage=7200', (string) $response->headers->get('Cache-Control'));
     }
@@ -319,7 +375,7 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, null, null, true);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         self::assertStringContainsString('public', (string) $response->headers->get('Cache-Control'));
     }
@@ -345,7 +401,7 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, null, null, false);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         self::assertStringContainsString('private', (string) $response->headers->get('Cache-Control'));
     }
@@ -371,12 +427,42 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, 3600, 7200, true);
 
-        $response = $controller->__invoke('ef7436441c4defbf', 'image', 'jpg');
+        $response = $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
 
         $cacheControl = (string) $response->headers->get('Cache-Control');
         self::assertStringContainsString('public', $cacheControl);
         self::assertStringContainsString('max-age=3600', $cacheControl);
         self::assertStringContainsString('s-maxage=7200', $cacheControl);
+    }
+
+    #[Test]
+    public function returns304WhenEtagMatches(): void
+    {
+        $tempFile = $this->createTempFile('content');
+        $file = new File($tempFile);
+
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+            contentType: 'image/jpeg',
+            etag: '"etag-value-123"',
+            expiresAt: new DateTimeImmutable('+1 day'),
+        );
+
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadata);
+        $storage->method('hasFile')->willReturn(true);
+        $storage->method('getFile')->willReturn($file);
+
+        $downloader = self::createMock(FileDownloaderInterface::class);
+
+        $controller = new CdnController($storage, $downloader, null, null, null, true);
+
+        $request = new Request();
+        $request->headers->set('If-None-Match', '"etag-value-123"');
+
+        $response = $controller->__invoke($request, 'ef7436441c4defbf', 'image', 'jpg');
+
+        self::assertSame(304, $response->getStatusCode());
     }
 
     #[Test]
@@ -406,7 +492,30 @@ final class CdnControllerTest extends TestCase
 
         $controller = new CdnController($storage, $downloader, null, null, null);
 
-        $controller->__invoke('ef7436441c4defbf', 'my-document', 'pdf');
+        $controller->__invoke(new Request(), 'ef7436441c4defbf', 'my-document', 'pdf');
+    }
+
+    #[Test]
+    public function throwsNotFoundWhenDownloadFails(): void
+    {
+        $metadataWithoutFile = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+        );
+
+        $storage = self::createMock(CdnStorageInterface::class);
+        $storage->method('getMetadata')->willReturn($metadataWithoutFile);
+        $storage->method('hasFile')->willReturn(false);
+
+        $downloader = self::createMock(FileDownloaderInterface::class);
+        $downloader->method('download')
+            ->willThrowException(new AssetDownloadFailedException('Failed to download asset from "https://a.storyblok.com/f/12345/image.jpg"', 404));
+
+        $controller = new CdnController($storage, $downloader, null, null, null);
+
+        $this->expectException(NotFoundHttpException::class);
+        $this->expectExceptionMessage('Asset "image.jpg" could not be downloaded.');
+
+        $controller->__invoke(new Request(), 'ef7436441c4defbf', 'image', 'jpg');
     }
 
     private function createTempFile(string $content): string

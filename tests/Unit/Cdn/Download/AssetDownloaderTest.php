@@ -19,6 +19,8 @@ use PHPUnit\Framework\TestCase;
 use Safe\DateTimeImmutable;
 use Storyblok\Bundle\Cdn\Domain\DownloadedFile;
 use Storyblok\Bundle\Cdn\Download\AssetDownloader;
+use Storyblok\Bundle\Cdn\Download\AssetDownloadFailedException;
+use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -200,5 +202,56 @@ final class AssetDownloaderTest extends TestCase
 
         self::assertSame('GET', $response->getRequestMethod());
         self::assertSame($url, $response->getRequestUrl());
+    }
+
+    #[Test]
+    public function downloadThrowsExceptionOnHttpError(): void
+    {
+        $url = 'https://a.storyblok.com/f/12345/image.jpg';
+
+        $response = new MockResponse('Not Found', [
+            'http_code' => 404,
+        ]);
+
+        $client = new MockHttpClient($response);
+        $downloader = new AssetDownloader($client);
+
+        self::expectException(AssetDownloadFailedException::class);
+        self::expectExceptionMessageMatches('/Failed to download asset from/');
+
+        $downloader->download($url);
+    }
+
+    #[Test]
+    public function downloadThrowsExceptionOnServerError(): void
+    {
+        $url = 'https://a.storyblok.com/f/12345/image.jpg';
+
+        $response = new MockResponse('Internal Server Error', [
+            'http_code' => 500,
+        ]);
+
+        $client = new MockHttpClient($response);
+        $downloader = new AssetDownloader($client);
+
+        self::expectException(AssetDownloadFailedException::class);
+
+        $downloader->download($url);
+    }
+
+    #[Test]
+    public function downloadThrowsExceptionOnTransportError(): void
+    {
+        $url = 'https://a.storyblok.com/f/12345/image.jpg';
+
+        $client = new MockHttpClient(static function (): MockResponse {
+            throw new TransportException('Network is unreachable');
+        });
+        $downloader = new AssetDownloader($client);
+
+        self::expectException(AssetDownloadFailedException::class);
+        self::expectExceptionMessageMatches('/Failed to download asset from/');
+
+        $downloader->download($url);
     }
 }

@@ -36,7 +36,7 @@ final class TraceableCdnStorageTest extends TestCase
     #[Test]
     public function defaults(): void
     {
-        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated = $this->createStub(CdnStorageInterface::class);
         $storage = new TraceableCdnStorage($decorated);
 
         self::assertEmpty($storage->getTraces());
@@ -244,7 +244,7 @@ final class TraceableCdnStorageTest extends TestCase
         $filename = 'image.jpg';
         $metadata = new CdnFileMetadata('https://a.storyblok.com/f/12345/image.jpg');
 
-        $decorated = $this->createMock(CdnStorageInterface::class);
+        $decorated = $this->createStub(CdnStorageInterface::class);
 
         $storage = new TraceableCdnStorage($decorated);
 

@@ -36,6 +36,7 @@ final class RequirementTest extends TestCase
         yield 'dash' => ['valid-slug'];
         yield 'only dash' => ['/-/test'];
         yield 'underscore' => ['valid_slug'];
+        yield 'double underscore' => ['valid_slug-with__double-underscore-v1'];
         yield 'only underscore' => ['/_/test'];
         yield 'complete path with underscores' => ['my/path_to/a_valid_slug'];
         yield 'complete path with dashes' => ['my/path-to/a-valid-slug'];

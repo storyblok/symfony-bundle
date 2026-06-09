@@ -98,6 +98,7 @@ final class ConfigurationTest extends TestCase
                 ],
                 'cache' => [
                     'public' => true,
+                    'etag' => null,
                     'max_age' => $cdnMaxAge,
                     'smax_age' => $cdnSmaxAge,
                 ],
@@ -141,6 +142,7 @@ final class ConfigurationTest extends TestCase
                 ],
                 'cache' => [
                     'public' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -185,6 +187,7 @@ final class ConfigurationTest extends TestCase
                 ],
                 'cache' => [
                     'public' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -229,6 +232,7 @@ final class ConfigurationTest extends TestCase
                 ],
                 'cache' => [
                     'public' => null,
+                    'etag' => null,
                     'max_age' => 3600,
                     'smax_age' => null,
                 ],
@@ -273,6 +277,7 @@ final class ConfigurationTest extends TestCase
                 ],
                 'cache' => [
                     'public' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -334,6 +339,7 @@ final class ConfigurationTest extends TestCase
                 ],
                 'cache' => [
                     'public' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -378,6 +384,7 @@ final class ConfigurationTest extends TestCase
                 ],
                 'cache' => [
                     'public' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],
@@ -422,6 +429,7 @@ final class ConfigurationTest extends TestCase
                 ],
                 'cache' => [
                     'public' => null,
+                    'etag' => null,
                     'max_age' => null,
                     'smax_age' => null,
                 ],

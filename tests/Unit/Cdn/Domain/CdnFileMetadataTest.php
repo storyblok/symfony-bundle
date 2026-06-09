@@ -70,7 +70,7 @@ final class CdnFileMetadataTest extends TestCase
 
         self::assertSame('https://a.storyblok.com/f/12345/image.jpg', $metadata->originalUrl);
         self::assertSame('image/png', $metadata->contentType);
-        self::assertSame('"xyz789"', $metadata->etag);
+        self::assertSame('xyz789', $metadata->etag);
         self::assertSame('2025-06-15T10:30:00+00:00', $metadata->expiresAt?->format(\DateTimeInterface::ATOM));
     }
 
@@ -104,7 +104,7 @@ final class CdnFileMetadataTest extends TestCase
 
         self::assertSame('https://a.storyblok.com/f/12345/image.jpg', $enriched->originalUrl);
         self::assertSame('image/webp', $enriched->contentType);
-        self::assertSame('"newetag"', $enriched->etag);
+        self::assertSame('newetag', $enriched->etag);
         self::assertSame($expiresAt, $enriched->expiresAt);
     }
 
@@ -189,5 +189,71 @@ final class CdnFileMetadataTest extends TestCase
             'etag' => null,
             'expiresAt' => null,
         ], $json);
+    }
+
+    #[Test]
+    public function fromArrayNormalizesStrongEtag(): void
+    {
+        $data = [
+            'originalUrl' => 'https://a.storyblok.com/f/12345/image.jpg',
+            'contentType' => 'image/jpeg',
+            'etag' => '"f062382e65b34974ba85009cf8625737"',
+            'expiresAt' => null,
+        ];
+
+        $metadata = CdnFileMetadata::fromArray($data);
+
+        self::assertSame('f062382e65b34974ba85009cf8625737', $metadata->etag);
+    }
+
+    #[Test]
+    public function fromArrayNormalizesWeakEtag(): void
+    {
+        $data = [
+            'originalUrl' => 'https://a.storyblok.com/f/12345/image.jpg',
+            'contentType' => 'image/jpeg',
+            'etag' => 'W/"f062382e65b34974ba85009cf8625737"',
+            'expiresAt' => null,
+        ];
+
+        $metadata = CdnFileMetadata::fromArray($data);
+
+        self::assertSame('W/f062382e65b34974ba85009cf8625737', $metadata->etag);
+    }
+
+    #[Test]
+    public function withDownloadInfoNormalizesStrongEtag(): void
+    {
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+        );
+
+        $enriched = $metadata->withDownloadInfo('image/jpeg', '"abc123"', new DateTimeImmutable());
+
+        self::assertSame('abc123', $enriched->etag);
+    }
+
+    #[Test]
+    public function withDownloadInfoNormalizesWeakEtag(): void
+    {
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+        );
+
+        $enriched = $metadata->withDownloadInfo('image/jpeg', 'W/"abc123"', new DateTimeImmutable());
+
+        self::assertSame('W/abc123', $enriched->etag);
+    }
+
+    #[Test]
+    public function withDownloadInfoHandlesNullEtag(): void
+    {
+        $metadata = new CdnFileMetadata(
+            originalUrl: 'https://a.storyblok.com/f/12345/image.jpg',
+        );
+
+        $enriched = $metadata->withDownloadInfo('image/jpeg', null, new DateTimeImmutable());
+
+        self::assertNull($enriched->etag);
     }
 }
