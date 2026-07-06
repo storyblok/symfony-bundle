@@ -119,6 +119,7 @@ final class MakeStoryblokBlock extends AbstractMaker
     {
         $command
             ->addOption('namespace', null, InputOption::VALUE_REQUIRED, 'Namespace for the generated block classes', self::NAMESPACE_PREFIX)
+            ->addOption('template-path', null, InputOption::VALUE_REQUIRED, 'Base directory (relative to "templates/") for the generated Twig templates', self::TEMPLATE_DIR)
             ->setHelp(<<<'TXT'
                 The <info>%command.name%</info> command connects to your Storyblok space, lists the
                 available components (blocks) and generates a block class and Twig template for the
@@ -128,10 +129,11 @@ final class MakeStoryblokBlock extends AbstractMaker
 
                     <info>php %command.full_name%</info>
 
-                By default the classes are generated in the <comment>App\Block</comment> namespace. Pass
-                <info>--namespace</info> to change it:
+                By default the classes are generated in the <comment>App\Block</comment> namespace and the
+                templates in <comment>templates/blocks</comment>. Override them with <info>--namespace</info> and
+                <info>--template-path</info>:
 
-                    <info>php %command.full_name% --namespace="App\Storyblok\Block"</info>
+                    <info>php %command.full_name% --namespace="App\Storyblok\Block" --template-path="storyblok/blocks"</info>
 
                 TXT);
     }
@@ -185,17 +187,18 @@ final class MakeStoryblokBlock extends AbstractMaker
         }
 
         $base = self::namespaceFrom($input);
+        $templateBase = self::templatePathFrom($input);
         $childNames = self::childComponentNames($this->component->name, $this->components);
 
         // When a block restricts a "bloks" field to specific children, group the parent and
         // its children in a directory named after the parent block - both for the PHP classes
         // (namespace) and the Twig templates.
         $namespace = $base;
-        $templateDir = self::TEMPLATE_DIR;
+        $templateDir = $templateBase;
 
         if ([] !== $childNames) {
             $namespace = $base.Str::asClassName($this->component->name).'\\';
-            $templateDir = self::TEMPLATE_DIR.'/'.Str::asSnakeCase($this->component->name);
+            $templateDir = $templateBase.'/'.Str::asSnakeCase($this->component->name);
         }
 
         $unmapped = $this->generateBlock($generator, $this->component, $namespace, $templateDir);
@@ -285,5 +288,16 @@ final class MakeStoryblokBlock extends AbstractMaker
         }
 
         return \trim($namespace, '\\').'\\';
+    }
+
+    private static function templatePathFrom(InputInterface $input): string
+    {
+        $path = $input->getOption('template-path');
+
+        if (!\is_string($path) || '' === \trim($path, '/')) {
+            return self::TEMPLATE_DIR;
+        }
+
+        return \trim($path, '/');
     }
 }
