@@ -168,7 +168,7 @@ final class ConfigurationTest extends TestCase
             ['base_uri' => $faker->url()],
             ['token' => $faker->uuid()],
             ['management_token' => $faker->uuid()],
-        ], 'must be configured together');
+        ], 'The "storyblok.space_id" option must be configured when "storyblok.management_token" is set.');
     }
 
     #[Test]
@@ -180,7 +180,7 @@ final class ConfigurationTest extends TestCase
             ['base_uri' => $faker->url()],
             ['token' => $faker->uuid()],
             ['space_id' => (string) $faker->numberBetween(1, 999999)],
-        ], 'must be configured together');
+        ], 'The "storyblok.management_token" option must be configured when "storyblok.space_id" is set.');
     }
 
     #[Test]
