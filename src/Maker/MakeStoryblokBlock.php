@@ -34,7 +34,9 @@ use Symfony\Component\Console\Input\InputOption;
  *
  * Lists the components of the configured Storyblok space, lets the developer pick one
  * (flagging the ones that already have a generated class), reads its field schema and
- * generates the matching `#[AsBlock]` value object plus a template stub.
+ * generates the matching `#[AsBlock]` value object plus a template stub. When the selected
+ * block restricts a "bloks" field to specific child components, those children are generated
+ * too, grouped in a directory named after the parent block.
  *
  * @author Silas Joisten <silasjoisten@proton.me>
  */
@@ -52,6 +54,11 @@ final class MakeStoryblokBlock extends AbstractMaker
     public const string TEMPLATE_DIR = 'block';
     private ?RemoteComponent $component = null;
 
+    /**
+     * @var array<string, RemoteComponent>
+     */
+    private array $components = [];
+
     public function __construct(
         private readonly ComponentProviderInterface $componentProvider,
         private readonly SchemaMapper $schemaMapper,
@@ -67,6 +74,45 @@ final class MakeStoryblokBlock extends AbstractMaker
     public static function getCommandDescription(): string
     {
         return 'Generate a block class from a Storyblok component';
+    }
+
+    /**
+     * Returns the names of the child components a block (and its descendants) restricts its
+     * "bloks" fields to, deduplicated and limited to components that actually exist.
+     *
+     * @param array<string, RemoteComponent> $components
+     *
+     * @return list<string>
+     */
+    public static function childComponentNames(string $rootName, array $components): array
+    {
+        $found = [];
+        $visited = [$rootName => true];
+        $queue = [$rootName];
+
+        while ([] !== $queue) {
+            $current = \array_shift($queue);
+
+            foreach ($components[$current]->schema as $field) {
+                if ('bloks' !== ($field['type'] ?? null)) {
+                    continue;
+                }
+
+                $whitelist = \is_array($field['component_whitelist'] ?? null) ? $field['component_whitelist'] : [];
+
+                foreach ($whitelist as $childName) {
+                    if (!\is_string($childName) || isset($visited[$childName]) || !isset($components[$childName])) {
+                        continue;
+                    }
+
+                    $visited[$childName] = true;
+                    $found[] = $childName;
+                    $queue[] = $childName;
+                }
+            }
+        }
+
+        return $found;
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
@@ -105,6 +151,7 @@ final class MakeStoryblokBlock extends AbstractMaker
         $choices = [];
 
         foreach ($components as $component) {
+            $this->components[$component->name] = $component;
             $label = $component->name.($this->blockRegistry->has($component->name) ? ' [already exists]' : '');
             $choices[$label] = $component;
         }
@@ -120,10 +167,49 @@ final class MakeStoryblokBlock extends AbstractMaker
             throw new \LogicException('No component was selected.');
         }
 
-        $namespace = self::namespaceFrom($input);
-        $className = $namespace.Str::asClassName($this->component->name);
-        $templatePath = \sprintf('%s/%s.html.twig', self::TEMPLATE_DIR, Str::asSnakeCase($this->component->name));
-        $properties = $this->schemaMapper->map($this->component->schema, $this->component->name);
+        $base = self::namespaceFrom($input);
+        $childNames = self::childComponentNames($this->component->name, $this->components);
+
+        // When a block restricts a "bloks" field to specific children, group the parent and
+        // its children in a directory (namespace) named after the parent block.
+        $namespace = [] !== $childNames
+            ? $base.Str::asClassName($this->component->name).'\\'
+            : $base;
+
+        $unmapped = $this->generateBlock($generator, $this->component, $namespace);
+
+        foreach ($childNames as $childName) {
+            // Do not overwrite children that are already generated.
+            if ($this->blockRegistry->has($childName)) {
+                continue;
+            }
+
+            $unmapped = [...$unmapped, ...$this->generateBlock($generator, $this->components[$childName], $namespace)];
+        }
+
+        $generator->writeChanges();
+
+        $this->writeSuccessMessage($io);
+
+        if ([] !== $unmapped) {
+            $io->note(\sprintf(
+                'The following field(s) could not be mapped and were left as "// @TODO": %s.',
+                \implode(', ', $unmapped),
+            ));
+        }
+    }
+
+    /**
+     * Generates the block class, its Twig template and any generated enums for a single
+     * component and returns the list of field keys that could not be mapped.
+     *
+     * @return list<string>
+     */
+    private function generateBlock(Generator $generator, RemoteComponent $component, string $namespace): array
+    {
+        $className = $namespace.Str::asClassName($component->name);
+        $templatePath = \sprintf('%s/%s.html.twig', self::TEMPLATE_DIR, Str::asSnakeCase($component->name));
+        $properties = $this->schemaMapper->map($component->schema, $component->name);
 
         $classData = ClassData::create(
             class: $className,
@@ -154,7 +240,7 @@ final class MakeStoryblokBlock extends AbstractMaker
 
         $generator->generateClassFromClassData($classData, __DIR__.'/templates/Block.tpl.php', [
             'properties' => $properties,
-            'block_name' => $this->component->name,
+            'block_name' => $component->name,
             'block_template' => $templatePath,
         ]);
 
@@ -162,18 +248,10 @@ final class MakeStoryblokBlock extends AbstractMaker
             'block_fqcn' => $className,
         ]);
 
-        $generator->writeChanges();
-
-        $this->writeSuccessMessage($io);
-
-        $unmapped = \array_values(\array_filter($properties, static fn (Property $property): bool => $property->isUnmapped()));
-
-        if ([] !== $unmapped) {
-            $io->note(\sprintf(
-                'The following field(s) could not be mapped and were left as "// @TODO": %s.',
-                \implode(', ', \array_map(static fn (Property $property): string => $property->key, $unmapped)),
-            ));
-        }
+        return \array_values(\array_map(
+            static fn (Property $property): string => $property->key,
+            \array_filter($properties, static fn (Property $property): bool => $property->isUnmapped()),
+        ));
     }
 
     private static function namespaceFrom(InputInterface $input): string
