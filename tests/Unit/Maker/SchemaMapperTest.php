@@ -160,6 +160,60 @@ final class SchemaMapperTest extends TestCase
         self::assertSame(['first', 'second', 'third'], array_map(static fn (Property $p): string => $p->key, $properties));
     }
 
+    #[Test]
+    public function optionFieldWithInlineOptionsBecomesEnum(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'layout' => ['type' => 'option', 'required' => true, 'options' => [
+                ['name' => 'Full width', 'value' => 'full'],
+                ['name' => 'Boxed', 'value' => 'boxed'],
+            ]],
+        ], 'hero');
+
+        $enum = $properties[0]->enum;
+
+        self::assertFalse($properties[0]->nullable);
+        self::assertNotNull($enum);
+        self::assertSame('HeroLayout', $enum->shortName);
+        self::assertSame(['FullWidth' => 'full', 'Boxed' => 'boxed'], $enum->cases);
+    }
+
+    #[Test]
+    public function optionalOptionFieldBecomesNullableEnum(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'theme' => ['type' => 'option', 'options' => [['name' => 'Light', 'value' => 'light']]],
+        ], 'hero');
+
+        self::assertTrue($properties[0]->isEnum());
+        self::assertTrue($properties[0]->nullable);
+    }
+
+    #[Test]
+    public function optionCaseNameStartingWithDigitIsPrefixed(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'columns' => ['type' => 'option', 'required' => true, 'options' => [
+                ['name' => '2 Columns', 'value' => 'two'],
+            ]],
+        ], 'hero');
+
+        $enum = $properties[0]->enum;
+
+        self::assertNotNull($enum);
+        self::assertSame(['_2Columns' => 'two'], $enum->cases);
+    }
+
+    #[Test]
+    public function datasourceBackedOptionFieldIsUnmapped(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'country' => ['type' => 'option', 'source' => 'internal_stories'],
+        ], 'hero');
+
+        self::assertTrue($properties[0]->isUnmapped());
+    }
+
     /**
      * @param list<Property> $properties
      *

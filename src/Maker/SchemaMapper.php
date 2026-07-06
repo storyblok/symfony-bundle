@@ -37,11 +37,12 @@ final class SchemaMapper
     private const array SYSTEM_KEYS = ['_uid', 'component', '_editable'];
 
     /**
-     * @param array<string, array<mixed>> $schema the raw component schema, keyed by field name
+     * @param array<string, array<mixed>> $schema        the raw component schema, keyed by field name
+     * @param string                      $componentName the Storyblok component name (used to name generated enums)
      *
      * @return list<Property>
      */
-    public function map(array $schema): array
+    public function map(array $schema, string $componentName = ''): array
     {
         \uasort(
             $schema,
@@ -61,7 +62,7 @@ final class SchemaMapper
                 continue;
             }
 
-            $property = self::mapField((string) $key, $storyblokType, $field);
+            $property = self::mapField($componentName, (string) $key, $storyblokType, $field);
 
             if (null !== $property) {
                 $properties[] = $property;
@@ -74,7 +75,7 @@ final class SchemaMapper
     /**
      * @param array<mixed> $field
      */
-    private static function mapField(string $key, string $storyblokType, array $field): ?Property
+    private static function mapField(string $componentName, string $key, string $storyblokType, array $field): ?Property
     {
         $name = u($key)->camel()->toString();
 
@@ -83,6 +84,11 @@ final class SchemaMapper
         }
 
         $required = true === ($field['required'] ?? false);
+
+        if ('option' === $storyblokType && null !== $enum = self::buildEnum($componentName, $key, $field)) {
+            return new Property(key: $key, name: $name, nullable: !$required, enum: $enum);
+        }
+
         $type = self::guessType($storyblokType, $name);
 
         if (null === $type) {
@@ -135,5 +141,75 @@ final class SchemaMapper
         }
 
         return null;
+    }
+
+    /**
+     * Builds a backed enum from an "option" field with inline options, or null when the
+     * options are backed by a datasource/stories (external source) or cannot be represented.
+     *
+     * @param array<mixed> $field
+     */
+    private static function buildEnum(string $componentName, string $key, array $field): ?GeneratedEnum
+    {
+        $source = \is_string($field['source'] ?? null) ? $field['source'] : '';
+
+        if ('' !== $source) {
+            return null;
+        }
+
+        $options = \is_array($field['options'] ?? null) ? $field['options'] : [];
+        $cases = [];
+
+        foreach ($options as $option) {
+            if (!\is_array($option)) {
+                continue;
+            }
+
+            $value = $option['value'] ?? null;
+
+            if (!\is_string($value) || '' === $value) {
+                continue;
+            }
+
+            $caseName = self::caseName(\is_string($option['name'] ?? null) ? $option['name'] : '', $value);
+
+            if ('' === $caseName) {
+                continue;
+            }
+
+            $cases[$caseName] = $value;
+        }
+
+        if ([] === $cases) {
+            return null;
+        }
+
+        $shortName = self::studly($componentName).self::studly($key);
+
+        if ('' === $shortName) {
+            return null;
+        }
+
+        return new GeneratedEnum($shortName, $cases);
+    }
+
+    private static function caseName(string $label, string $value): string
+    {
+        $name = self::studly('' !== $label ? $label : $value);
+
+        if ('' === $name) {
+            return '';
+        }
+
+        if (\ctype_digit($name[0])) {
+            $name = '_'.$name;
+        }
+
+        return $name;
+    }
+
+    private static function studly(string $value): string
+    {
+        return \ucfirst(u($value)->camel()->toString());
     }
 }

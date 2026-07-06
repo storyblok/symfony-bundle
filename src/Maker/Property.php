@@ -46,12 +46,21 @@ final readonly class Property
          * The raw Storyblok field type when it could not be mapped to a {@see Type}.
          */
         public ?string $storyblokType = null,
+        /**
+         * A backed enum generated from an "option" field's inline options.
+         */
+        public ?GeneratedEnum $enum = null,
     ) {
+    }
+
+    public function isEnum(): bool
+    {
+        return null !== $this->enum;
     }
 
     public function isUnmapped(): bool
     {
-        return null === $this->type;
+        return null === $this->type && null === $this->enum;
     }
 
     /**
@@ -59,6 +68,10 @@ final readonly class Property
      */
     public function typehint(): string
     {
+        if (null !== $this->enum) {
+            return $this->nullable ? '?'.$this->enum->shortName : $this->enum->shortName;
+        }
+
         if (null === $this->type) {
             return 'mixed';
         }
@@ -98,6 +111,10 @@ final readonly class Property
      */
     public function assignment(): string
     {
+        if (null !== $this->enum) {
+            return \sprintf('$this->%s = %s;', $this->name, $this->enumExpression($this->enum));
+        }
+
         if (null === $this->type) {
             throw new \LogicException('Cannot build an assignment for an unmapped property.');
         }
@@ -120,5 +137,17 @@ final readonly class Property
             $this->key,
             $this->storyblokType ?? 'unknown',
         );
+    }
+
+    private function enumExpression(GeneratedEnum $enum): string
+    {
+        $key = \sprintf("'%s'", \str_replace("'", "\\'", $this->key));
+        $call = \sprintf('self::enum($values, %s, %s::class)', $key, $enum->shortName);
+
+        if (!$this->nullable) {
+            return $call;
+        }
+
+        return \sprintf('\array_key_exists(%s, $values) && \'\' !== $values[%s] ? %s : null', $key, $key, $call);
     }
 }

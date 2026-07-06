@@ -27,6 +27,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Generates a block class (and its Twig template) from a Storyblok component schema.
@@ -70,16 +71,23 @@ final class MakeStoryblokBlock extends AbstractMaker
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
-        $command->setHelp(<<<'TXT'
-            The <info>%command.name%</info> command connects to your Storyblok space, lists the
-            available components (blocks) and generates a block class and Twig template for the
-            one you select.
+        $command
+            ->addOption('namespace', null, InputOption::VALUE_REQUIRED, 'Namespace for the generated block classes', self::NAMESPACE_PREFIX)
+            ->setHelp(<<<'TXT'
+                The <info>%command.name%</info> command connects to your Storyblok space, lists the
+                available components (blocks) and generates a block class and Twig template for the
+                one you select.
 
-            Components that already have a generated class are flagged with <comment>[already exists]</comment>.
+                Components that already have a generated class are flagged with <comment>[already exists]</comment>.
 
-                <info>php %command.full_name%</info>
+                    <info>php %command.full_name%</info>
 
-            TXT);
+                By default the classes are generated in the <comment>App\Block</comment> namespace. Pass
+                <info>--namespace</info> to change it:
+
+                    <info>php %command.full_name% --namespace="App\Storyblok\Block"</info>
+
+                TXT);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
@@ -112,11 +120,13 @@ final class MakeStoryblokBlock extends AbstractMaker
             throw new \LogicException('No component was selected.');
         }
 
+        $namespace = self::namespaceFrom($input);
+        $className = $namespace.Str::asClassName($this->component->name);
         $templatePath = \sprintf('%s/%s.html.twig', self::TEMPLATE_DIR, Str::asSnakeCase($this->component->name));
-        $properties = $this->schemaMapper->map($this->component->schema);
+        $properties = $this->schemaMapper->map($this->component->schema, $this->component->name);
 
         $classData = ClassData::create(
-            class: self::classNameFor($this->component->name),
+            class: $className,
             suffix: '',
             useStatements: [
                 AsBlock::class,
@@ -126,6 +136,17 @@ final class MakeStoryblokBlock extends AbstractMaker
         $classData->setIsFinal(true);
 
         foreach ($properties as $property) {
+            if (null !== $property->enum) {
+                $enumFqcn = $namespace.'Enum\\'.$property->enum->shortName;
+                $classData->addUseStatement($enumFqcn);
+
+                $generator->generateClass($enumFqcn, __DIR__.'/templates/Enum.tpl.php', [
+                    'cases' => $property->enum->cases,
+                ]);
+
+                continue;
+            }
+
             if (null !== $property->type && null !== $useStatement = $property->type->useStatement()) {
                 $classData->addUseStatement($useStatement);
             }
@@ -138,7 +159,7 @@ final class MakeStoryblokBlock extends AbstractMaker
         ]);
 
         $generator->generateTemplate($templatePath, __DIR__.'/templates/block_template.tpl.php', [
-            'block_fqcn' => self::classNameFor($this->component->name),
+            'block_fqcn' => $className,
         ]);
 
         $generator->writeChanges();
@@ -155,8 +176,14 @@ final class MakeStoryblokBlock extends AbstractMaker
         }
     }
 
-    private static function classNameFor(string $componentName): string
+    private static function namespaceFrom(InputInterface $input): string
     {
-        return self::NAMESPACE_PREFIX.Str::asClassName($componentName);
+        $namespace = $input->getOption('namespace');
+
+        if (!\is_string($namespace) || '' === \trim($namespace, '\\')) {
+            return self::NAMESPACE_PREFIX;
+        }
+
+        return \trim($namespace, '\\').'\\';
     }
 }

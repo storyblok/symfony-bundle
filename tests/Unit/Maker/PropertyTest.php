@@ -16,6 +16,7 @@ namespace Storyblok\Bundle\Tests\Unit\Maker;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Storyblok\Bundle\Maker\GeneratedEnum;
 use Storyblok\Bundle\Maker\Property;
 use Storyblok\Bundle\Maker\Type;
 
@@ -51,6 +52,30 @@ final class PropertyTest extends TestCase
         self::assertSame('array', $property->typehint());
         self::assertSame('/** @var list<object> */', $property->phpDoc());
         self::assertSame("\$this->items = self::Blocks(\$values, 'items', 1, 5);", $property->assignment());
+    }
+
+    #[Test]
+    public function enumProperty(): void
+    {
+        $property = new Property(key: 'layout', name: 'layout', enum: new GeneratedEnum('HeroLayout', ['Full' => 'full']));
+
+        self::assertTrue($property->isEnum());
+        self::assertFalse($property->isUnmapped());
+        self::assertSame('HeroLayout', $property->typehint());
+        self::assertSame('public HeroLayout $layout;', $property->declaration());
+        self::assertSame("\$this->layout = self::enum(\$values, 'layout', HeroLayout::class);", $property->assignment());
+    }
+
+    #[Test]
+    public function nullableEnumProperty(): void
+    {
+        $property = new Property(key: 'theme', name: 'theme', nullable: true, enum: new GeneratedEnum('HeroTheme', ['Light' => 'light']));
+
+        self::assertSame('?HeroTheme', $property->typehint());
+        self::assertSame(
+            "\$this->theme = \\array_key_exists('theme', \$values) && '' !== \$values['theme'] ? self::enum(\$values, 'theme', HeroTheme::class) : null;",
+            $property->assignment(),
+        );
     }
 
     #[Test]
