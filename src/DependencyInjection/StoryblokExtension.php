@@ -49,6 +49,7 @@ use Storyblok\Bundle\Twig\CdnExtension;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
 use Storyblok\ManagementApi\Endpoints\ComponentApi;
 use Storyblok\ManagementApi\ManagementApiClient;
+use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -164,6 +165,19 @@ final class StoryblokExtension extends Extension
 
         $container->setParameter('storyblok_api.management_token', $config['management_token']);
         $container->setParameter('storyblok_api.space_id', $config['space_id']);
+
+        // The maker command and the Management API client ship as dev dependencies
+        // (require-dev + suggest) and are not installed in every application. If the maker is
+        // configured but a package is missing, guide the developer with an actionable message
+        // instead of failing with a cryptic "class does not exist" error. The parameters above
+        // are set unconditionally so the configured env vars are consumed.
+        if (!class_exists(AbstractMaker::class)) {
+            throw new \LogicException('The "make:storyblok:block" maker is configured ("storyblok.management_token" / "storyblok.space_id"), but symfony/maker-bundle is not installed. Try running "composer require --dev symfony/maker-bundle".');
+        }
+
+        if (!class_exists(ManagementApiClient::class)) {
+            throw new \LogicException('The "make:storyblok:block" maker is configured ("storyblok.management_token" / "storyblok.space_id"), but storyblok/php-management-api-client is not installed. Try running "composer require --dev storyblok/php-management-api-client".');
+        }
 
         $container->setDefinition(ManagementApiClient::class, new Definition(ManagementApiClient::class, [
             '$personalAccessToken' => '%storyblok_api.management_token%',
