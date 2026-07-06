@@ -43,6 +43,8 @@ use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
 use Storyblok\Bundle\Twig\CdnExtension;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
+use Storyblok\ManagementApi\ManagementApiClient;
+use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -76,6 +78,8 @@ final class StoryblokExtension extends Extension
             self::configureAssetsApi($container);
             $container->setAlias(StoryblokClientInterface::class, StoryblokClient::class);
         }
+
+        self::configureMaker($loader, $container, $config);
 
         self::configureCdn($container, $config);
 
@@ -138,6 +142,29 @@ final class StoryblokExtension extends Extension
         $container->setDefinition(GlobalCachingListener::class, $storage);
 
         $this->registerAttributes($container, $config);
+    }
+
+    /**
+     * Registers the "make:storyblok:block" maker command, but only when both
+     * symfony/maker-bundle and storyblok/php-management-api-client are installed and the
+     * Management API credentials are configured.
+     *
+     * @param array<string, mixed> $config
+     */
+    private static function configureMaker(PhpFileLoader $loader, ContainerBuilder $container, array $config): void
+    {
+        if (!class_exists(AbstractMaker::class)
+            || !class_exists(ManagementApiClient::class)
+            || null === $config['management_token']
+            || null === $config['space_id']
+        ) {
+            return;
+        }
+
+        $container->setParameter('storyblok_api.management_token', $config['management_token']);
+        $container->setParameter('storyblok_api.space_id', $config['space_id']);
+
+        $loader->load('maker.php');
     }
 
     /**

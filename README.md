@@ -603,6 +603,84 @@ storyblok:
     blocks_template_path: 'my/custom/path'
 ```
 
+### Generating Blocks from Storyblok
+
+Instead of writing block classes by hand, you can generate them from your Storyblok
+components with the `make:storyblok:block` maker command. It connects to the
+[Storyblok Management API](https://github.com/storyblok/php-management-api-client), lists
+the components of your space (flagging the ones that already have a generated class with
+`[already exists]`), and turns the schema of the component you select into an `#[AsBlock]`
+value object using the [`ValueObjectTrait`](#helpers) — plus a matching Twig template.
+
+This is a development-time tool, so the required packages are optional. Install them as dev
+dependencies:
+
+```bash
+composer require --dev symfony/maker-bundle storyblok/php-management-api-client
+```
+
+Then configure a Management API [personal access token](https://app.storyblok.com/#/me/account?tab=token)
+and your space id. The command is only registered once both are set:
+
+```yaml
+# config/packages/storyblok.yaml
+storyblok:
+    management_token: '%env(STORYBLOK_MANAGEMENT_TOKEN)%'
+    space_id: '%env(STORYBLOK_SPACE_ID)%'
+```
+
+Now run the command and pick a component:
+
+```bash
+php bin/console make:storyblok:block
+```
+
+Given a `hero` component with a required `title` (text), an optional `subtitle` (text) and a
+required `body` (richtext), the command generates `src/Block/Hero.php`:
+
+```php
+namespace App\Block;
+
+use Storyblok\Api\Domain\Type\RichText;
+use Storyblok\Bundle\Block\Attribute\AsBlock;
+use Storyblok\Bundle\Util\ValueObjectTrait;
+
+#[AsBlock(name: 'hero', template: 'block/hero.html.twig')]
+final readonly class Hero
+{
+    use ValueObjectTrait;
+
+    public string $title;
+    public ?string $subtitle;
+    public RichText $body;
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    public function __construct(array $values)
+    {
+        $this->title = self::string($values, 'title');
+        $this->subtitle = self::nullOrString($values, 'subtitle');
+        $this->body = self::RichText($values, 'body');
+    }
+}
+```
+
+together with the template `templates/block/hero.html.twig`:
+
+```twig
+{# @var block \App\Block\Hero #}
+<div {{ block|storyblok_attributes }}>
+
+</div>
+```
+
+Storyblok field types are mapped to the matching `ValueObjectTrait` helpers, and `required`
+fields become non-nullable while optional ones use the `nullOr*` variants. Field types that
+have no clean representation (for example custom plugin fields, `option` or `table`) are not
+dropped — they are emitted as a `// @TODO` line in the constructor so you can complete them
+manually.
+
 ### Rendering Blocks in Twig
 
 A new `render_block` Twig filter allows easy rendering of Storyblok blocks:

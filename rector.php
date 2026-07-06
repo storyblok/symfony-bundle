@@ -50,6 +50,7 @@ return static function (RectorConfig $rectorConfig): void {
         PreferPHPUnitThisCallRector::class,
         ReplaceTestAnnotationWithPrefixedFunctionRector::class,
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        __DIR__.'/src/Maker/templates',
     ]);
 
     $rectorConfig->rule(PreferPHPUnitSelfCallRector::class);
