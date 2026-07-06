@@ -111,7 +111,25 @@ final class SchemaMapper
             maxLength: Type::String === $type ? self::intOrNull($field['max_length'] ?? null) : null,
             min: Type::Blocks === $type ? self::intOrNull($field['minimum'] ?? null) : null,
             max: Type::Blocks === $type ? self::intOrNull($field['maximum'] ?? null) : null,
+            itemClass: Type::Blocks === $type ? self::singleWhitelistClass($field) : null,
         );
+    }
+
+    /**
+     * Returns the item class short name for a "bloks" field restricted to exactly one
+     * component, or null when it allows several (or any) components.
+     *
+     * @param array<mixed> $field
+     */
+    private static function singleWhitelistClass(array $field): ?string
+    {
+        $whitelist = \is_array($field['component_whitelist'] ?? null) ? \array_values($field['component_whitelist']) : [];
+
+        if (1 !== \count($whitelist) || !\is_string($whitelist[0]) || '' === $whitelist[0]) {
+            return null;
+        }
+
+        return self::studly($whitelist[0]);
     }
 
     private static function guessType(string $storyblokType, string $name): ?Type

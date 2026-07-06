@@ -79,6 +79,16 @@ final class PropertyTest extends TestCase
     }
 
     #[Test]
+    public function typedListProperty(): void
+    {
+        $property = new Property(key: 'items', name: 'items', type: Type::Blocks, min: 3, max: 5, itemClass: 'CardRowItem');
+
+        self::assertSame('array', $property->typehint());
+        self::assertSame('/** @var list<CardRowItem> */', $property->phpDoc());
+        self::assertSame("\$this->items = self::list(\$values, 'items', CardRowItem::class, 3, 5);", $property->assignment());
+    }
+
+    #[Test]
     public function unmappedProperty(): void
     {
         $property = new Property(key: 'seo_meta', name: 'seoMeta', storyblokType: 'custom');

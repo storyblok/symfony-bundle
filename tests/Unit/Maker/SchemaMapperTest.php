@@ -205,6 +205,38 @@ final class SchemaMapperTest extends TestCase
     }
 
     #[Test]
+    public function bloksFieldRestrictedToSingleComponentUsesTypedList(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'items' => ['type' => 'bloks', 'required' => true, 'minimum' => 3, 'maximum' => 5, 'component_whitelist' => ['text_with_bullets_item']],
+        ], 'text_with_bullets');
+
+        self::assertSame('TextWithBulletsItem', $properties[0]->itemClass);
+        self::assertSame(3, $properties[0]->min);
+        self::assertSame(5, $properties[0]->max);
+    }
+
+    #[Test]
+    public function bloksFieldWithMultipleComponentsHasNoItemClass(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'body' => ['type' => 'bloks', 'component_whitelist' => ['a', 'b']],
+        ]);
+
+        self::assertNull($properties[0]->itemClass);
+    }
+
+    #[Test]
+    public function unrestrictedBloksFieldHasNoItemClass(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'body' => ['type' => 'bloks'],
+        ]);
+
+        self::assertNull($properties[0]->itemClass);
+    }
+
+    #[Test]
     public function datasourceBackedOptionFieldIsUnmapped(): void
     {
         $properties = (new SchemaMapper())->map([

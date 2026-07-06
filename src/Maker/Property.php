@@ -50,6 +50,12 @@ final readonly class Property
          * A backed enum generated from an "option" field's inline options.
          */
         public ?GeneratedEnum $enum = null,
+        /**
+         * The item class short name for a "bloks" field restricted to a single component,
+         * e.g. "TextWithBulletsItem". Produces a typed list via self::list() instead of the
+         * dynamic self::Blocks().
+         */
+        public ?string $itemClass = null,
     ) {
     }
 
@@ -99,7 +105,7 @@ final readonly class Property
     public function phpDoc(): ?string
     {
         if (Type::Blocks === $this->type) {
-            return '/** @var list<object> */';
+            return \sprintf('/** @var list<%s> */', $this->itemClass ?? 'object');
         }
 
         return null;
@@ -113,6 +119,10 @@ final readonly class Property
     {
         if (null !== $this->enum) {
             return \sprintf('$this->%s = %s;', $this->name, $this->enumExpression($this->enum));
+        }
+
+        if (Type::Blocks === $this->type && null !== $this->itemClass) {
+            return \sprintf('$this->%s = %s;', $this->name, $this->listExpression($this->itemClass));
         }
 
         if (null === $this->type) {
@@ -149,5 +159,17 @@ final readonly class Property
         }
 
         return \sprintf('\array_key_exists(%s, $values) && \'\' !== $values[%s] ? %s : null', $key, $key, $call);
+    }
+
+    private function listExpression(string $itemClass): string
+    {
+        $key = \sprintf("'%s'", \str_replace("'", "\\'", $this->key));
+        $bounds = '';
+
+        if (null !== $this->min || null !== $this->max) {
+            $bounds = \sprintf(', %s, %s', $this->min ?? 'null', $this->max ?? 'null');
+        }
+
+        return \sprintf('self::list($values, %s, %s::class%s)', $key, $itemClass, $bounds);
     }
 }
