@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Storyblok\Bundle\Maker;
 
 use Storyblok\Bundle\Block\Attribute\AsBlock;
+use Storyblok\Bundle\Block\BlockRegistry;
 use Storyblok\Bundle\Maker\Storyblok\ComponentProviderInterface;
 use Storyblok\Bundle\Util\ValueObjectTrait;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -53,6 +54,7 @@ final class MakeStoryblokBlock extends AbstractMaker
     public function __construct(
         private readonly ComponentProviderInterface $componentProvider,
         private readonly SchemaMapper $schemaMapper,
+        private readonly BlockRegistry $blockRegistry,
     ) {
     }
 
@@ -95,8 +97,7 @@ final class MakeStoryblokBlock extends AbstractMaker
         $choices = [];
 
         foreach ($components as $component) {
-            $exists = class_exists(self::classNameFor($component->name));
-            $label = $component->name.($exists ? ' [already exists]' : '');
+            $label = $component->name.($this->blockRegistry->has($component->name) ? ' [already exists]' : '');
             $choices[$label] = $component;
         }
 

@@ -42,6 +42,11 @@ final readonly class ManagementApiComponentProvider implements ComponentProvider
 
         /** @var Component $component */
         foreach ($this->componentApi->all()->data() as $component) {
+            // Only generate nestable blocks (#[AsBlock]); skip content types (is_root only).
+            if ($component->isContentType()) {
+                continue;
+            }
+
             $components[] = new RemoteComponent($component->name(), $component->getSchema());
         }
 

@@ -59,6 +59,28 @@ final class ManagementApiComponentProviderTest extends TestCase
     }
 
     #[Test]
+    public function contentTypesAreExcluded(): void
+    {
+        $payload = [
+            'components' => [
+                ['name' => 'hero', 'schema' => [], 'is_nestable' => true, 'is_root' => false],
+                ['name' => 'page', 'schema' => [], 'is_nestable' => false, 'is_root' => true],
+            ],
+        ];
+
+        $client = ManagementApiClient::initTest(new MockHttpClient([
+            new MockResponse(json_encode($payload)),
+        ]));
+
+        $provider = new ManagementApiComponentProvider(new ComponentApi($client, 'space-id'), 'space-id', 'token');
+
+        $components = $provider->components();
+
+        self::assertCount(1, $components);
+        self::assertSame('hero', $components[0]->name);
+    }
+
+    #[Test]
     public function throwsWhenSpaceIdIsEmpty(): void
     {
         $client = ManagementApiClient::initTest(new MockHttpClient());

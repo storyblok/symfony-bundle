@@ -66,6 +66,11 @@ final class BlockRegistry implements \Countable
         return self::$blocks[$name];
     }
 
+    public function has(string $name): bool
+    {
+        return \array_key_exists($name, self::$blocks);
+    }
+
     public function count(): int
     {
         return \count(self::$blocks);
