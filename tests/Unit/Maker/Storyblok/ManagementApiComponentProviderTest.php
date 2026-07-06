@@ -47,7 +47,7 @@ final class ManagementApiComponentProviderTest extends TestCase
             new MockResponse(json_encode($payload)),
         ]));
 
-        $provider = new ManagementApiComponentProvider(new ComponentApi($client, 'space-id'));
+        $provider = new ManagementApiComponentProvider(new ComponentApi($client, 'space-id'), 'space-id', 'token');
 
         $components = $provider->components();
 
@@ -56,5 +56,29 @@ final class ManagementApiComponentProviderTest extends TestCase
         self::assertArrayHasKey('title', $components[0]->schema);
         self::assertSame('teaser', $components[1]->name);
         self::assertSame([], $components[1]->schema);
+    }
+
+    #[Test]
+    public function throwsWhenSpaceIdIsEmpty(): void
+    {
+        $client = ManagementApiClient::initTest(new MockHttpClient());
+        $provider = new ManagementApiComponentProvider(new ComponentApi($client, ''), '', 'token');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('space id is empty');
+
+        $provider->components();
+    }
+
+    #[Test]
+    public function throwsWhenManagementTokenIsEmpty(): void
+    {
+        $client = ManagementApiClient::initTest(new MockHttpClient());
+        $provider = new ManagementApiComponentProvider(new ComponentApi($client, 'space-id'), 'space-id', '');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Management API token is empty');
+
+        $provider->components();
     }
 }

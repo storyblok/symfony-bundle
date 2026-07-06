@@ -190,7 +190,11 @@ final class StoryblokExtension extends Extension
 
         $container->setDefinition(
             ManagementApiComponentProvider::class,
-            (new Definition(ManagementApiComponentProvider::class))->setAutowired(true),
+            new Definition(ManagementApiComponentProvider::class, [
+                '$componentApi' => new Reference(ComponentApi::class),
+                '$spaceId' => '%storyblok_api.space_id%',
+                '$managementToken' => '%storyblok_api.management_token%',
+            ]),
         );
         $container->setAlias(ComponentProviderInterface::class, ManagementApiComponentProvider::class);
 
