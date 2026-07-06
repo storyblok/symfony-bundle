@@ -188,12 +188,17 @@ final class MakeStoryblokBlock extends AbstractMaker
         $childNames = self::childComponentNames($this->component->name, $this->components);
 
         // When a block restricts a "bloks" field to specific children, group the parent and
-        // its children in a directory (namespace) named after the parent block.
-        $namespace = [] !== $childNames
-            ? $base.Str::asClassName($this->component->name).'\\'
-            : $base;
+        // its children in a directory named after the parent block - both for the PHP classes
+        // (namespace) and the Twig templates.
+        $namespace = $base;
+        $templateDir = self::TEMPLATE_DIR;
 
-        $unmapped = $this->generateBlock($generator, $this->component, $namespace);
+        if ([] !== $childNames) {
+            $namespace = $base.Str::asClassName($this->component->name).'\\';
+            $templateDir = self::TEMPLATE_DIR.'/'.Str::asSnakeCase($this->component->name);
+        }
+
+        $unmapped = $this->generateBlock($generator, $this->component, $namespace, $templateDir);
 
         foreach ($childNames as $childName) {
             // Do not overwrite children that are already generated.
@@ -201,7 +206,7 @@ final class MakeStoryblokBlock extends AbstractMaker
                 continue;
             }
 
-            $unmapped = [...$unmapped, ...$this->generateBlock($generator, $this->components[$childName], $namespace)];
+            $unmapped = [...$unmapped, ...$this->generateBlock($generator, $this->components[$childName], $namespace, $templateDir)];
         }
 
         $generator->writeChanges();
@@ -222,10 +227,10 @@ final class MakeStoryblokBlock extends AbstractMaker
      *
      * @return list<string>
      */
-    private function generateBlock(Generator $generator, RemoteComponent $component, string $namespace): array
+    private function generateBlock(Generator $generator, RemoteComponent $component, string $namespace, string $templateDir): array
     {
         $className = $namespace.Str::asClassName($component->name);
-        $templatePath = \sprintf('%s/%s.html.twig', self::TEMPLATE_DIR, Str::asSnakeCase($component->name));
+        $templatePath = \sprintf('%s/%s.html.twig', $templateDir, Str::asSnakeCase($component->name));
         $properties = $this->schemaMapper->map($component->schema, $component->name);
 
         $classData = ClassData::create(
