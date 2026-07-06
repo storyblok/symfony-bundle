@@ -176,6 +176,10 @@ final class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
             ->end()
+            ->validate()
+                ->ifTrue(static fn (array $v): bool => (null === $v['management_token']) !== (null === $v['space_id']))
+                ->thenInvalid('The "management_token" and "space_id" options must be configured together for the "make:storyblok:block" maker command.')
+            ->end()
         ;
 
         return $treeBuilder;

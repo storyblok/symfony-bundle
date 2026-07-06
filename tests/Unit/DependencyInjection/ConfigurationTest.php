@@ -160,6 +160,30 @@ final class ConfigurationTest extends TestCase
     }
 
     #[Test]
+    public function managementTokenRequiresSpaceId(): void
+    {
+        $faker = self::faker();
+
+        self::assertConfigurationIsInvalid([
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['management_token' => $faker->uuid()],
+        ], 'must be configured together');
+    }
+
+    #[Test]
+    public function spaceIdRequiresManagementToken(): void
+    {
+        $faker = self::faker();
+
+        self::assertConfigurationIsInvalid([
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['space_id' => (string) $faker->numberBetween(1, 999999)],
+        ], 'must be configured together');
+    }
+
+    #[Test]
     public function defaults(): void
     {
         $faker = self::faker();

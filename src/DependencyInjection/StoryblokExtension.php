@@ -41,16 +41,21 @@ use Storyblok\Bundle\Controller\CdnController;
 use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
+use Storyblok\Bundle\Maker\MakeStoryblokBlock;
+use Storyblok\Bundle\Maker\SchemaMapper;
+use Storyblok\Bundle\Maker\Storyblok\ComponentProviderInterface;
+use Storyblok\Bundle\Maker\Storyblok\ManagementApiComponentProvider;
 use Storyblok\Bundle\Twig\CdnExtension;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
+use Storyblok\ManagementApi\Endpoints\ComponentApi;
 use Storyblok\ManagementApi\ManagementApiClient;
-use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\TraceableHttpClient;
 use function Symfony\Component\String\u;
@@ -79,7 +84,7 @@ final class StoryblokExtension extends Extension
             $container->setAlias(StoryblokClientInterface::class, StoryblokClient::class);
         }
 
-        self::configureMaker($loader, $container, $config);
+        self::configureMaker($container, $config);
 
         self::configureCdn($container, $config);
 
@@ -145,26 +150,44 @@ final class StoryblokExtension extends Extension
     }
 
     /**
-     * Registers the "make:storyblok:block" maker command, but only when both
-     * symfony/maker-bundle and storyblok/php-management-api-client are installed and the
-     * Management API credentials are configured.
+     * Registers the "make:storyblok:block" maker command when the Management API credentials
+     * are configured. Both "management_token" and "space_id" must be set together (enforced by
+     * {@see Configuration}).
      *
      * @param array<string, mixed> $config
      */
-    private static function configureMaker(PhpFileLoader $loader, ContainerBuilder $container, array $config): void
+    private static function configureMaker(ContainerBuilder $container, array $config): void
     {
-        if (!class_exists(AbstractMaker::class)
-            || !class_exists(ManagementApiClient::class)
-            || null === $config['management_token']
-            || null === $config['space_id']
-        ) {
+        if (null === $config['management_token'] && null === $config['space_id']) {
             return;
         }
 
         $container->setParameter('storyblok_api.management_token', $config['management_token']);
         $container->setParameter('storyblok_api.space_id', $config['space_id']);
 
-        $loader->load('maker.php');
+        $container->setDefinition(ManagementApiClient::class, new Definition(ManagementApiClient::class, [
+            '$personalAccessToken' => '%storyblok_api.management_token%',
+        ]));
+
+        $container->setDefinition(ComponentApi::class, new Definition(ComponentApi::class, [
+            '$managementClient' => new Reference(ManagementApiClient::class),
+            '$spaceId' => '%storyblok_api.space_id%',
+        ]));
+
+        $container->setDefinition(
+            ManagementApiComponentProvider::class,
+            (new Definition(ManagementApiComponentProvider::class))->setAutowired(true),
+        );
+        $container->setAlias(ComponentProviderInterface::class, ManagementApiComponentProvider::class);
+
+        $container->setDefinition(SchemaMapper::class, new Definition(SchemaMapper::class));
+
+        $container->setDefinition(
+            MakeStoryblokBlock::class,
+            (new Definition(MakeStoryblokBlock::class))
+                ->setAutowired(true)
+                ->addTag('maker.command'),
+        );
     }
 
     /**
