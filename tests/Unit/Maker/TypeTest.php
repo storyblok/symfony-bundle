@@ -78,6 +78,32 @@ final class TypeTest extends TestCase
         yield 'link' => [Type::Link, "\\array_key_exists('field', \$values) ? self::Link(\$values, 'field') : null"];
     }
 
+    #[DataProvider('provideTypehints')]
+    #[Test]
+    public function typehint(Type $type, string $expected): void
+    {
+        self::assertSame($expected, $type->typehint());
+    }
+
+    /**
+     * @return iterable<string, array{Type, string}>
+     */
+    public static function provideTypehints(): iterable
+    {
+        yield 'string' => [Type::String, 'string'];
+        yield 'richtext' => [Type::RichText, 'RichText'];
+        yield 'integer' => [Type::Integer, 'int'];
+        yield 'float' => [Type::Float, 'float'];
+        yield 'boolean' => [Type::Boolean, 'bool'];
+        yield 'datetime' => [Type::DateTimeImmutable, '\DateTimeImmutable'];
+        yield 'asset' => [Type::Asset, 'Asset'];
+        yield 'multilink' => [Type::MultiLink, 'MultiLink'];
+        yield 'link' => [Type::Link, 'Link'];
+        yield 'uuid' => [Type::Uuid, 'Uuid'];
+        yield 'editable' => [Type::Editable, 'Editable'];
+        yield 'blocks' => [Type::Blocks, 'array'];
+    }
+
     #[Test]
     public function stringExpressionUsesMaxLength(): void
     {

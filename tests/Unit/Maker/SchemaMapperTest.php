@@ -237,6 +237,32 @@ final class SchemaMapperTest extends TestCase
     }
 
     #[Test]
+    public function optionCaseNameFallsBackToValueWhenNameIsMissing(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'kind' => ['type' => 'option', 'required' => true, 'options' => [
+                ['value' => 'primary'],
+            ]],
+        ], 'hero');
+
+        $enum = $properties[0]->enum;
+
+        self::assertNotNull($enum);
+        self::assertSame(['Primary' => 'primary'], $enum->cases);
+    }
+
+    #[Test]
+    public function optionWithoutUsableOptionsIsUnmapped(): void
+    {
+        $properties = (new SchemaMapper())->map([
+            'kind' => ['type' => 'option', 'options' => []],
+        ], 'hero');
+
+        self::assertTrue($properties[0]->isUnmapped());
+        self::assertSame('option', $properties[0]->storyblokType);
+    }
+
+    #[Test]
     public function datasourceBackedOptionFieldIsUnmapped(): void
     {
         $properties = (new SchemaMapper())->map([
