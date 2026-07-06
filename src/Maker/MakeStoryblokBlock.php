@@ -33,7 +33,7 @@ use Symfony\Component\Console\Input\InputOption;
  * Generates a block class (and its Twig template) from a Storyblok component schema.
  *
  * Lists the components of the configured Storyblok space, lets the developer pick one
- * (flagging the ones that already have a generated class), reads its field schema and
+ * (skipping the ones that already have a generated class), reads its field schema and
  * generates the matching `#[AsBlock]` value object plus a template stub. When the selected
  * block restricts a "bloks" field to specific child components, those children are generated
  * too, grouped in a directory named after the parent block.
@@ -124,7 +124,7 @@ final class MakeStoryblokBlock extends AbstractMaker
                 available components (blocks) and generates a block class and Twig template for the
                 one you select.
 
-                Components that already have a generated class are flagged with <comment>[already exists]</comment>.
+                Blocks that already have a generated class are listed and cannot be selected.
 
                     <info>php %command.full_name%</info>
 
@@ -149,11 +149,28 @@ final class MakeStoryblokBlock extends AbstractMaker
         }
 
         $choices = [];
+        $existing = [];
 
         foreach ($components as $component) {
             $this->components[$component->name] = $component;
-            $label = $component->name.($this->blockRegistry->has($component->name) ? ' [already exists]' : '');
-            $choices[$label] = $component;
+
+            if ($this->blockRegistry->has($component->name)) {
+                $existing[] = $component->name;
+
+                continue;
+            }
+
+            $choices[$component->name] = $component;
+        }
+
+        if ([] !== $existing) {
+            \sort($existing);
+            $io->text('The following blocks already have a generated class and are skipped:');
+            $io->listing($existing);
+        }
+
+        if ([] === $choices) {
+            throw new \RuntimeException('All Storyblok blocks already have a generated class.');
         }
 
         $selected = $io->choice('Select the Storyblok block you want to generate', array_keys($choices));
