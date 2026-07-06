@@ -645,7 +645,7 @@ use Storyblok\Api\Domain\Type\RichText;
 use Storyblok\Bundle\Block\Attribute\AsBlock;
 use Storyblok\Bundle\Util\ValueObjectTrait;
 
-#[AsBlock(name: 'hero', template: 'block/hero.html.twig')]
+#[AsBlock(name: 'hero', template: 'blocks/hero.html.twig')]
 final readonly class Hero
 {
     use ValueObjectTrait;
@@ -666,7 +666,7 @@ final readonly class Hero
 }
 ```
 
-together with the template `templates/block/hero.html.twig`:
+together with the template `templates/blocks/hero.html.twig`:
 
 ```twig
 {# @var block \App\Block\Hero #}

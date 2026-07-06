@@ -51,7 +51,7 @@ final class MakeStoryblokBlock extends AbstractMaker
      * The directory (relative to the application "templates/" directory) the generated
      * Twig templates are placed in.
      */
-    public const string TEMPLATE_DIR = 'block';
+    public const string TEMPLATE_DIR = 'blocks';
     private ?RemoteComponent $component = null;
 
     /**
