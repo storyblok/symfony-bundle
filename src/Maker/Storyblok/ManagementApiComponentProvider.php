@@ -20,6 +20,8 @@ use Storyblok\ManagementApi\Endpoints\ComponentApi;
 use Webmozart\Assert\Assert;
 
 /**
+ * @internal
+ *
  * Lists Storyblok components through the Management API {@see ComponentApi}.
  *
  * @author Silas Joisten <silasjoisten@proton.me>

@@ -17,6 +17,8 @@ namespace Storyblok\Bundle\Maker\Storyblok;
 use Storyblok\Bundle\Maker\RemoteComponent;
 
 /**
+ * @internal
+ *
  * Lists the components (blocks) available in a Storyblok space.
  *
  * Abstracts the Storyblok Management API so the maker can be unit tested without
