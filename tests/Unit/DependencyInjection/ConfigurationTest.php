@@ -76,6 +76,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => $secret,
             'version' => $version,
             'auto_resolve_relations' => $autoResolveRelations,
@@ -108,6 +110,80 @@ final class ConfigurationTest extends TestCase
     }
 
     #[Test]
+    public function managementCredentialsCanBeConfigured(): void
+    {
+        $faker = self::faker();
+        $url = $faker->url();
+        $token = $faker->uuid();
+        $managementToken = $faker->uuid();
+        $spaceId = (string) $faker->numberBetween(1, 999999);
+
+        self::assertProcessedConfigurationEquals([
+            ['base_uri' => $url],
+            ['token' => $token],
+            ['management_token' => $managementToken],
+            ['space_id' => $spaceId],
+        ], [
+            'base_uri' => $url,
+            'token' => $token,
+            'management_token' => $managementToken,
+            'space_id' => $spaceId,
+            'webhook_secret' => null,
+            'version' => 'published',
+            'auto_resolve_relations' => false,
+            'auto_resolve_links' => false,
+            'blocks_template_path' => 'blocks',
+            'controller' => [
+                'ascending_redirect_fallback' => false,
+                'cache' => [
+                    'public' => null,
+                    'must_revalidate' => null,
+                    'etag' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+            'cdn' => [
+                'enabled' => true,
+                'storage' => [
+                    'type' => 'filesystem',
+                    'path' => '%kernel.project_dir%/var/cdn',
+                ],
+                'cache' => [
+                    'public' => null,
+                    'etag' => null,
+                    'max_age' => null,
+                    'smax_age' => null,
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function managementTokenRequiresSpaceId(): void
+    {
+        $faker = self::faker();
+
+        self::assertConfigurationIsInvalid([
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['management_token' => $faker->uuid()],
+        ], 'The "storyblok.space_id" option must be configured when "storyblok.management_token" is set.');
+    }
+
+    #[Test]
+    public function spaceIdRequiresManagementToken(): void
+    {
+        $faker = self::faker();
+
+        self::assertConfigurationIsInvalid([
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['space_id' => (string) $faker->numberBetween(1, 999999)],
+        ], 'The "storyblok.management_token" option must be configured when "storyblok.space_id" is set.');
+    }
+
+    #[Test]
     public function defaults(): void
     {
         $faker = self::faker();
@@ -120,6 +196,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
@@ -165,6 +243,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
@@ -210,6 +290,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
@@ -255,6 +337,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
@@ -317,6 +401,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
@@ -362,6 +448,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
@@ -407,6 +495,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
@@ -478,6 +568,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
@@ -525,6 +617,8 @@ final class ConfigurationTest extends TestCase
         ], [
             'base_uri' => $url,
             'token' => $token,
+            'management_token' => null,
+            'space_id' => null,
             'webhook_secret' => null,
             'version' => 'published',
             'auto_resolve_relations' => false,
