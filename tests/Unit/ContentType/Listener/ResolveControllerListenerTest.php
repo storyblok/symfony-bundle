@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Storyblok\Bundle\Tests\Unit\ContentType\Listener;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
@@ -247,6 +248,119 @@ final class ResolveControllerListenerTest extends TestCase
         self::assertSame(SampleWithSlugController::class, $event->getController()::class);
         self::assertSame(SampleContentType::class, $request->attributes->get('_storyblok_content_type'));
         self::assertNotNull($storage->getContentType());
+    }
+
+    /**
+     * @param array<string, mixed> $story
+     */
+    #[DataProvider('provideStorySlugCases')]
+    #[Test]
+    public function usesCorrectSlugForSecondFetch(string $expectedSlug, array $story): void
+    {
+        $response = new StoryResponse([
+            'story' => [
+                'content' => [
+                    'component' => SampleContentType::type(),
+                ],
+                ...$story,
+            ],
+            'cv' => 0,
+            'rels' => [],
+            'links' => [],
+        ]);
+
+        $slugs = [];
+
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects($this->exactly(2))
+            ->method('bySlug')
+            ->willReturnCallback(static function (string $slug) use (&$slugs, $response): StoryResponse {
+                $slugs[] = $slug;
+
+                return $response;
+            });
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(
+            SampleController::class,
+            SampleContentType::class,
+            'sample_content_type',
+            resolveLinks: new ResolveLinks(type: LinkType::Link),
+        ));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => 'requested-slug']);
+
+        $listener(new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
+
+        self::assertSame(['requested-slug', $expectedSlug], $slugs);
+        self::assertNotNull($storage->getContentType());
+    }
+
+    /**
+     * @return iterable<string, array{string, array<string, mixed>}>
+     */
+    public static function provideStorySlugCases(): iterable
+    {
+        yield 'translatable slugs app installed, default language' => ['about-us', [
+            'default_full_slug' => 'about-us',
+            'full_slug' => 'about-us',
+            'lang' => 'default',
+        ]];
+
+        yield 'translatable slugs app installed, language prefixed full_slug' => ['about-us', [
+            'default_full_slug' => 'about-us',
+            'full_slug' => 'en/ueber-uns',
+            'lang' => 'en',
+        ]];
+
+        yield 'no translatable slugs app, default language' => ['about-us', [
+            'default_full_slug' => null,
+            'full_slug' => 'about-us',
+            'lang' => 'default',
+        ]];
+
+        yield 'no translatable slugs app, language prefixed full_slug' => ['about-us', [
+            'default_full_slug' => null,
+            'full_slug' => 'en/about-us',
+            'lang' => 'en',
+        ]];
+
+        yield 'no translatable slugs app, language prefixed nested full_slug' => ['folder/about-us', [
+            'default_full_slug' => null,
+            'full_slug' => 'en/folder/about-us',
+            'lang' => 'en',
+        ]];
+
+        yield 'no translatable slugs app, unprefixed full_slug for non-default language' => ['about-us', [
+            'default_full_slug' => null,
+            'full_slug' => 'about-us',
+            'lang' => 'en',
+        ]];
+
+        yield 'no translatable slugs app, slug segment equals language code' => ['en/en-page', [
+            'default_full_slug' => 'en/en-page',
+            'full_slug' => 'en/en-page',
+            'lang' => 'default',
+        ]];
+
+        yield 'no translatable slugs app, missing lang key' => ['about-us', [
+            'default_full_slug' => null,
+            'full_slug' => 'about-us',
+        ]];
     }
 
     #[Test]
