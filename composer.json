@@ -40,8 +40,14 @@
     "phpstan/phpstan-webmozart-assert": "^2.0",
     "phpunit/phpunit": "^12",
     "rector/rector": "^2.0",
+    "storyblok/php-management-api-client": "^1.8",
     "symfony/event-dispatcher": "^6.0 || ^7.1 || ^8.0",
+    "symfony/maker-bundle": "^1.60",
     "thecodingmachine/phpstan-safe-rule": "^1.4"
+  },
+  "suggest": {
+    "storyblok/php-management-api-client": "To generate block classes from your Storyblok components with the \"make:storyblok:block\" command (^1.8).",
+    "symfony/maker-bundle": "To generate block classes with the \"make:storyblok:block\" command (^1.60)."
   },
   "minimum-stability": "stable",
   "autoload": {

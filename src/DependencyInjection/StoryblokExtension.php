@@ -41,14 +41,22 @@ use Storyblok\Bundle\Controller\CdnController;
 use Storyblok\Bundle\DataCollector\CdnCollector;
 use Storyblok\Bundle\DataCollector\StoryblokCollector;
 use Storyblok\Bundle\Listener\UpdateProfilerListener;
+use Storyblok\Bundle\Maker\MakeStoryblokBlock;
+use Storyblok\Bundle\Maker\SchemaMapper;
+use Storyblok\Bundle\Maker\Storyblok\ComponentProviderInterface;
+use Storyblok\Bundle\Maker\Storyblok\ManagementApiComponentProvider;
 use Storyblok\Bundle\Twig\CdnExtension;
 use Storyblok\Bundle\Webhook\Handler\WebhookHandlerInterface;
+use Storyblok\ManagementApi\Endpoints\ComponentApi;
+use Storyblok\ManagementApi\ManagementApiClient;
+use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpClient\TraceableHttpClient;
 use function Symfony\Component\String\u;
@@ -76,6 +84,8 @@ final class StoryblokExtension extends Extension
             self::configureAssetsApi($container);
             $container->setAlias(StoryblokClientInterface::class, StoryblokClient::class);
         }
+
+        self::configureMaker($container, $config);
 
         self::configureCdn($container, $config);
 
@@ -138,6 +148,64 @@ final class StoryblokExtension extends Extension
         $container->setDefinition(GlobalCachingListener::class, $storage);
 
         $this->registerAttributes($container, $config);
+    }
+
+    /**
+     * Registers the "make:storyblok:block" maker command when the Management API credentials
+     * are configured. Both "management_token" and "space_id" must be set together (enforced by
+     * {@see Configuration}).
+     *
+     * @param array<string, mixed> $config
+     */
+    private static function configureMaker(ContainerBuilder $container, array $config): void
+    {
+        if (null === $config['management_token'] && null === $config['space_id']) {
+            return;
+        }
+
+        $container->setParameter('storyblok_api.management_token', $config['management_token']);
+        $container->setParameter('storyblok_api.space_id', $config['space_id']);
+
+        // The maker command and the Management API client ship as dev dependencies
+        // (require-dev + suggest) and are not installed in every application. If the maker is
+        // configured but a package is missing, guide the developer with an actionable message
+        // instead of failing with a cryptic "class does not exist" error. The parameters above
+        // are set unconditionally so the configured env vars are consumed.
+        if (!class_exists(AbstractMaker::class)) {
+            throw new \LogicException('The "make:storyblok:block" maker is configured ("storyblok.management_token" / "storyblok.space_id"), but symfony/maker-bundle is not installed. Try running "composer require --dev symfony/maker-bundle".');
+        }
+
+        if (!class_exists(ManagementApiClient::class)) {
+            throw new \LogicException('The "make:storyblok:block" maker is configured ("storyblok.management_token" / "storyblok.space_id"), but storyblok/php-management-api-client is not installed. Try running "composer require --dev storyblok/php-management-api-client".');
+        }
+
+        $container->setDefinition(ManagementApiClient::class, new Definition(ManagementApiClient::class, [
+            '$personalAccessToken' => '%storyblok_api.management_token%',
+        ]));
+
+        $container->setDefinition(ComponentApi::class, new Definition(ComponentApi::class, [
+            '$managementClient' => new Reference(ManagementApiClient::class),
+            '$spaceId' => '%storyblok_api.space_id%',
+        ]));
+
+        $container->setDefinition(
+            ManagementApiComponentProvider::class,
+            new Definition(ManagementApiComponentProvider::class, [
+                '$componentApi' => new Reference(ComponentApi::class),
+                '$spaceId' => '%storyblok_api.space_id%',
+                '$managementToken' => '%storyblok_api.management_token%',
+            ]),
+        );
+        $container->setAlias(ComponentProviderInterface::class, ManagementApiComponentProvider::class);
+
+        $container->setDefinition(SchemaMapper::class, new Definition(SchemaMapper::class));
+
+        $container->setDefinition(
+            MakeStoryblokBlock::class,
+            (new Definition(MakeStoryblokBlock::class))
+                ->setAutowired(true)
+                ->addTag('maker.command'),
+        );
     }
 
     /**

@@ -99,6 +99,7 @@ $config->getFinder()
     ])
     ->notPath('Block/Renderer/RendererInterface.php')
     ->notPath('DependencyInjection/Configuration.php')
+    ->notPath('Maker/templates')
     ->in('src')
     ->in('tests');
 

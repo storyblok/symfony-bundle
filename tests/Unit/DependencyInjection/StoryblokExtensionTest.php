@@ -70,6 +70,48 @@ final class StoryblokExtensionTest extends TestCase
     }
 
     #[Test]
+    public function loadExposesManagementCredentialsAsParameters(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        // These usually reference environment variables. They must be exposed as container
+        // parameters unconditionally so those env vars are consumed even if the maker
+        // services are not registered - otherwise the container fails to compile with
+        // "Environment variables ... are never used.".
+        $extension->load([
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+            ['management_token' => $managementToken = '%env(STORYBLOK_MANAGEMENT_API_TOKEN)%'],
+            ['space_id' => $spaceId = '%env(STORYBLOK_SPACE_ID)%'],
+        ], $builder);
+
+        self::assertSame($managementToken, $builder->getParameter('storyblok_api.management_token'));
+        self::assertSame($spaceId, $builder->getParameter('storyblok_api.space_id'));
+    }
+
+    #[Test]
+    public function loadWithoutManagementCredentialsDoesNotSetParameters(): void
+    {
+        $faker = self::faker();
+
+        $extension = new StoryblokExtension();
+        $builder = new ContainerBuilder();
+        $builder->setParameter('kernel.debug', true);
+
+        $extension->load([
+            ['base_uri' => $faker->url()],
+            ['token' => $faker->uuid()],
+        ], $builder);
+
+        self::assertFalse($builder->hasParameter('storyblok_api.management_token'));
+        self::assertFalse($builder->hasParameter('storyblok_api.space_id'));
+    }
+
+    #[Test]
     public function loadWithoutKernelDebugWillRemoveDefinitions(): void
     {
         $faker = self::faker();

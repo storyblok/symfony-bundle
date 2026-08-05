@@ -77,6 +77,18 @@ final readonly class ResolveControllerListener
             Assert::keyExists($story, 'full_slug');
             $slug = $story['default_full_slug'] ?? $story['full_slug'];
 
+            // Without the Translatable Slugs app "default_full_slug" is null and
+            // "full_slug" is prefixed with the requested language ("en/about-us").
+            // The Content Delivery API only accepts the unprefixed slug, so the
+            // prefix must be removed before the slug is used for further requests.
+            if (null === $story['default_full_slug']
+                && \is_string($story['lang'] ?? null)
+                && 'default' !== $story['lang']
+                && \str_starts_with($slug, $story['lang'].'/')
+            ) {
+                $slug = \substr($slug, \strlen($story['lang']) + 1);
+            }
+
             Assert::keyExists($story, 'content');
             Assert::keyExists($story['content'], 'component');
         } catch (ClientExceptionInterface|\InvalidArgumentException|\ValueError) {
