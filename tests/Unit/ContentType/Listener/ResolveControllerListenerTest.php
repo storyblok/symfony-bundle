@@ -50,7 +50,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesController(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -95,7 +95,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerBySlug(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -142,7 +142,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerBySlugWithoutLocalizedSlugAppInstalled(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -186,10 +186,74 @@ final class ResolveControllerListenerTest extends TestCase
     }
 
     #[Test]
+    public function resolvesControllerWithLanguagePrefixedFullSlugWithoutLocalizedSlugAppInstalled(): void
+    {
+        $response = new StoryResponse([
+            'story' => [
+                'content' => [
+                    'component' => SampleContentType::type(),
+                ],
+                'default_full_slug' => null,
+                'full_slug' => 'en/'.SampleWithSlugController::SLUG,
+                'lang' => 'en',
+            ],
+            'cv' => 0,
+            'rels' => [],
+            'links' => [],
+        ]);
+
+        $slugs = [];
+
+        $api = self::createMock(StoriesApiInterface::class);
+        $api->expects($this->exactly(2))
+            ->method('bySlug')
+            ->willReturnCallback(static function (string $slug) use (&$slugs, $response): StoryResponse {
+                $slugs[] = $slug;
+
+                return $response;
+            });
+
+        $container = new Container();
+        $container->set(SampleController::class, new SampleController());
+        $container->set(SampleWithSlugController::class, new SampleWithSlugController());
+
+        $registry = new ContentTypeControllerRegistry();
+        $registry->add(new ContentTypeControllerDefinition(SampleController::class, SampleContentType::class, 'sample_content_type'));
+        $registry->add(new ContentTypeControllerDefinition(
+            SampleWithSlugController::class,
+            SampleContentType::class,
+            'sample_content_type',
+            '/'.SampleWithSlugController::SLUG,
+            resolveLinks: new ResolveLinks(type: LinkType::Link),
+        ));
+
+        $storage = new ContentTypeStorage();
+
+        $listener = new ResolveControllerListener($api, $container, $registry, $storage, new NullLogger(), 'draft');
+
+        $request = new Request();
+        $request->setLocale('en');
+        $request->attributes->set('_route', Route::CONTENT_TYPE);
+        $request->attributes->set('_route_params', ['slug' => SampleWithSlugController::SLUG]);
+
+        $listener($event = new ControllerEvent(
+            TestKernel::create([], self::class, static fn () => ''),
+            static fn () => '',
+            $request,
+            KernelInterface::MAIN_REQUEST,
+        ));
+
+        self::assertSame([\rtrim(SampleWithSlugController::SLUG, '/'), SampleWithSlugController::SLUG], $slugs);
+        self::assertSame(SampleWithSlugController::class, $event->getController()::class);
+        self::assertSame(SampleContentType::class, $request->attributes->get('_storyblok_content_type'));
+        self::assertNotNull($storage->getContentType());
+    }
+
+    #[Test]
     public function isNotMainRequest(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::never())
+        $api->expects($this->never())
             ->method('bySlug');
 
         $listener = new ResolveControllerListener($api, new Container(), new ContentTypeControllerRegistry(), $storage = new ContentTypeStorage(), new NullLogger(), 'draft');
@@ -210,7 +274,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function routeAttributeIsNotContentTypeRoute(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::never())
+        $api->expects($this->never())
             ->method('bySlug');
 
         $listener = new ResolveControllerListener($api, new Container(), new ContentTypeControllerRegistry(), $storage = new ContentTypeStorage(), new NullLogger(), 'draft');
@@ -234,7 +298,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function routeParamsAttributeHasNoSlug(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::never())
+        $api->expects($this->never())
             ->method('bySlug');
 
         $listener = new ResolveControllerListener($api, new Container(), new ContentTypeControllerRegistry(), $storage = new ContentTypeStorage(), new NullLogger(), 'draft');
@@ -259,7 +323,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function bySlugThrowsException(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willThrowException(new \InvalidArgumentException());
 
@@ -283,7 +347,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerThrowsInvalidStoryExceptionWhenContentTypeCanNotBeConstructed(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -335,7 +399,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerWithResolveRelations(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::exactly(2))
+        $api->expects($this->exactly(2))
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -386,7 +450,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerWithResolveLinks(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::exactly(2))
+        $api->expects($this->exactly(2))
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -438,7 +502,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerWithResolveRelationsAndResolveLinks(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::exactly(2))
+        $api->expects($this->exactly(2))
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -490,7 +554,7 @@ final class ResolveControllerListenerTest extends TestCase
     public function resolvesControllerWithoutResolveRelationsAndResolveLinksCallsApiOnce(): void
     {
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::once())
+        $api->expects($this->once())
             ->method('bySlug')
             ->willReturn(new StoryResponse([
                 'story' => [
@@ -543,7 +607,7 @@ final class ResolveControllerListenerTest extends TestCase
     {
         $callCount = 0;
         $api = self::createMock(StoriesApiInterface::class);
-        $api->expects(self::exactly(2))
+        $api->expects($this->exactly(2))
             ->method('bySlug')
             ->willReturnCallback(static function () use (&$callCount): StoryResponse {
                 ++$callCount;
